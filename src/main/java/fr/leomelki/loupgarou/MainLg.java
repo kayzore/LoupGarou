@@ -95,7 +95,7 @@ public class MainLg extends JavaPlugin{
 	
 	@Getter @Setter private LGGame currentGame;//Because for now, only one game will be playable on one server (flemme)
 
-        static public FileConfiguration nicksFile;
+	static public FileConfiguration nicksFile;
 	
 	@Override
 	public void onEnable() {
@@ -110,13 +110,13 @@ public class MainLg extends JavaPlugin{
 		}
 		loadConfig();
 
-                File f = new File(getDataFolder(), "nicks.yml");
-                nicksFile = YamlConfiguration.loadConfiguration(f);
-                try{
-                        nicksFile.save(f);
-                } catch (IOException e) {
-                        e.printStackTrace();
-                }
+		final File f = new File(getDataFolder(), "nicks.yml");
+		nicksFile = YamlConfiguration.loadConfiguration(f);
+		try {
+			nicksFile.save(f);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		Bukkit.getConsoleSender().sendMessage("/");
 		Bukkit.getPluginManager().registerEvents(new PlayerInteractListener(getRoles()), this);
@@ -219,7 +219,7 @@ public class MainLg extends JavaPlugin{
 					else
 						team.setPrefix(WrappedChatComponent.fromText("§f"));
                                         if (lgp.getNick() != null)
-                                            team.setSuffix(WrappedChatComponent.fromText(" §l" + lgp.getName()));
+                                            team.setSuffix(WrappedChatComponent.fromText("§8 => §b" + lgp.getName()));
 				}
 			}
 		});
@@ -400,50 +400,62 @@ public class MainLg extends JavaPlugin{
 					}
 					return true;
 				}else if(args[0].equalsIgnoreCase("nick")) {
-					if(args.length == 3) {
-                                            Player player = Bukkit.getPlayer(args[1]);
-                                            if(player == null) {
-                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
-                                                    return true;
-                                            }
-                                            LGPlayer lgp = LGPlayer.thePlayer(player);
-                                            if(lgp.getGame() == null) {
-                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
-                                                    return true;
-                                            }
-                                            Player detect = Bukkit.getPlayer(args[2]);
-                                            if(detect != null) {    
-                                                    sender.sendMessage("§4Erreur : §cCe surnom est déjà le pseudo d'un joueur !");
-                                                    return true;
-                                            }
-                                            for(LGPlayer other : getCurrentGame().getInGame()) {
-                                                    if(args[2].equalsIgnoreCase(other.getNick())){
-                                                        sender.sendMessage("§4Erreur : §cCe surnom est déjà le surnom d'un joueur !");
-                                                        return true;
-                                                    }
-                                            }
-                                            lgp.setNick(args[2]);
-                                            for(LGPlayer other : getCurrentGame().getInGame()) {
-                                                    if(lgp != other) {
-                                                            other.getPlayer().hidePlayer(MainLg.getInstance(), lgp.getPlayer());
-                                                            other.getPlayer().showPlayer(MainLg.getInstance(), lgp.getPlayer());
-                                                    }
-                                            }
-                                            lgp.updatePrefix();
-                                            sender.sendMessage("§7§o"+lgp.getName(true)+" s'appellera désormais §8§o"+args[2]+"§7§o !");
-                                            nicksFile.set(lgp.getPlayer().getUniqueId().toString(), args[2]);
-                                            File f = new File(getDataFolder(), "nicks.yml");
-                                            try{
-                                                    nicksFile.save(f);
-                                            } catch (IOException e) {
-                                                    sender.sendMessage("§4Erreur : §cImpossible de sauvegarder le surnom");
-                                            }
-                                        }else{
-                                            sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
-                                            sender.sendMessage(prefix+"§4Essayez §c/lg nick <pseudo_minecraft> <surnom>");
-                                        }
-                                        return true;
-                                }else if(args[0].equalsIgnoreCase("unnick")) {
+					if (args.length < 3) {
+						sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
+						sender.sendMessage(prefix+"§4Essayez §c/lg nick <pseudo_minecraft> <surnom>");
+						
+						return true;
+					}
+
+					Player player = Bukkit.getPlayer(args[1]);
+					if(player == null) {
+									sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
+									return true;
+					}
+					LGPlayer lgp = LGPlayer.thePlayer(player);
+					if(lgp.getGame() == null) {
+									sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
+									return true;
+					}
+					
+					final ArrayList<String> nicknameTokens = new ArrayList<String>();
+					for (int index = 2; index < args.length; index++) nicknameTokens.add(args[index]);
+					final String nickname = String.join(" ", nicknameTokens);
+
+					Player detect = Bukkit.getPlayer(nickname);
+					if(detect != null) {    
+									sender.sendMessage("§4Erreur : §cCe surnom est déjà le pseudo d'un joueur !");
+									return true;
+					}
+					for(LGPlayer other : getCurrentGame().getInGame()) {
+									if(nickname.equalsIgnoreCase(other.getNick())){
+											sender.sendMessage("§4Erreur : §cCe surnom est déjà le surnom d'un joueur !");
+											return true;
+									}
+					}
+
+					lgp.setNick(nickname);
+					for(LGPlayer other : getCurrentGame().getInGame()) {
+									if(lgp != other) {
+													other.getPlayer().hidePlayer(MainLg.getInstance(), lgp.getPlayer());
+													other.getPlayer().showPlayer(MainLg.getInstance(), lgp.getPlayer());
+									}
+					}
+					lgp.updatePrefix();
+					sender.sendMessage("§7§o"+lgp.getName(true)+" s'appellera désormais §8§o"+nickname+"§7§o !");
+					nicksFile.set(lgp.getPlayer().getUniqueId().toString(), nickname);
+					File f = new File(getDataFolder(), "nicks.yml");
+					try{
+									nicksFile.save(f);
+					} catch (IOException e) {
+									sender.sendMessage("§4Erreur : §cImpossible de sauvegarder le surnom");
+					}
+
+					return true;
+
+
+					
+        }else if(args[0].equalsIgnoreCase("unnick")) {
 					if(args.length == 2) {
                                             Player player = Bukkit.getPlayer(args[1]);
                                             if(player == null) {
