@@ -1,6 +1,5 @@
 package fr.leomelki.loupgarou;
 
-
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -50,6 +49,7 @@ import fr.leomelki.loupgarou.listeners.CancelListener;
 import fr.leomelki.loupgarou.listeners.ChatListener;
 import fr.leomelki.loupgarou.listeners.JoinListener;
 import fr.leomelki.loupgarou.listeners.LoupGarouListener;
+import fr.leomelki.loupgarou.listeners.PlayerInteractListener;
 import fr.leomelki.loupgarou.listeners.VoteListener;
 import fr.leomelki.loupgarou.roles.RAnge;
 import fr.leomelki.loupgarou.roles.RAssassin;
@@ -81,6 +81,7 @@ import fr.leomelki.loupgarou.roles.RVampire;
 import fr.leomelki.loupgarou.roles.RVillageois;
 import fr.leomelki.loupgarou.roles.RVoyante;
 import fr.leomelki.loupgarou.roles.Role;
+import fr.leomelki.loupgarou.utils.ItemBuilder;
 import fr.leomelki.loupgarou.utils.VariousUtils;
 import lombok.Getter;
 import lombok.Setter;

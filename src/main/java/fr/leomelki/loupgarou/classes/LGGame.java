@@ -66,6 +66,7 @@ import fr.leomelki.loupgarou.roles.RoleType;
 import fr.leomelki.loupgarou.roles.RoleWinType;
 import fr.leomelki.loupgarou.scoreboard.CustomScoreboard;
 import fr.leomelki.loupgarou.utils.MultipleValueMap;
+import fr.leomelki.loupgarou.utils.ItemBuilder;
 import fr.leomelki.loupgarou.utils.VariousUtils;
 import lombok.Getter;
 import lombok.Setter;
