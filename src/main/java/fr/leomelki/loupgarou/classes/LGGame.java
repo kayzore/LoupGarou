@@ -246,7 +246,14 @@ public class LGGame implements Listener{
 				}
 			}
 			
-			player.setGameMode(GameMode.ADVENTURE);
+			lgp.getPlayer().setGameMode(GameMode.ADVENTURE);
+
+                        String fNick = MainLg.nicksFile.getString(lgp.getPlayer().getUniqueId().toString());
+                        if (fNick!=null){
+                            lgp.setNick(fNick);
+                            lgp.updatePrefix();
+                        }
+
 			broadcastMessage("§7Le joueur §8"+lgp.getName()+"§7 a rejoint la partie §9(§8"+inGame.size()+"§7/§8"+maxPlayers+"§9)");
 			
 			//Reset scoreboard
@@ -538,7 +545,7 @@ public class LGGame implements Listener{
 					WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
 					ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
 					info.setAction(PlayerInfoAction.REMOVE_PLAYER);
-					infos.add(new PlayerInfoData(new WrappedGameProfile(lgp.getPlayer().getUniqueId(), lgp.getName()), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(lgp.getName())));
+					infos.add(new PlayerInfoData(new WrappedGameProfile(lgp.getPlayer().getUniqueId(), lgp.getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(lgp.getName(true))));
 					info.setData(infos);
 					info.sendPacket(lgp.getPlayer());
 				}else

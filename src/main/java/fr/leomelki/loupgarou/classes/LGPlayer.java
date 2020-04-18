@@ -1,5 +1,6 @@
 package fr.leomelki.loupgarou.classes;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
@@ -64,6 +67,7 @@ public class LGPlayer {
 	@Getter @Setter private LGGame game;
 	@Getter @Setter private String latestObjective;
 	@Getter private CustomScoreboard scoreboard;
+        @Getter @Setter private String nick;
 	public LGPlayer(Player player) {
 		this.player = player;
 	}
@@ -120,7 +124,13 @@ public class LGPlayer {
 	}
 	private String name;
 	public String getName() {
-		return player != null ? getPlayer().getName() : name;
+                return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
+	}
+	public String getName(boolean real) { // si true, alors on renvoie le vrai pseudo minecraft et pas le nick
+                if (real)
+                    return (player != null ? getPlayer().getName() : name);
+                else
+                    return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
 	}
 
 
@@ -134,6 +144,7 @@ public class LGPlayer {
 			updateOwnSkin();
 			getPlayer().setWalkSpeed(0.2f);
 	//		sendMessage("§2Vous venez de rejoindre une partie de Loup-Garou. §aBon jeu!");
+
 			return true;
 		}
 		return false;
@@ -161,15 +172,15 @@ public class LGPlayer {
 					else{
 						WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 						team.setMode(2);
-						team.setName(lgp.getName());
+						team.setName(lgp.getName(true));
 						team.setPrefix(WrappedChatComponent.fromText(""));
-						team.setPlayers(Arrays.asList(lgp.getName()));
+						team.setPlayers(Arrays.asList(lgp.getName(true)));
 						team.sendPacket(getPlayer());
 						
 						WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
 						ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
 						info.setAction(PlayerInfoAction.ADD_PLAYER);
-						infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName()), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName())));
+						infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName(true))));
 						info.setData(infos);
 						info.sendPacket(getPlayer());
 					}
@@ -182,18 +193,18 @@ public class LGPlayer {
 	//TODO Update prefix for only one guy
 	public void updatePrefix() {
 		if(getGame() != null && !isDead() && player != null) {
-			List<String> meList = Arrays.asList(getName());
+			List<String> meList = Arrays.asList(getName(true));
 			for(LGPlayer lgp : getGame().getInGame()) {
 				WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
 				ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
 				info.setAction(PlayerInfoAction.ADD_PLAYER);
-				infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName()), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName())));
+				infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName(true))));
 				info.setData(infos);
 				info.sendPacket(lgp.getPlayer());
 
 				WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 				team.setMode(2);
-				team.setName(getName());
+				team.setName(getName(true));
 				team.setPrefix(WrappedChatComponent.fromText(""));
 				team.setPlayers(meList);
 				team.sendPacket(lgp.getPlayer());
@@ -208,7 +219,7 @@ public class LGPlayer {
 			for(LGPlayer lgp : getGame().getAlive())
 				if(lgp != this && lgp.getPlayer() != null) {
 					if(!lgp.isDead())
-						infos.add(new PlayerInfoData(new WrappedGameProfile(lgp.getPlayer().getUniqueId(), lgp.getName()), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(lgp.getName())));
+						infos.add(new PlayerInfoData(new WrappedGameProfile(lgp.getPlayer().getUniqueId(), lgp.getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(lgp.getName(true))));
 					getPlayer().hidePlayer(lgp.getPlayer());
 				}
 			info.setData(infos);
@@ -226,7 +237,7 @@ public class LGPlayer {
 					WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
 					ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
 					info.setAction(PlayerInfoAction.ADD_PLAYER);
-					infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName()), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName())));
+					infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName(true))));
 					info.setData(infos);
 					info.sendPacket(getPlayer());
 				}else if(!isDead() && lgp.getPlayer() != null){

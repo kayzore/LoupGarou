@@ -1,6 +1,7 @@
 package fr.leomelki.loupgarou;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +16,7 @@ import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -92,6 +94,8 @@ public class MainLg extends JavaPlugin{
 	@Getter private static String prefix = ""/*"§7[§9Loup-Garou§7] "*/;
 	
 	@Getter @Setter private LGGame currentGame;//Because for now, only one game will be playable on one server (flemme)
+
+        static public FileConfiguration nicksFile;
 	
 	@Override
 	public void onEnable() {
@@ -105,6 +109,15 @@ public class MainLg extends JavaPlugin{
 			saveConfig();
 		}
 		loadConfig();
+
+                File f = new File(getDataFolder(), "nicks.yml");
+                nicksFile = YamlConfiguration.loadConfiguration(f);
+                try{
+                        nicksFile.save(f);
+                } catch (IOException e) {
+                        e.printStackTrace();
+                }
+
 		Bukkit.getConsoleSender().sendMessage("/");
 		Bukkit.getPluginManager().registerEvents(new PlayerInteractListener(getRoles()), this);
 		Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
@@ -150,7 +163,7 @@ public class MainLg extends JavaPlugin{
 						WrappedChatComponent displayName = data.getDisplayName();
 						Bukkit.getPluginManager().callEvent(evt2);
 						if(evt2.getPrefix().length() > 0) {
-								try {
+							try {
 								if(displayName != null) {
 									JSONObject obj = (JSONObject) new JSONParser().parse(displayName.getJson());
 									displayName = WrappedChatComponent.fromText(evt2.getPrefix()+obj.get("text"));
@@ -160,6 +173,16 @@ public class MainLg extends JavaPlugin{
 								e.printStackTrace();
 							}
 						}
+
+                                                //try{
+                                                //        if (lgp.getNick()!=null){
+                                                            //JSONObject obj = (JSONObject) new JSONParser().parse(displayName.getJson());
+                                                            //displayName = WrappedChatComponent.fromText( obj.get("text") + " §l" + lgp.getName());
+                                                //        }
+                                                //} catch (ParseException e) {
+						//	e.printStackTrace();
+						//}
+
 						LGSkinLoadEvent evt = new LGSkinLoadEvent(lgp.getGame(), lgp, player, data.getProfile());
 						Bukkit.getPluginManager().callEvent(evt);
 						datas.add(new PlayerInfoData(evt.getProfile(), data.getLatency(), data.getGameMode(), displayName));
@@ -195,6 +218,8 @@ public class MainLg extends JavaPlugin{
 						team.setPrefix(WrappedChatComponent.fromText(evt2.getPrefix()));
 					else
 						team.setPrefix(WrappedChatComponent.fromText("§f"));
+                                        if (lgp.getNick() != null)
+                                            team.setSuffix(WrappedChatComponent.fromText(" §l" + lgp.getName()));
 				}
 			}
 		});
@@ -374,10 +399,87 @@ public class MainLg extends JavaPlugin{
 						}
 					}
 					return true;
-				}
+				}else if(args[0].equalsIgnoreCase("nick")) {
+					if(args.length == 3) {
+                                            Player player = Bukkit.getPlayer(args[1]);
+                                            if(player == null) {
+                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
+                                                    return true;
+                                            }
+                                            LGPlayer lgp = LGPlayer.thePlayer(player);
+                                            if(lgp.getGame() == null) {
+                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
+                                                    return true;
+                                            }
+                                            Player detect = Bukkit.getPlayer(args[2]);
+                                            if(detect != null) {    
+                                                    sender.sendMessage("§4Erreur : §cCe surnom est déjà le pseudo d'un joueur !");
+                                                    return true;
+                                            }
+                                            for(LGPlayer other : getCurrentGame().getInGame()) {
+                                                    if(args[2].equalsIgnoreCase(other.getNick())){
+                                                        sender.sendMessage("§4Erreur : §cCe surnom est déjà le surnom d'un joueur !");
+                                                        return true;
+                                                    }
+                                            }
+                                            lgp.setNick(args[2]);
+                                            for(LGPlayer other : getCurrentGame().getInGame()) {
+                                                    if(lgp != other) {
+                                                            other.getPlayer().hidePlayer(MainLg.getInstance(), lgp.getPlayer());
+                                                            other.getPlayer().showPlayer(MainLg.getInstance(), lgp.getPlayer());
+                                                    }
+                                            }
+                                            lgp.updatePrefix();
+                                            sender.sendMessage("§7§o"+lgp.getName(true)+" s'appellera désormais §8§o"+args[2]+"§7§o !");
+                                            nicksFile.set(lgp.getPlayer().getUniqueId().toString(), args[2]);
+                                            File f = new File(getDataFolder(), "nicks.yml");
+                                            try{
+                                                    nicksFile.save(f);
+                                            } catch (IOException e) {
+                                                    sender.sendMessage("§4Erreur : §cImpossible de sauvegarder le surnom");
+                                            }
+                                        }else{
+                                            sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
+                                            sender.sendMessage(prefix+"§4Essayez §c/lg nick <pseudo_minecraft> <surnom>");
+                                        }
+                                        return true;
+                                }else if(args[0].equalsIgnoreCase("unnick")) {
+					if(args.length == 2) {
+                                            Player player = Bukkit.getPlayer(args[1]);
+                                            if(player == null) {
+                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
+                                                    return true;
+                                            }
+                                            LGPlayer lgp = LGPlayer.thePlayer(player);
+                                            if(lgp.getGame() == null) {
+                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
+                                                    return true;
+                                            }
+                                            lgp.setNick(null);
+                                            for(LGPlayer other : getCurrentGame().getInGame()) {
+                                                    if(lgp != other) {
+                                                            other.getPlayer().hidePlayer(MainLg.getInstance(), lgp.getPlayer());
+                                                            other.getPlayer().showPlayer(MainLg.getInstance(), lgp.getPlayer());
+                                                    }
+                                            }
+                                            lgp.updatePrefix();
+                                            sender.sendMessage("§7§o"+lgp.getName(true)+" s'appellera désormais §8§o"+lgp.getName(false)+"§7§o !");
+                                            nicksFile.set(lgp.getPlayer().getUniqueId().toString(), null);
+                                            File f = new File(getDataFolder(), "nicks.yml");
+                                            try{
+                                                    nicksFile.save(f);
+                                            } catch (IOException e) {
+                                                    sender.sendMessage("§4Erreur : §cImpossible de sauvegarder le surnom");
+                                            }
+                                        }else{
+                                            sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
+                                            sender.sendMessage(prefix+"§4Essayez §c/lg unnick <pseudo_minecraft>");
+                                        }
+                                        return true;
+                                }
 			}
 			sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
-			sender.sendMessage(prefix+"§4Essayez /lg §caddSpawn/end/start/nextNight/nextDay/reloadConfig/roles/reloadPacks/joinAll");
+			sender.sendMessage(prefix+"§4Essayez /lg §caddSpawn/end/start/nextNight/nextDay/reloadConfig/roles/reloadPacks/joinAll/nick/unnick");
 			return true;
 		}
 		return false;
@@ -396,7 +498,7 @@ public class MainLg extends JavaPlugin{
 				else if(args.length == 4)
 					return Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 		}else if(args.length == 1)
-			return getStartingList(args[0], "addSpawn", "end", "start", "nextNight", "nextDay", "reloadConfig", "roles", "joinAll", "reloadPacks");
+			return getStartingList(args[0], "addSpawn", "end", "start", "nextNight", "nextDay", "reloadConfig", "roles", "joinAll", "reloadPacks", "nick", "unnick");
 		return new ArrayList<String>(0);
 	}
 	private List<String> getStartingList(String startsWith, String... list){
