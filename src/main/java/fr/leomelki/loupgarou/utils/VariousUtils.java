@@ -42,7 +42,7 @@ public class VariousUtils {
 	}
 	private static char[] hex = "0123456789abcdef".toCharArray();
 	public static char toHex(int i) {
-		return hex[i];
+		return hex[i % hex.length];
 	}
 
 }
