@@ -1,9 +1,7 @@
 package fr.leomelki.loupgarou.roles;
 
 import java.util.List;
-import java.util.Random;
 
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 
@@ -11,8 +9,6 @@ import fr.leomelki.loupgarou.MainLg;
 import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.events.LGDayStartEvent;
-import fr.leomelki.loupgarou.events.LGPlayerKilledEvent;
-import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
 public class RMontreurDOurs extends Role{
 	public RMontreurDOurs(LGGame game) {
@@ -55,7 +51,6 @@ public class RMontreurDOurs extends Role{
 		return -1;
 	}
 	
-	private static Random random = new Random();
 	private int lastNight = -1;
 
 	@EventHandler(priority = EventPriority.LOWEST)

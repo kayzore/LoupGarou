@@ -85,7 +85,6 @@ import fr.leomelki.loupgarou.roles.RVillageois;
 import fr.leomelki.loupgarou.roles.RVoyante;
 import fr.leomelki.loupgarou.roles.Role;
 import fr.leomelki.loupgarou.utils.ItemBuilder;
-import fr.leomelki.loupgarou.utils.VariousUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -265,7 +264,6 @@ public class MainLg extends JavaPlugin {
 		if(label.equalsIgnoreCase("lg")) {
 			if(args[0].equalsIgnoreCase("roles") && args.length == 1){
 				sender.sendMessage(prefix + "§6Voici la liste des rôles:");
-				int index = 0;
 				for (String role : getRoles().keySet())
 					if (MainLg.getInstance().getConfig().getInt("role." + role) > 0) {
 						sender.sendMessage(prefix + "  §e- §6" + role + " §e: " + MainLg.getInstance().getConfig().getInt("role." + role));

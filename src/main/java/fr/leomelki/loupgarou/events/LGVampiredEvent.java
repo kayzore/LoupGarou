@@ -1,7 +1,5 @@
 package fr.leomelki.loupgarou.events;
 
-import org.bukkit.event.Cancellable;
-
 import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 import lombok.Getter;

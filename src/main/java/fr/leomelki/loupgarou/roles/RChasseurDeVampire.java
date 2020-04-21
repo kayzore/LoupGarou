@@ -1,19 +1,9 @@
 package fr.leomelki.loupgarou.roles;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-
 import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.classes.LGPlayer.LGChooseCallback;
-import fr.leomelki.loupgarou.classes.LGWinType;
-import fr.leomelki.loupgarou.events.LGEndCheckEvent;
-import fr.leomelki.loupgarou.events.LGGameEndEvent;
-import fr.leomelki.loupgarou.events.LGNightEndEvent;
-import fr.leomelki.loupgarou.events.LGNightPlayerPreKilledEvent;
-import fr.leomelki.loupgarou.events.LGPyromaneGasoilEvent;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
-import fr.leomelki.loupgarou.events.LGRoleTurnEndEvent;
 
 public class RChasseurDeVampire extends Role{
 	public RChasseurDeVampire(LGGame game) {

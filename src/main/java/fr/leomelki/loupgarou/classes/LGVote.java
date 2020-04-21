@@ -36,7 +36,6 @@ import fr.leomelki.loupgarou.utils.VariousUtils;
 import lombok.Getter;
 import net.minecraft.server.v1_15_R1.DataWatcher;
 import net.minecraft.server.v1_15_R1.DataWatcherObject;
-import net.minecraft.server.v1_15_R1.DataWatcherRegistry;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.EntityArmorStand;
 import net.minecraft.server.v1_15_R1.IChatBaseComponent;
@@ -53,7 +52,7 @@ public class LGVote {
 	private int votesSize = 0;
 	private LGPlayer mayor;
 	private ArrayList<LGPlayer> latestTop = new ArrayList<LGPlayer>(), blacklisted = new ArrayList<LGPlayer>();
-	private final boolean positiveVote, randomIfEqual;
+	private final boolean randomIfEqual;
 	@Getter private boolean mayorVote;
     private boolean ended;
 	public LGVote(int timeout, int littleTimeout, LGGame game, boolean positiveVote, boolean randomIfEqual, TextGenerator generator) {
@@ -62,7 +61,6 @@ public class LGVote {
 		this.timeout = timeout;
 		this.game = game;
 		this.generator = generator;
-		this.positiveVote = positiveVote;
 		this.randomIfEqual = randomIfEqual;
 	}
 	public void start(List<LGPlayer> participants, List<LGPlayer> viewers, Runnable callback) {
@@ -174,7 +172,6 @@ public class LGVote {
 						VariousUtils.setWarning(player.getPlayer(), false);
 
 				for(int i = 0;i<choosable.size();i++) {
-					LGPlayer lgp = choosable.get(i);
 					showArrow(mayor, null, -mayor.getPlayer().getEntityId()-i);
 				}
 				//Choix au hasard d'un joueur si personne n'a été désigné
@@ -197,7 +194,6 @@ public class LGVote {
 									VariousUtils.setWarning(player.getPlayer(), false);
 
 							for(int i = 0;i<choosable.size();i++) {
-								LGPlayer lgp = choosable.get(i);
 								showArrow(mayor, null, -mayor.getPlayer().getEntityId()-i);
 							}
 							game.cancelWait();
@@ -240,7 +236,6 @@ public class LGVote {
 			votesSize = 999;
 			game.wait(littleTimeout, initialTimeout, this::end, generator);
 		}
-		String italic = game.isDay() ? "" : "§o";
 		boolean changeVote = false;
 		if(voter.getCache().has("vote")) {//On enlève l'ancien vote
 			LGPlayer devoted = voter.getCache().get("vote");
