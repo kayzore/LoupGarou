@@ -1,153 +1,67 @@
+## Fork of leomelki/LoupGarou by TheOptimisticFactory
 
+- This repository is based off https://github.com/leomelki/LoupGarou and contains improvements made by the community before it lands in the main repository (if ever).
+- The `dev` branch is **STABLE**, despite his name. The `wip` branch, on the other hand might not
 
+## Useful commands (for ops) ##
 
-  
+- `/lg joinAll` to make everyone connected join the lobby
+- `/lg start` to start the game
+- `/lg end` to interrupt an ongoing game
+- `/lg nick <username> <nickname>` to set a nickname to a player
+- `/lg addSpawn` to add a spawn-point on your EXACT position and look direction
+- `/lg roles` to get the list of currently active roles
+- `/lg roles list` to get the complete list of available roles
+- `/lg roles set <role> <amount>` to set the number of players for a given role
 
-## Table des matières
+## Notes ##
 
-- [À propos](#à-propos)
-- [Jouer facilement](#jouer-facilement)
-- [Installation](#installation)
-  - [Dépendances requises](#dépendances-requises)
-  - [Installation classique](#installation-classique)
-  - [Installation avec docker (Alternative)](#installation-avec-docker-alternative)
-- [Commandes](#commandes)
-- [Crédits](#crédits)
-- [Aide](#aide)
-  - [Questions fréquentes](#questions-fréquentes)
-- [Indications pour les développeurs](#indications-pour-les-développeurs)
-  - [Ajouter des rôles](#ajouter-des-rôles)
- 	 - [Quelques classes utiles](#quelques-classes-utiles)
-  - [Publier un rôle](#publier-un-rôle)
+- The following warning is normal and can safely be ignored: `WARNING: Illegal reflective access by com.comphenix.net.sf.cglib.core.ReflectUtils$1 (file:<path>) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)`. It is due to the fact that [ProtocolLib currently does not support Java versions above Java 8 and won't until Mojang and Spigot decide to update.](https://github.com/dmulloy2/ProtocolLib/issues/603#issuecomment-490207994)
 
-## À propos
+## Additional features compared to original plugin ##
 
-Le mode Loup-Garou est un mode inspiré du jeu de société [Les Loups-Garous de Thiercelieux](https://fr.wikipedia.org/wiki/Les_Loups-garous_de_Thiercelieux) reprenant son fonctionnement ainsi que sa manière d'être joué, à la seule différence qu'aucun maître du jeu n'est requis, le déroulement de chaque partie étant entièrement automatisé :
+#### 01) Village composition showcase at the end of the game
 
-- Déroulement de la partie automatisé
-- Rôles du jeu de base, et nouveaux rôles
-- Utilisable sur n'importe quelle map
+- https://github.com/leomelki/LoupGarou/pull/42 (Author: [TheOptimisticFactory](https://github.com/TheOptimisticFactory))
 
-## Jouer facilement
-Un serveur est mis à votre disposition pour vous permettre de jouer au LoupGarou rapidement et facilement entre amis ou avec des inconnus. Vous avez juste à créer une partie et y inviter vos amis, ou à rejoindre des parties publiques.
+  ![image](https://user-images.githubusercontent.com/2607260/79672340-4260a780-81d1-11ea-9b49-266a992e872a.png)
 
-**IP:** `lg.leomelki.fr`
-**Version:** `1.9.4`
+#### 02) Ability to set nickanmes to players
 
-## Installation
+- https://github.com/leomelki/LoupGarou/pull/40 (Author: [Nicooow](https://github.com/Nicooow)).
+- Tweaked the PR with an [additional commit (9cbb739)](https://github.com/TheOptimisticFactory/LoupGarou/commit/9cbb73935532cacab8787cc4586a64e42b65958e) to:
+  + support nickname containing spaces
+  + color the nicknames
 
-### Dépendances requises
-- [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/)
+  ![image](https://user-images.githubusercontent.com/2607260/79674319-56f96b80-81e2-11ea-87ef-d4bdfd4494aa.png)
 
-### Installation classique
-**Minecraft 1.15.1 est requis.**  
-Pour installer le plug-in, merci de suivre les étapes suivantes:
-  - Téléchargez Spigot 1.15.1 et lancez une fois le serveur
-  - Dans le dossier `plugins`, insérez [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) et [LoupGarou.jar](https://github.com/leomelki/LoupGarou/releases)
-  - Redémarrez votre serveur puis donnez vous les permissions administrateur (/op <votre_pseudo> dans la console)
-  - Allez sur la map et ajoutez les points de spawn sur chaque dalle `/lg addSpawn`
-  - Connectez-vous au serveur et choisissez les rôles à utiliser avec `/lg roles set <ROLE> <MONTANT>`
-	  - ⚠️ Il faut qu'il y ait autant de places dans les rôles que de joueur pour lancer une partie
-  - Vous pouvez démarrer la partie avec `/lg start <pseudo>` 
-	  - ⚠️ N'oubliez pas de mettre votre pseudo. Exemple : `/lg start leomelki` 
+  ![javaw_Nk1NdY7KXw](https://user-images.githubusercontent.com/2607260/79673723-8e651980-81dc-11ea-8258-eb077bca7fca.png)
 
-Lien des releases : [Cliquez ici](https://github.com/leomelki/LoupGarou/releases)
+#### 03) GUI to configure roles and start game
 
+- https://github.com/leomelki/LoupGarou/pull/19 (Author: [Commantary](https://github.com/Commantary)).
+- Tweaked the PR with an [additional commit (7df0439)](https://github.com/TheOptimisticFactory/LoupGarou/commit/7df04392ecb443d42207b859fcbbf4188e8080ae) to:
+  + fix compilation issues
 
-### Installation avec docker (Alternative)
+  ![image](https://user-images.githubusercontent.com/2607260/80097236-41ca6700-856b-11ea-978c-dd658ad09c67.png)
 
-Vous devez avoir installé `docker` et `docker-compose` sur votre machine
+#### 04) Highlight of the % of votes on a given player
 
-#### Installation du serveur
-```sh
-docker-compose up -d --build
-```
+- https://github.com/leomelki/LoupGarou/pull/43 (Author: [TheOptimisticFactory](https://github.com/TheOptimisticFactory))
 
-#### Démarage du serveur
+  ![image](https://user-images.githubusercontent.com/2607260/79676799-f706c300-81e9-11ea-86cd-0c9cd98be0b3.png)
 
-Vous devez exécuter la commande suivante à chaque redémarage de votre machine avant de pouvoir continuer
+#### 05) Server logs when a player dies or gets resurrected
 
-```sh
-docker-compose up -d
-```
+- https://github.com/leomelki/LoupGarou/pull/47 (Author: [TheOptimisticFactory](https://github.com/TheOptimisticFactory))
 
-Ainsi, vous pouvez lancer le serveur en utilisant la commande suivante :
+  ![image](https://user-images.githubusercontent.com/2607260/80264401-56564e80-8694-11ea-9f28-89a425b4d59b.png)
 
-```sh
-docker-compose exec loup-garou java -jar spigot.jar
-```
+#### 06) Revamped scoreboard to avoid useless scoring
 
-Les fichiers relatifs à minecraft se situeront dans le dossier `minecraft_data` 
-> **Tip :** Il faut accepter les conditions d'utilisations de Mojang en modifiant le fichier `minecraft_data/eula.txt`
+- Needs testing before the PR gets created. (Author: [TheOptimisticFactory](https://github.com/TheOptimisticFactory))
+  + Added highlight of the total number of players remaining.
+  + Added support of plural names in the scoreboard.
+  + Rewritten logic to avoid instantiating 15 instances when 1 is sufficient.
 
-## Commandes
-
-`/lg roles` : Retourne la liste des rôles dans la partie  
-`/lg roles set <ID> <MONTANT>` : Définit le nombre de joueurs pour un certain rôle  
-`/lg addSpawn` : Ajoute un point de spawn (emplacement de joueur)  
-`/lg start <PSEUDO>` : Lance la partie  
-`/lg end <PSEUDO>` : Arrête une partie  
-`/lg reloadConfig` : Recharge la configuration  
-`/lg joinAll` : À utiliser après avoir changé les rôles  
-
-## Crédits
-
-- Chef de Projet : [Shytoos](https://twitter.com/shytoos_)
-- Développement : [Leomelki](https://twitter.com/leomelki)
-- Mapping : [Cosii](https://www.youtube.com/channel/UCwyOcA41QSk590fl9L0ys8A)
-
-## Aide
-
-Par soucis de temps, nous ne pouvons pas faire de support au cas par cas, mais vous pouvez rejoindre notre serveur [Discord](https://discord.gg/Squeezie) pour trouver de l'aide auprès de la communauté.
-
-### Questions fréquentes
-
-- Que faire en cas de problème d'affichage (votes bloqués au dessus des têtes, etc...) ?  
-
-Cela arrive après avoir `reload` au cours d'une partie, tous les joueurs qui ont ce problème doivent se déconnecter et se reconnecter.
-
-- Pourquoi la partie ne se lance pas ?  
-
-Il faut taper la commande `/lg start <PSEUDO>` en mettant le pseudo d'un des joueurs qui sera présent dans la partie. Si cela ne fonctionne toujours pas, c'est parce qu'il n'y a pas suffisamment de rôles pour le nombre de joueurs, il doit y avoir le même nombre de rôles qu'il y aura de joueurs dans la partie. N'oubliez pas de taper `/lg joinAll` après avoir modifié la liste des rôles.
-
-- J'ai mal placés mes spawns ou je veux utiliser une nouvelle map, comment faire ?  
-
-Il suffit d'ouvrir le fichier `plugins\LoupGarou\config.yml` et de supprimer les points de spawn.
-
-- Puis-je mettre plusieurs fois le même rôle dans une seule partie ?
-
-Cela est possible pour les rôles `Loup-Garou`, `Villageois` et `Chasseur`.
-D'autres rôles peuvent aussi marcher mais n'ont pas été testés avec plusieurs joueurs ayant ce rôle dans une seule partie. C'est à vos risques et périls.
-
-- Le tour du loup noir (ou tout autre type de loup garou) ne passe pas.
-
-Il vous faut au minimum un loup garou normal lorsque vous mettez d'autres types de loups dans la partie.
-
-## Indications pour les développeurs
-
-Ce plugin LoupGarou ayant été modifié de nombreuses fois, parfois dans des timings tendus, le code n'est pas très propre. Aussi, il n'est pas documenté.  
-
-Vous devez utiliser `Lombok` et `Maven` pour modifier ce projet. 
-Vous devez aussi installer la repository `Spigot` avec [BuildTools](https://www.spigotmc.org/wiki/buildtools/).
-
-**Cependant, si l'envie vous prend de modifier ou d'utiliser le code ici présent en partie, ou dans sa totalité, merci de créditer [Leomelki](https://twitter.com/leomelki) et [Shytoos](https://twitter.com/shytoos_).**
-
-### Ajouter des rôles
-
-Ce plugin de Loup-Garou est organisé autour d'un système d'événements, disponibles dans le package `fr.leomelki.loupgarou.events`.  
-N'ayant pas le temps de les documenter, vous devriez comprendre vous-même quand ils sont appelés.
-
-Pour vous aider à créer des rôles, copiez des rôles ayant déjà été créés pour ainsi les modifier.
-
-⚠️ Ce projet a été créé de façon à ce que les rôles soient (presque) totalement indépendants du reste du code (LGGame, LGPlayer...).  
-Merci de garder cela en tête lors du développement de nouveaux rôles : utilisez un maximum les évènements et, s'il en manque, créez-les !
-
-#### Quelques classes utiles
-`LGGame` : Contient le coeur du jeu, à modifier le minimum possible !  
-`LGPlayer` : Classe utilisée pour intéragir avec les joueurs et stocker leurs données, à modifier le minimum possible !  
-`LGVote` : Système gérant les votes.  
-`RoleSort`: Classement de l'apparition des rôles durant la nuit. 
-
-### Publier un rôle
-
-Si vous arrivez à créer un rôle, je vous invite à faire une demande de publication dans cette repo afin de les faire partager à l'ensemble de la communauté !
+  ![javaw_wQKF2n7IGS](https://user-images.githubusercontent.com/2607260/80265125-c5cd3d80-8696-11ea-8e32-0d1fc49d5708.png)
