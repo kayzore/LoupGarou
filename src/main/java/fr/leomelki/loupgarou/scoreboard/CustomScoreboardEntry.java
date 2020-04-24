@@ -7,102 +7,89 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardScore;
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardTeam;
+import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.utils.VariousUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 public class CustomScoreboardEntry {
-	private static WrappedChatComponent nullComponent = WrappedChatComponent.fromText("");
-	
-	//setter car flemme de modifier le systeme pour le rendre plus logique
-	@Getter @Setter private int score;
-	private final String name;
+	private final int amount;
 	private final CustomScoreboard scoreboard;
-	private WrappedChatComponent prefix, suffix;
+	private final String name;
+	private final String scoreboardName;
 
-	public CustomScoreboardEntry(int score, CustomScoreboard scoreboard) {
-		this.score = score;
+	public CustomScoreboardEntry(CustomScoreboard scoreboard, String rawName, int amount) {
+		this.amount = amount;
 		this.scoreboard = scoreboard;
-		this.name = "§"+VariousUtils.toHex(score);
+		this.scoreboardName = scoreboard.getName();
+		this.name = this.generateDisplayableName(rawName);
+		this.show();
 	}
-	
+
 	public void show() {
-		if(prefix != null) {
-			WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
-			team.setPlayers(Arrays.asList(name));
-			team.setName(name);
-			team.setMode(0);
-			team.setPrefix(prefix);
-			if(suffix != null)
-				team.setSuffix(suffix);
-			team.sendPacket(scoreboard.getPlayer().getPlayer());
-			
-			WrapperPlayServerScoreboardScore score = new WrapperPlayServerScoreboardScore();
-			score.setObjectiveName(scoreboard.getName());
-			score.setScoreboardAction(ScoreboardAction.CHANGE);
-			score.setScoreName(name);
-			score.setValue(this.score);
-			score.sendPacket(scoreboard.getPlayer().getPlayer());
+		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
+		team.setPlayers(Arrays.asList(this.name));
+		team.setName(this.name);
+		team.setMode(0);
+
+		WrapperPlayServerScoreboardScore score = new WrapperPlayServerScoreboardScore();
+		score.setScoreboardAction(ScoreboardAction.CHANGE);
+		score.setObjectiveName(this.scoreboardName);
+		score.setScoreName(name);
+		score.setValue(this.amount);
+
+		for (LGPlayer current : this.scoreboard.getInGamePlayers()) {
+			team.sendPacket(current.getPlayer().getPlayer());
+			score.sendPacket(current.getPlayer().getPlayer());
 		}
 	}
-	
-	public void setDisplayName(String displayName) {
-		boolean spawn = prefix == null;
-		if(displayName.length() > 16) {
-			char colorCode = 'f';
-			int limit = displayName.charAt(14) == '§' && displayName.charAt(13) != '§' ? 14 : displayName.charAt(15) == '§' ? 15 : 16;
-			String prefixStr = displayName.substring(0, limit);
-			
-			prefix = WrappedChatComponent.fromText(prefixStr);
-			
-			if(limit == 16) {
-				boolean storeColorCode = false;
-				for(char c : prefixStr.toCharArray())
-					if(storeColorCode) {
-						storeColorCode = false;
-						colorCode = c;
-					}else
-						if(c == '§')
-							storeColorCode = true;
-				suffix = WrappedChatComponent.fromText("§"+colorCode+displayName.substring(limit));
-			}else
-				suffix = WrappedChatComponent.fromText(displayName.substring(limit));
-		} else {
-			prefix = WrappedChatComponent.fromText(displayName);
-			suffix = nullComponent;
+
+	public String generateDisplayableName(String rawName) {
+		if (rawName.length() <= 16) {
+			return rawName;
 		}
+
+		final int limit = rawName.charAt(14) == '§' && rawName.charAt(13) != '§' ? 14 : rawName.charAt(15) == '§' ? 15 : 16;
+		final String prefix = rawName.substring(0, limit);
+		String suffix;
 		
-		if(scoreboard.isShown()) {
-			if(spawn)
-				show();
-			else {
-				WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
-				team.setPlayers(Arrays.asList(name));
-				team.setName(name);
-				team.setMode(2);
-				team.setPrefix(prefix);
-				if(suffix != null)
-					team.setSuffix(suffix);
-				team.sendPacket(scoreboard.getPlayer().getPlayer());
+		if (limit != 16) {
+			suffix = rawName.substring(limit);
+		} else {
+			char colorCode = 'f';
+			boolean storeColorCode = false;
+			for (char c : prefix.toCharArray()) {
+				if (storeColorCode) {
+					storeColorCode = false;
+					colorCode = c;
+				} else if(c == '§') {
+					storeColorCode = true;
+				}
 			}
+			suffix = "§" + colorCode + rawName.substring(limit);
 		}
+
+		return prefix + suffix;
 	}
 	public void delete() {
 		hide();
-		prefix = null;
 	}
 	public void hide() {
-		if(prefix != null && scoreboard.isShown()) {
+		if (scoreboard.isShown()) {
 			WrapperPlayServerScoreboardScore score = new WrapperPlayServerScoreboardScore();
 			score.setObjectiveName(scoreboard.getName());
 			score.setScoreboardAction(ScoreboardAction.REMOVE);
-			score.setScoreName(name);
-			score.sendPacket(scoreboard.getPlayer().getPlayer());
-			
+			score.setScoreName(this.name);
+			score.setValue(this.amount);
+
 			WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
-			team.setName(name);
+			team.setName(this.name);
 			team.setMode(1);
-			team.sendPacket(scoreboard.getPlayer().getPlayer());
+
+			for (LGPlayer current : this.scoreboard.getInGamePlayers()) {
+				team.sendPacket(current.getPlayer().getPlayer());
+				score.sendPacket(current.getPlayer().getPlayer());
+			}
 		}
 	}
 

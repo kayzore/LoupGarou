@@ -31,7 +31,6 @@ import fr.leomelki.loupgarou.classes.chat.LGNoChat;
 import fr.leomelki.loupgarou.roles.Role;
 import fr.leomelki.loupgarou.roles.RoleType;
 import fr.leomelki.loupgarou.roles.RoleWinType;
-import fr.leomelki.loupgarou.scoreboard.CustomScoreboard;
 import fr.leomelki.loupgarou.utils.VariableCache;
 import fr.leomelki.loupgarou.utils.VariousUtils;
 import lombok.Getter;
@@ -63,25 +62,12 @@ public class LGPlayer {
 	@Getter private VariableCache cache = new VariableCache();
 	@Getter @Setter private LGGame game;
 	@Getter @Setter private String latestObjective;
-	@Getter private CustomScoreboard scoreboard;
         @Getter @Setter private String nick;
 	public LGPlayer(Player player) {
 		this.player = player;
 	}
 	public LGPlayer(String name) {
 		this.name = name;
-	}
-	
-	public void setScoreboard(CustomScoreboard scoreboard) {
-		if(player != null) {
-			if(this.scoreboard != null)
-				this.scoreboard.hide();
-			
-			this.scoreboard = scoreboard;
-			
-			if(scoreboard != null)
-				scoreboard.show();
-		}
 	}
 	
 	public void sendActionBarMessage(String msg) {

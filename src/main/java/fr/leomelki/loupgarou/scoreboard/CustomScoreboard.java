@@ -1,6 +1,7 @@
 package fr.leomelki.loupgarou.scoreboard;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
@@ -8,52 +9,89 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardDisplayObjective;
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardObjective;
 import fr.leomelki.loupgarou.classes.LGPlayer;
+import fr.leomelki.loupgarou.classes.RolePlayers;
+import fr.leomelki.loupgarou.roles.Role;
 import fr.leomelki.loupgarou.utils.RandomString;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+
 public class CustomScoreboard {
-	@Getter private final String name = RandomString.generate(16);
-	@Getter private final String displayName;
-	private final List<CustomScoreboardEntry> entries = Arrays.asList(new CustomScoreboardEntry(15, this), new CustomScoreboardEntry(14, this), new CustomScoreboardEntry(13, this),
-																			  new CustomScoreboardEntry(12, this), new CustomScoreboardEntry(11, this), new CustomScoreboardEntry(10, this),
-																			  new CustomScoreboardEntry(9, this), new CustomScoreboardEntry(8, this), new CustomScoreboardEntry(7, this),
-																			  new CustomScoreboardEntry(6, this), new CustomScoreboardEntry(5, this), new CustomScoreboardEntry(4, this),
-																			  new CustomScoreboardEntry(3, this), new CustomScoreboardEntry(2, this), new CustomScoreboardEntry(1, this),
-																			  new CustomScoreboardEntry(0, this));
-	@Getter private final LGPlayer player;
 	@Getter private boolean shown;
-	
-	public CustomScoreboardEntry getLine(int index) {
-		return entries.get(index);
+	@Getter private final String name = RandomString.generate(16);
+	@Getter private final ArrayList<LGPlayer> inGamePlayers;
+	private final String displayName = "§7";
+	private final ArrayList<CustomScoreboardEntry> entries = new ArrayList<CustomScoreboardEntry>();
+
+	public CustomScoreboard(ArrayList<LGPlayer> inGamePlayers) {
+		this.inGamePlayers = inGamePlayers;
 	}
-	
+
+	private void createEntry(String name, int amountOfPlayers) {
+		this.entries.add(new CustomScoreboardEntry(this, name, amountOfPlayers));
+	}
+
+	private void removePreexistingEntries() {
+		final ArrayList<CustomScoreboardEntry> preexistingEntries = (ArrayList<CustomScoreboardEntry>) this.entries.clone();
+
+		for (CustomScoreboardEntry preexistingEntry: preexistingEntries) {
+			preexistingEntry.hide();
+			this.entries.remove(preexistingEntry);
+		}
+	}
+
+	public void displayEntries(ArrayList<RolePlayers> activeRoles) {
+    this.removePreexistingEntries();
+    int totalRemaingPlayers = 0;
+
+		for (RolePlayers currentPlayers : activeRoles) {
+      final int amountOfPlayers = currentPlayers.getAmountOfPlayers();
+
+			if (amountOfPlayers > 0) {
+				final Role currentRole = currentPlayers.getRole();
+				final String sanitizedName = currentRole.getName(amountOfPlayers).replace("§l", "");
+
+				this.createEntry(sanitizedName, amountOfPlayers);
+        totalRemaingPlayers += amountOfPlayers;
+			}
+    }
+
+    this.createEntry("§e[TOTAL]", totalRemaingPlayers);
+	}
+
+	public void announce(String message, int fakeDuration) {
+		this.removePreexistingEntries();
+		this.createEntry(message, fakeDuration);
+	}
+
 	public void show() {
 		WrapperPlayServerScoreboardObjective objective = new WrapperPlayServerScoreboardObjective();
 		objective.setMode(0);
 		objective.setName(name);
 		objective.setDisplayName(WrappedChatComponent.fromText(displayName));
-		objective.sendPacket(player.getPlayer());
+
 		WrapperPlayServerScoreboardDisplayObjective display = new WrapperPlayServerScoreboardDisplayObjective();
 		display.setPosition(1);
 		display.setScoreName(name);
-		display.sendPacket(player.getPlayer());
+
+		for (LGPlayer currentPlayer : inGamePlayers) {
+			objective.sendPacket(currentPlayer.getPlayer());
+			display.sendPacket(currentPlayer.getPlayer());
+		}
+
 		shown = true;
-		
-		for(CustomScoreboardEntry entry : entries)
-			entry.show();
 	}
-	
+
 	public void hide() {
 		WrapperPlayServerScoreboardObjective remove = new WrapperPlayServerScoreboardObjective();
 		remove.setMode(1);
 		remove.setName(name);
-		remove.sendPacket(player.getPlayer());
-		
-		for(CustomScoreboardEntry entry : entries)
-			entry.hide();
-		
+
+		for (LGPlayer currentPlayer : inGamePlayers) {
+			remove.sendPacket(currentPlayer.getPlayer());
+    }
+
+    this.removePreexistingEntries();
 		shown = false;
 	}
 }
