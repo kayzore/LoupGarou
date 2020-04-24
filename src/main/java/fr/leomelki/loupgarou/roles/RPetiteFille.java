@@ -21,6 +21,12 @@ public class RPetiteFille extends Role{
 	public RoleWinType getWinType() {
 		return RoleWinType.VILLAGE;
 	}
+
+	@Override
+	public String getName(int amount) {
+		return (amount > 1) ? "§a§lPetites Filles" : this.getName();
+	}
+
 	@Override
 	public String getName() {
 		return "§a§lPetite Fille";

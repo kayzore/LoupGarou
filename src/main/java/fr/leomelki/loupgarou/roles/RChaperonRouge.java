@@ -23,6 +23,12 @@ public class RChaperonRouge extends Role{
 		return RoleWinType.VILLAGE;
 	}
 	@Override
+	public String getName(int amount) {
+		final String baseline = this.getName();
+
+		return (amount > 1) ? baseline.replace("haperon", "haperons") : baseline;
+	}
+	@Override
 	public String getName() {
 		return "§a§lChaperon Rouge";
 	}

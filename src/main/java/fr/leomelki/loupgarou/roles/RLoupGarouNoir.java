@@ -49,6 +49,11 @@ public class RLoupGarouNoir extends Role{
 	}
 
 	@Override
+	public String getName(int amount) {
+		return (amount > 1) ? "§c§lLoups Noirs" : this.getName();
+	}
+
+	@Override
 	public String getName() {
 		return "§c§lLoup Noir";
 	}

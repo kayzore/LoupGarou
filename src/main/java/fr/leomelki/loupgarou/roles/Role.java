@@ -30,7 +30,7 @@ public abstract class Role implements Listener{
 			waitedPlayers = config.getInt(roleConfigName);
 	}
 	
-
+	public abstract String getName(int amount);
 	public abstract String getName();
 	public abstract String getFriendlyName();
 	public abstract String getShortDescription();

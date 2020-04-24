@@ -17,6 +17,12 @@ public class RVoyante extends Role{
 		return RoleWinType.VILLAGE;
 	}
 	@Override
+	public String getName(int amount) {
+		final String baseline = this.getName();
+
+		return (amount > 1) ? baseline + "s" : baseline;
+	}
+	@Override
 	public String getName() {
 		return "§a§lVoyante";
 	}

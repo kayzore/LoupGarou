@@ -15,6 +15,11 @@ public class RVillageois extends Role{
 		return RoleWinType.VILLAGE;
 	}
 	@Override
+	public String getName(int amount) {
+		return this.getName();
+	}
+
+	@Override
 	public String getName() {
 		return "§a§lVillageois";
 	}

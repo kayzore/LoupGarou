@@ -38,6 +38,12 @@ public class RSurvivant extends Role{
 		return RoleWinType.NONE;
 	}
 	@Override
+	public String getName(int amount) {
+		final String baseline = this.getName();
+
+		return (amount > 1) ? baseline + "s" : baseline;
+	}
+	@Override
 	public String getName() {
 		return "§d§lSurvivant";
 	}

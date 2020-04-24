@@ -15,6 +15,11 @@ public class RGrandMechantLoup extends Role{
 	}
 
 	@Override
+	public String getName(int amount) {
+		return (amount > 1) ? "§c§lGrands Méchants Loups" : this.getName();
+	}
+
+	@Override
 	public String getName() {
 		return "§c§lGrand Méchant Loup";
 	}

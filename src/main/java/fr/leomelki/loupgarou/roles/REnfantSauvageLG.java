@@ -12,6 +12,14 @@ public class REnfantSauvageLG extends Role{
 	public REnfantSauvageLG(LGGame game) {
 		super(game);
 	}
+
+	@Override
+	public String getName(int amount) {
+		final String baseline = this.getName();
+
+		return (amount > 1) ? baseline.replace("nfant-", "nfants-") : baseline;
+	}
+
 	@Override
 	public String getName() {
 		for(LGPlayer lgp : getPlayers())
