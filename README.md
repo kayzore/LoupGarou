@@ -64,4 +64,12 @@
   + Added support of plural names in the scoreboard.
   + Rewritten logic to avoid instantiating 15 instances when 1 is sufficient.
 
-  ![javaw_wQKF2n7IGS](https://user-images.githubusercontent.com/2607260/80265125-c5cd3d80-8696-11ea-8e32-0d1fc49d5708.png)
+  ![javaw_3n08F7Wy4V](https://user-images.githubusercontent.com/2607260/80318956-faafd080-880d-11ea-8a82-5d7a63f66330.png)
+
+#### 07) Persisted round results for postgame analytics
+
+- Needs testing before the PR gets created. (Author: [TheOptimisticFactory](https://github.com/TheOptimisticFactory))
+- Village composition and victory type is saved in `stats.csv` to enable postgame analytics
+
+  ![Code_FCvEXfwuZR](https://user-images.githubusercontent.com/2607260/80318997-54b09600-880e-11ea-9256-a29da3f42175.png)
+
