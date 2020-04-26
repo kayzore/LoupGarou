@@ -77,7 +77,7 @@ public class RLoupGarou extends Role{
 	}
 	
 	@Getter private LGChat chat = new LGChat((sender, message) -> {
-		return "§c"+sender.getName()+" §6» §f"+message;
+		return "§c" + sender.getFullName() + " §6» §f" + message;
 	});
 
 	boolean showSkins = false;
@@ -92,7 +92,7 @@ public class RLoupGarou extends Role{
 
 	public void onNightTurn(Runnable callback) {
 		vote = new LGVote(getTimeout(), getTimeout()/3, getGame(), false, false, (player, secondsLeft)-> {
-			return !getPlayers().contains(player) ? "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)" : player.getCache().has("vote") ? "§l§9Vous votez contre §c§l"+player.getCache().<LGPlayer>get("vote").getName() : "§6Il vous reste §e"+secondsLeft+" seconde"+(secondsLeft > 1 ? "s" : "")+"§6 pour voter";
+			return !getPlayers().contains(player) ? "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)" : player.getCache().has("vote") ? "§l§9Vous votez contre §c§l"+player.getCache().<LGPlayer>get("vote").getFullName() : "§6Il vous reste §e"+secondsLeft+" seconde"+(secondsLeft > 1 ? "s" : "")+"§6 pour voter";
 		});
 		for(LGPlayer lgp : getGame().getAlive())
 			if(lgp.getRoleType() == RoleType.LOUP_GAROU)
@@ -141,7 +141,7 @@ public class RLoupGarou extends Role{
 		if(choosen != null) {
 			getGame().kill(choosen, Reason.LOUP_GAROU);
 			for(LGPlayer player : getPlayers())
-				player.sendMessage("§6Les §c§lLoups§6 ont décidé de tuer §7§l"+choosen.getName()+"§6.");
+				player.sendMessage("§6Les §c§lLoups§6 ont décidé de tuer §7§l" + choosen.getFullName() + "§6.");
 		}else
 			for(LGPlayer player : getPlayers())
 				player.sendMessage("§6Personne n'a été désigné pour mourir.");

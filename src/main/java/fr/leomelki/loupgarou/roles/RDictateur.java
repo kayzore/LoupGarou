@@ -160,7 +160,7 @@ public class RDictateur extends Role{
 			player.stopChoosing();
 			p.getInventory().setItem(8, null);
 			p.updateInventory();
-			getGame().broadcastMessage("§7§l"+player.getName()+"§9 n'a tué personne.");
+			getGame().broadcastMessage("§7§l" + player.getFullName() + "§9 n'a tué personne.");
 			run.run();
 		}
 	}
@@ -209,7 +209,7 @@ public class RDictateur extends Role{
 					if(lgp.getCache().getBoolean("just_coup_d_etat")) {
 						getPlayers().remove(lgp);
 						lgp.getCache().remove("just_coup_d_etat");
-						getGame().broadcastMessage("§7§l"+lgp.getName()+" §9réalise un coup d'état.");
+						getGame().broadcastMessage("§7§l" + lgp.getFullName() + " §9réalise un coup d'état.");
 						//lgp.sendTitle("§6Vous faites votre coup d'état", "§aChoisissez qui tuer", 60);
 						
 						//On le met sur le slot 0 pour éviter un missclick sur la croix
@@ -220,7 +220,7 @@ public class RDictateur extends Role{
 						lgp.sendMessage("§6Choisis un joueur à exécuter.");
 						getGame().wait(60, ()->{
 							lgp.stopChoosing();
-							getGame().broadcastMessage("§7§l"+lgp.getName()+"§9 n'a tué personne.");
+							getGame().broadcastMessage("§7§l" + lgp.getFullName() + "§9 n'a tué personne.");
 							lgp.getPlayer().getInventory().setItem(8, null);
 							lgp.getPlayer().updateInventory();
 							this.run();
@@ -254,7 +254,7 @@ public class RDictateur extends Role{
 			return;
 		
 		if(roleType != RoleType.VILLAGER) {
-			getGame().broadcastMessage("§7§l"+dicta.getName()+" §9devient le §5§lCapitaine§9 du village.");
+			getGame().broadcastMessage("§7§l" + dicta.getFullName() + " §9devient le §5§lCapitaine§9 du village.");
 			getGame().setMayor(dicta);
 		} else {
 			getGame().kill(dicta, Reason.DICTATOR_SUICIDE);
@@ -262,7 +262,7 @@ public class RDictateur extends Role{
 				if(lgp == dicta)
 					lgp.sendMessage("§9§oÇa ne s'est pas passé comme prévu...");
 				else
-					lgp.sendMessage("§9Le "+getName()+"§9 s'est trompé, il mourra la nuit suivante.");
+					lgp.sendMessage("§9Le " + getName() + "§9 s'est trompé, il mourra la nuit suivante.");
 			}
 		}
 		callback.run();

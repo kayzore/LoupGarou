@@ -66,12 +66,12 @@ public class RDetective extends Role{
 					if(player.getCache().has("detective_first")) {
 						LGPlayer first = player.getCache().remove("detective_first");
 						if(first == choosen) {
-							player.sendMessage("§cVous ne pouvez pas comparer §7§l"+first.getName()+"§c avec lui même !");
+							player.sendMessage("§cVous ne pouvez pas comparer §7§l" + first.getFullName() + "§c avec lui même !");
 						} else {
 							if((first.getRoleType() == RoleType.NEUTRAL || choosen.getRoleType() == RoleType.NEUTRAL) ? first.getRole().getClass() == choosen.getRole().getClass() : first.getRoleType() == choosen.getRoleType())
-								player.sendMessage("§7§l"+first.getName()+"§6 et §7§l"+choosen.getName()+"§6 sont §adu même camp.");
+								player.sendMessage("§7§l" + first.getFullName() + "§6 et §7§l" + choosen.getFullName() + "§6 sont §adu même camp.");
 							else
-								player.sendMessage("§7§l"+first.getName()+"§6 et §7§l"+choosen.getName()+"§6 ne sont §cpas du même camp.");
+								player.sendMessage("§7§l" + first.getFullName() + "§6 et §7§l" + choosen.getFullName() + "§6 ne sont §cpas du même camp.");
 
 							player.stopChoosing();
 							player.hideView();
@@ -79,7 +79,7 @@ public class RDetective extends Role{
 						}
 					} else {
 						player.getCache().set("detective_first", choosen);
-						player.sendMessage("§9Choisis un joueur avec qui tu souhaites comparer le rôle de §7§l"+choosen.getName());
+						player.sendMessage("§9Choisis un joueur avec qui tu souhaites comparer le rôle de §7§l" + choosen.getFullName());
 					}
 				}
 			}

@@ -74,14 +74,14 @@ public class RGarde extends Role{
 						if(lastProtected == player)
 							player.sendMessage("§4§oTu t'es déjà protégé la nuit dernière.");
 						else
-							player.sendMessage("§4§oTu as déjà protégé §7§l§o"+lastProtected.getName()+"§4§o la nuit dernière.");
+							player.sendMessage("§4§oTu as déjà protégé §7§l§o" + lastProtected.getFullName() + "§4§o la nuit dernière.");
 					}  else {
 						if(choosen == player) {
 							player.sendMessage("§6Tu décides de te protéger toi-même cette nuit.");
 							player.sendActionBarMessage("§9Tu seras protégé.");
 						} else {
-							player.sendMessage("§6Tu vas protéger §7§l"+choosen.getName()+"§6 cette nuit.");
-							player.sendActionBarMessage("§7§l"+choosen.getName()+"§9 sera protégé.");
+							player.sendMessage("§6Tu vas protéger §7§l" + choosen.getFullName() + "§6 cette nuit.");
+							player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§9 sera protégé.");
 						}
 						choosen.getCache().set("garde_protected", true);
 						player.getCache().set("garde_lastProtected", choosen);

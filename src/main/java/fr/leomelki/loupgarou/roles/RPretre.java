@@ -196,7 +196,7 @@ public class RPretre extends Role{
 				@Override
 				public void callback(LGPlayer choosen) {
 					if(choosen != null) {
-						final String choosenName = choosen.getName();
+						final String choosenName = choosen.getFullName();
 						if(!choosen.isDead())
 							lgp.sendMessage("§7§l"+choosenName+"§c n'est pas mort.");
 						else if(lgp.getRoleType() == RoleType.LOUP_GAROU && choosen.getRoleType() == RoleType.NEUTRAL) {
@@ -218,7 +218,7 @@ public class RPretre extends Role{
 							lgp.hideView();
 							callback.run();
 
-							final String resurectionLog = lgp.getName() + " a réssuscité " + choosenName;
+							final String resurectionLog = lgp.getFullName() + " a réssuscité " + choosenName;
 
 							System.out.println(resurectionLog.replaceAll("\\§.", ""));
 						}
@@ -272,7 +272,7 @@ public class RPretre extends Role{
 					
 					getGame().updateRoleScoreboard();
 					
-					getGame().broadcastMessage("§7§l"+lgp.getName()+"§6 a été ressuscité cette nuit.");
+					getGame().broadcastMessage("§7§l" + lgp.getFullName() + "§6 a été ressuscité cette nuit.");
 
 					for(LGPlayer player : getGame().getInGame())
 						if(player.getPlayer() != null && player != lgp) {

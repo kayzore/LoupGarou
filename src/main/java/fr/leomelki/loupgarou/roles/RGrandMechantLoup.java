@@ -77,8 +77,8 @@ public class RGrandMechantLoup extends Role{
 			@Override
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
-					player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 va mourir cette nuit");
-					player.sendMessage("§6Tu as choisi de manger §7§l"+choosen.getName()+"§6.");
+					player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 va mourir cette nuit");
+					player.sendMessage("§6Tu as choisi de manger §7§l" + choosen.getFullName() + "§6.");
 					getGame().kill(choosen, getGame().getDeaths().containsKey(Reason.LOUP_GAROU) ? Reason.GM_LOUP_GAROU : Reason.LOUP_GAROU);
 					player.stopChoosing();
 					player.hideView();

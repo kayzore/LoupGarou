@@ -84,7 +84,7 @@ public class RVampire extends Role{
 	}
 	
 	@Getter private LGChat chat = new LGChat((sender, message) -> {
-		return "§5"+sender.getName()+" §6» §f"+message;
+		return "§5" + sender.getFullName() + " §6» §f" + message;
 	});
 	int nextCanInfect = 0;
 	LGVote vote;
@@ -97,7 +97,7 @@ public class RVampire extends Role{
 
 	public void onNightTurn(Runnable callback) {
 		vote = new LGVote(getTimeout(), getTimeout()/3, getGame(), false, false, (player, secondsLeft)-> {
-			return !getPlayers().contains(player) ? "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)" : player.getCache().has("vote") ? "§l§9Vous votez pour §c§l"+player.getCache().<LGPlayer>get("vote").getName() : "§6Il vous reste §e"+secondsLeft+" seconde"+(secondsLeft > 1 ? "s" : "")+"§6 pour voter";
+			return !getPlayers().contains(player) ? "§6C'est au tour " + getFriendlyName() + " §6(§e" + secondsLeft + " s§6)" : player.getCache().has("vote") ? "§l§9Vous votez pour §c§l" + player.getCache().<LGPlayer>get("vote").getFullName() : "§6Il vous reste §e" + secondsLeft + " seconde"+(secondsLeft > 1 ? "s" : "") + "§6 pour voter";
 		});
 		for(LGPlayer lgp : getGame().getAlive())
 			if(lgp.getRoleType() == RoleType.VAMPIRE)
@@ -166,7 +166,7 @@ public class RVampire extends Role{
 				return;
 			}
 			for(LGPlayer player : getPlayers())
-				player.sendMessage("§7§l"+choosen.getName()+" s'est transformé en §5§lVampire§6.");
+				player.sendMessage("§7§l" + choosen.getFullName() + " s'est transformé en §5§lVampire§6.");
 			choosen.sendMessage("§6Tu as été infecté par les §5§lVampires §6pendant la nuit. Tu as perdu tes pouvoirs.");
 			choosen.sendMessage("§6§oTu gagnes désormais avec les §5§l§oVampires§6§o.");
 			choosen.getCache().set("vampire", true);
@@ -186,7 +186,7 @@ public class RVampire extends Role{
 					player.getCache().remove("just_vampire");
 					for(LGPlayer lgp : getGame().getInGame()) {
 						if(lgp.getRoleType() == RoleType.VAMPIRE)
-							lgp.sendMessage("§7§l"+player.getName()+"§6 s'est transformé en §5§lVampire§6...");
+							lgp.sendMessage("§7§l" + player.getFullName() + "§6 s'est transformé en §5§lVampire§6...");
 						else
 							lgp.sendMessage("§6Quelqu'un s'est transformé en §5§lVampire§6...");
 					}

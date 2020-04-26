@@ -59,10 +59,9 @@ public class RPronostiqueur extends Role{
 			@Override
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
-					//player.sendTitle("§6Vous avez regardé un rôle", "§e§l"+choosen.getName()+"§6§l est §e§l"+choosen.getRole().getName(), 5*20);
 					String gentilMechant = choosen.getRoleWinType() == RoleWinType.VILLAGE || choosen.getRoleWinType() == RoleWinType.NONE ? "§a§lgentil" : "§c§lméchant";
-					player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 est "+gentilMechant);
-					player.sendMessage("§6Votre instinct vous dit que §7§l"+choosen.getName()+"§6 est "+gentilMechant+"§6.");
+					player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 est "+gentilMechant);
+					player.sendMessage("§6Votre instinct vous dit que §7§l" + choosen.getFullName() + "§6 est " + gentilMechant + "§6.");
 					player.stopChoosing();
 					player.hideView();
 					callback.run();

@@ -76,8 +76,8 @@ public class REnfantSauvage extends Role{
 			public void callback(LGPlayer choosen) {
 				if(choosen != null) {
 					player.stopChoosing();
-					player.sendMessage("§6Si §7§l"+choosen.getName()+"§6 meurt, tu deviendras §c§lLoup-Garou§6.");
-					player.sendActionBarMessage("§7§l"+choosen.getName()+"§6 est ton modèle");
+					player.sendMessage("§6Si §7§l" + choosen.getFullName() + "§6 meurt, tu deviendras §c§lLoup-Garou§6.");
+					player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§6 est ton modèle");
 					player.getCache().set("enfant_svg", choosen);
 					choosen.getCache().set("enfant_svg_d", player);
 					getPlayers().remove(player);//Pour éviter qu'il puisse avoir plusieurs modèles
@@ -95,8 +95,8 @@ public class REnfantSauvage extends Role{
 		LGPlayer choosen = null;
 		while(choosen == null || choosen == player)
 			choosen = getGame().getAlive().get(random.nextInt(getGame().getAlive().size()));
-		player.sendMessage("§6Si §7§l"+choosen.getName()+"§6 meurt, tu deviendras §c§lLoup-Garou§6.");
-		player.sendActionBarMessage("§7§l"+choosen.getName()+"§6 est ton modèle");
+		player.sendMessage("§6Si §7§l" + choosen.getFullName() + "§6 meurt, tu deviendras §c§lLoup-Garou§6.");
+		player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§6 est ton modèle");
 		player.getCache().set("enfant_svg", choosen);
 		choosen.getCache().set("enfant_svg_d", player);
 		getPlayers().remove(player);
@@ -108,7 +108,7 @@ public class REnfantSauvage extends Role{
 			if(e.getKilled().getCache().has("enfant_svg_d")) {
 				LGPlayer enfant = e.getKilled().getCache().remove("enfant_svg_d");
 				if(!enfant.isDead() && enfant.getCache().remove("enfant_svg") == e.getKilled() && enfant.isRoleActive()) {
-					enfant.sendMessage("§7§l"+e.getKilled().getName()+"§6 est mort, tu deviens un §c§lLoup-Garou§6.");
+					enfant.sendMessage("§7§l" + e.getKilled().getFullName() + "§6 est mort, tu deviens un §c§lLoup-Garou§6.");
 					REnfantSauvageLG lgEnfantSvg = null;
 					for(Role role : getGame().getRoles())
 						if(role instanceof REnfantSauvageLG)

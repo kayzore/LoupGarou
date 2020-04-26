@@ -240,10 +240,12 @@ public class MainLg extends JavaPlugin {
 					Bukkit.getPluginManager().callEvent(evt2);
 					if(evt2.getPrefix().length() > 0)
 						team.setPrefix(WrappedChatComponent.fromText(evt2.getPrefix()));
-					else
+					else {
 						team.setPrefix(WrappedChatComponent.fromText("§f"));
-                                        if (lgp.getNick() != null)
-                                            team.setSuffix(WrappedChatComponent.fromText("§8 => §b" + lgp.getName()));
+						if (lgp.getNick() != null) {
+							team.setSuffix(WrappedChatComponent.fromText("§8 => §b" + lgp.getName()));
+						}
+					}
 				}
 			}
 		});
@@ -332,6 +334,8 @@ public class MainLg extends JavaPlugin {
 						return true;
 					}
 					sender.sendMessage("§aVous avez bien démarré une nouvelle partie !");
+					
+
 					lgp.getGame().updateStart();
 					return true;
 				}else if(args[0].equalsIgnoreCase("reloadconfig")) {
@@ -445,10 +449,10 @@ public class MainLg extends JavaPlugin {
 					for (int index = 2; index < args.length; index++) nicknameTokens.add(args[index]);
 					final String nickname = String.join(" ", nicknameTokens);
 
-					Player detect = Bukkit.getPlayer(nickname);
+					Player detect = Bukkit.getPlayerExact(nickname);
 					if(detect != null) {    
-									sender.sendMessage("§4Erreur : §cCe surnom est déjà le pseudo d'un joueur !");
-									return true;
+						sender.sendMessage("§4Erreur : §cCe surnom est déjà le pseudo d'un joueur !");
+						return true;
 					}
 					for(LGPlayer other : getCurrentGame().getInGame()) {
 									if(nickname.equalsIgnoreCase(other.getNick())){

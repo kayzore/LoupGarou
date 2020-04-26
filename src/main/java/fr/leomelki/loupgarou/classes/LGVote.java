@@ -221,7 +221,7 @@ public class LGVote {
 	}
 	public void vote(LGPlayer voter, LGPlayer voted) {
 		if(blacklisted.contains(voted)) {
-			voter.sendMessage("§cVous ne pouvez pas votre pour §7§l"+voted.getName()+"§c.");
+			voter.sendMessage("§cVous ne pouvez pas votre pour §7§l" + voted.getFullName() + "§c.");
 			return;
 		}
 		if(voted == voter.getCache().get("vote"))
@@ -264,17 +264,22 @@ public class LGVote {
 		
 		if(voter.getPlayer() != null) {
 			showVoting(voter, voted);
+			
 			String message;
+			final String voterName = voter.getFullName();
+			
 			if(voted != null) {
+				final String targetName = voted.getFullName();
+
 				if(changeVote) {
-					message = "§7§l"+voter.getName()+"§6 a changé son vote pour §7§l"+voted.getName()+"§6.";
-					voter.sendMessage("§6Tu as changé de vote pour §7§l"+voted.getName()+"§6.");
+					message = "§7§l" + voterName + "§6 a changé son vote pour §7§l" + targetName + "§6.";
+					voter.sendMessage("§6Tu as changé de vote pour §7§l" + targetName + "§6.");
 				} else {
-					message = "§7§l"+voter.getName()+"§6 a voté pour §7§l"+voted.getName()+"§6.";
-					voter.sendMessage("§6Tu as voté pour §7§l"+voted.getName()+"§6.");
+					message = "§7§l" + voterName + "§6 a voté pour §7§l" + targetName + "§6.";
+					voter.sendMessage("§6Tu as voté pour §7§l" + targetName + "§6.");
 				}
 			} else {
-				message = "§7§l"+voter.getName()+"§6 a annulé son vote.";
+				message = "§7§l" + voterName + "§6 a annulé son vote.";
 				voter.sendMessage("§6Tu as annulé ton vote.");
 			}
 			

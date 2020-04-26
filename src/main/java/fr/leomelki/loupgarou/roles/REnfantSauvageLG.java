@@ -90,6 +90,6 @@ public class REnfantSauvageLG extends Role{
 		lgRole.join(player, false);
 		for(LGPlayer lgp : lgRole.getPlayers())
 			if(lgp != player)
-				lgp.sendMessage("§7§l"+player.getName()+"§6 a rejoint les §c§lLoups-Garous§6.");
+				lgp.sendMessage("§7§l" + player.getFullName() + "§6 a rejoint les §c§lLoups-Garous§6.");
 	}
 }

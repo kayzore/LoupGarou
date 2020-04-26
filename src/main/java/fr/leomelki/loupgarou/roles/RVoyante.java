@@ -60,9 +60,8 @@ public class RVoyante extends Role{
 			@Override
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
-					//player.sendTitle("§6Vous avez regardé un rôle", "§e§l"+choosen.getName()+"§6§l est §e§l"+choosen.getRole().getName(), 5*20);
-					player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 est §e§l"+choosen.getRole().getName());
-					player.sendMessage("§6Tu découvres que §7§l"+choosen.getName()+"§6 est "+choosen.getRole().getName()+"§6.");
+					player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 est §e§l" + choosen.getRole().getName());
+					player.sendMessage("§6Tu découvres que §7§l" + choosen.getFullName() + "§6 est " + choosen.getRole().getName() + "§6.");
 					player.stopChoosing();
 					player.hideView();
 					callback.run();

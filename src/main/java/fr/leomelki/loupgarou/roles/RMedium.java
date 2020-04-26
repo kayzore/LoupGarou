@@ -71,12 +71,12 @@ public class RMedium extends Role{
 
 			@Override
 			public String receive(LGPlayer sender, String message) {
-				return "§7"+sender.getName()+"§6 » §f"+message;
+				return "(REKT)§7 " + sender.getFullName() + "§6 » §f" + message;
 			}
 			
 			@Override
 			public String send(LGPlayer sender, String message) {
-				return getName()+"§6 » §f"+message;
+				return "(" + getName() + ")§7 " + sender.getFullName() + "§6 » §f" + message;
 			}
 			
 		});

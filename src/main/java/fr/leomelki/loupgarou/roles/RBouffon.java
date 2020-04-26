@@ -108,12 +108,12 @@ public class RBouffon extends Role{
 		player.choose((choosen)->{
 			if(choosen != null) {
 				if(!choosable.contains(choosen))
-					player.sendMessage("§7§l"+choosen.getName()+"§4 n'a pas voté pour vous.");
+					player.sendMessage("§7§l" + choosen.getFullName() + "§4 n'a pas voté pour vous.");
 				else if(choosen.isDead())
-					player.sendMessage("§7§l"+choosen.getName()+"§4 est mort.");//fix
+					player.sendMessage("§7§l" + choosen.getFullName() + "§4 est mort.");//fix
 				else {
 					player.stopChoosing();
-					player.sendMessage("§6Ton fantôme va hanter l'esprit de §7§l"+choosen.getName()+"§6.");
+					player.sendMessage("§6Ton fantôme va hanter l'esprit de §7§l" + choosen.getFullName() + "§6.");
 					getGame().kill(choosen, Reason.BOUFFON);
 					player.hideView();
 					callback.run();

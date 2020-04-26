@@ -110,7 +110,7 @@ public class RCupidon extends Role{
 							destroy.sendPacket(player.getPlayer());
 							
 							setInLove(first, choosen);
-							player.sendMessage("§7§l"+first.getName()+"§9 et §7§l"+choosen.getName()+"§9 sont désormais follement amoureux.");
+							player.sendMessage("§7§l" + first.getFullName() + "§9 et §7§l" + choosen.getFullName() + "§9 sont désormais follement amoureux.");
 							player.stopChoosing();
 							player.hideView();
 							callback.run();
@@ -125,11 +125,11 @@ public class RCupidon extends Role{
 	}
 	protected void setInLove(LGPlayer player1, LGPlayer player2) {
 		player1.getCache().set("inlove", player2);
-		player1.sendMessage("§9Tu tombes amoureux de §7§l"+player2.getName()+"§9, il est "+player2.getRole().getName());
+		player1.sendMessage("§9Tu tombes amoureux de §7§l" + player2.getFullName() + "§9, il est " + player2.getRole().getName());
 		player1.sendMessage("§9§oTu peux lui parler en mettant un §e!§9 devant ton message.");
 		
 		player2.getCache().set("inlove", player1);
-		player2.sendMessage("§9Tu tombes amoureux de §7§l"+player1.getName()+"§9, il est "+player1.getRole().getName());
+		player2.sendMessage("§9Tu tombes amoureux de §7§l" + player1.getFullName() + "§9, il est " + player1.getRole().getName());
 		player2.sendMessage("§9§oTu peux lui parler en mettant un §e!§9 devant ton message.");
 		
 	/*	sendHead(player1, player2);
@@ -262,8 +262,8 @@ public class RCupidon extends Role{
 		if(player.getGame() == getGame()) {
 			if(e.getMessage().startsWith("!")) {
 				if(player.getCache().has("inlove")){
-					player.sendMessage("§d\u2764 "+player.getName()+" §6» §f"+e.getMessage().substring(1));
-					player.getCache().<LGPlayer>get("inlove").sendMessage("§d\u2764 "+player.getName()+" §6» §f"+e.getMessage().substring(1));
+					player.sendMessage("§d\u2764 " + player.getFullName() + " §6» §f" + e.getMessage().substring(1));
+					player.getCache().<LGPlayer>get("inlove").sendMessage("§d\u2764 " + player.getFullName() + " §6» §f" + e.getMessage().substring(1));
 				}else
 					player.sendMessage("§4Erreur : §cVous n'êtes pas en couple !");
 				e.setCancelled(true);

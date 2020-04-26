@@ -199,7 +199,7 @@ public class RSurvivant extends Role{
 					
 				@Override
 				public void run() {
-					getGame().broadcastMessage("§6§oLe "+getName()+"§6§o a rempli son objectif.");
+					getGame().broadcastMessage("§6§oLe " + getName() + "§6§o a rempli son objectif.");
 				}
 			}.runTaskAsynchronously(MainLg.getInstance());
 		}

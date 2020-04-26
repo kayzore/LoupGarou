@@ -118,7 +118,7 @@ public class RSorciere extends Role{
 	}
 	private void openInventory(LGPlayer player) {
 		inMenu = true;
-		Inventory inventory = Bukkit.createInventory(null, InventoryType.BREWING, sauver == null ? "§7Personne n'a été ciblé" : "§7§l"+sauver.getName()+" §7est ciblé");
+		Inventory inventory = Bukkit.createInventory(null, InventoryType.BREWING, sauver == null ? "§7Personne n'a été ciblé" : "§7§l" + sauver.getFullName() + " §7est ciblé");
 		inventory.setContents(items.clone());//clone au cas où Bukkit prenne directement la liste pour éviter de la modifier avec setItem (jsp)
 		if(sauver == null || player.getCache().getBoolean("witch_used_life"))
 			inventory.setItem(0, null);
@@ -126,7 +126,7 @@ public class RSorciere extends Role{
 		if(sauver != null) {
 			ItemStack head = new ItemStack(Material.ARROW);
 			ItemMeta meta = head.getItemMeta();
-			meta.setDisplayName("§7§l"+sauver.getName()+"§c est ciblé");
+			meta.setDisplayName("§7§l" + sauver.getFullName() + "§c est ciblé");
 			head.setItemMeta(meta);
 			inventory.setItem(4, head);
 		}
@@ -213,16 +213,16 @@ public class RSorciere extends Role{
 		player.getPlayer().updateInventory();
 		player.getCache().set("witch_used_death", true);
 		getGame().kill(choosen, Reason.SORCIERE);
-		player.sendMessage("§6Tu as décidé d'assassiner §7§l"+choosen.getName()+"§6.");
-		player.sendActionBarMessage("§7§l"+choosen.getName()+"§9 a été tué.");
+		player.sendMessage("§6Tu as décidé d'assassiner §7§l" + choosen.getFullName() + "§6.");
+		player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§9 a été tué.");
 		player.hideView();
 		callback.run();
 	}
 	private void saveLife(LGPlayer player) {
 		player.getCache().set("witch_used_life", true);
 		getGame().getDeaths().remove(Reason.LOUP_GAROU, sauver);
-		player.sendMessage("§6Tu as décidé de sauver §7§l"+sauver.getName()+"§6.");
-		player.sendActionBarMessage("§7§l"+sauver.getName()+"§9 a été sauvé.");
+		player.sendMessage("§6Tu as décidé de sauver §7§l" + sauver.getFullName() + "§6.");
+		player.sendActionBarMessage("§7§l" + sauver.getFullName() + "§9 a été sauvé.");
 		player.hideView();
 		callback.run();
 	}

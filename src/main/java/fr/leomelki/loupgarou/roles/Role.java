@@ -94,7 +94,7 @@ public abstract class Role implements Listener {
 		}.run();
 	}
 	public void join(LGPlayer player, boolean sendMessage) {
-		final String joinLog = player.getName() + " est " + getName();
+		final String joinLog = player.getFullName() + " est " + getName();
 
 		System.out.println(joinLog.replaceAll("\\§.", ""));
 		players.add(player);

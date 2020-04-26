@@ -103,11 +103,11 @@ public class RLoupGarouBlanc extends Role{
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
 					if(!lg.getPlayers().contains(choosen)) {
-						player.sendMessage("§7§l"+choosen.getName()+"§4 n'est pas un Loup-Garou.");
+						player.sendMessage("§7§l" + choosen.getFullName() + "§4 n'est pas un Loup-Garou.");
 						return;
 					}
-					player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 va mourir cette nuit");
-					player.sendMessage("§6Tu as choisi de dévorer §7§l"+choosen.getName()+"§6.");
+					player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 va mourir cette nuit");
+					player.sendMessage("§6Tu as choisi de dévorer §7§l" + choosen.getFullName() + "§6.");
 					player.getPlayer().getInventory().setItem(8, null);
 					player.getPlayer().updateInventory();
 					getGame().kill(choosen, Reason.LOUP_BLANC);

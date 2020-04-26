@@ -107,7 +107,7 @@ public class RLoupGarouNoir extends Role{
 	
 	public void openInventory(Player player) {
 		inMenu = true;
-		Inventory inventory = Bukkit.createInventory(null, 9, "§7Infecter "+toInfect.getName()+" ?");
+		Inventory inventory = Bukkit.createInventory(null, 9, "§7Infecter " + toInfect.getFullName() + " ?");
 		inventory.setContents(toInfect == null ? skip.clone() : items.clone());
 		player.closeInventory();
 		player.openInventory(inventory);
@@ -162,8 +162,8 @@ public class RLoupGarouNoir extends Role{
 			toInfect.getCache().set("infected", true);
 			getPlayers().remove(lgp);
 			toInfect.getCache().set("just_infected", true);
-			lgp.sendActionBarMessage("§9§lVous infectez §9"+toInfect.getName());
-			lgp.sendMessage("§6Tu as infecté §7§l"+toInfect.getName()+"§6.");
+			lgp.sendActionBarMessage("§9§lVous infectez §9" + toInfect.getFullName());
+			lgp.sendMessage("§6Tu as infecté §7§l" + toInfect.getFullName() + "§6.");
 			lgp.stopChoosing();
 			getGame().getDeaths().remove(Reason.LOUP_GAROU, toInfect);
 			lgp.hideView();
@@ -187,7 +187,7 @@ public class RLoupGarouNoir extends Role{
 					
 					for(LGPlayer lgp : getGame().getInGame()) {
 						if(lgp.getRoleType() == RoleType.LOUP_GAROU)
-							lgp.sendMessage("§7§l"+player.getName()+"§6 s'est fait infecter pendant la nuit.");
+							lgp.sendMessage("§7§l" + player.getFullName() + "§6 s'est fait infecter pendant la nuit.");
 						else
 							lgp.sendMessage("§6Un joueur a été §c§linfecté§6 pendant la nuit.");
 					}

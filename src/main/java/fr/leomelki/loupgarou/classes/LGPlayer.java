@@ -62,7 +62,9 @@ public class LGPlayer {
 	@Getter private VariableCache cache = new VariableCache();
 	@Getter @Setter private LGGame game;
 	@Getter @Setter private String latestObjective;
-        @Getter @Setter private String nick;
+	@Getter @Setter private String nick;
+	private String name;
+
 	public LGPlayer(Player player) {
 		this.player = player;
 	}
@@ -105,17 +107,22 @@ public class LGPlayer {
 	public void remove() {
 		this.player = null;
 	}
-	private String name;
-	public String getName() {
-                return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
-	}
-	public String getName(boolean real) { // si true, alors on renvoie le vrai pseudo minecraft et pas le nick
-                if (real)
-                    return (player != null ? getPlayer().getName() : name);
-                else
-                    return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
+	public String getFullName() {
+		final String playerName = (player != null) ? getPlayer().getName() : name;
+		final String nick = (this.nick != null) ? "§8 => §b" + this.nick : "";
+
+		return playerName + nick;
 	}
 
+	public String getName() {
+		return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
+	}
+	public String getName(boolean real) { // si true, alors on renvoie le vrai pseudo minecraft et pas le nick
+		if (real)
+				return (player != null ? getPlayer().getName() : name);
+		else
+				return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
+	}
 
 	public boolean join(LGGame game) {
 		if(getPlayer().getGameMode() == GameMode.SPECTATOR) {
@@ -126,12 +133,12 @@ public class LGPlayer {
 			//To update the skin
 			updateOwnSkin();
 			getPlayer().setWalkSpeed(0.2f);
-	//		sendMessage("§2Vous venez de rejoindre une partie de Loup-Garou. §aBon jeu!");
 
 			return true;
 		}
 		return false;
 	}
+
 	public void choose(LGChooseCallback callback, LGPlayer... blacklisted) {
 		this.blacklistedChoice = blacklisted == null ? new ArrayList<LGPlayer>(0) : Arrays.asList(blacklisted);
 		this.chooseCallback = callback;
@@ -188,7 +195,7 @@ public class LGPlayer {
 				WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 				team.setMode(2);
 				team.setName(getName(true));
-				team.setPrefix(WrappedChatComponent.fromText(""));
+				team.setPrefix(WrappedChatComponent.fromText("DANG YO"));
 				team.setPlayers(meList);
 				team.sendPacket(lgp.getPlayer());
 			}

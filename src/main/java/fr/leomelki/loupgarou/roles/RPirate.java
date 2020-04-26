@@ -159,12 +159,12 @@ public class RPirate extends Role{
 						player.getInventory().setItem(8, null);
 						player.updateInventory();
 						lgp.stopChoosing();
-						lgp.sendMessage("§6Tu as pris §7§l"+choosen.getName()+"§6 en otage.");
-						lgp.sendActionBarMessage("§7§l"+choosen.getName()+"§6 est ton otage");
+						lgp.sendMessage("§6Tu as pris §7§l" + choosen.getFullName() + "§6 en otage.");
+						lgp.sendActionBarMessage("§7§l" + choosen.getFullName() + "§6 est ton otage");
 						lgp.getCache().set("pirate_otage", choosen);
 						choosen.getCache().set("pirate_otage_d", lgp);
 						getPlayers().remove(lgp);//Pour éviter qu'il puisse prendre plusieurs otages
-						choosen.sendMessage("§7§l"+lgp.getName()+"§6 t'a pris en otage, il est "+getName()+"§6.");
+						choosen.sendMessage("§7§l" + lgp.getFullName() + "§6 t'a pris en otage, il est " + getName() + "§6.");
 						lgp.hideView();
 						callback.run();
 					}
@@ -178,7 +178,7 @@ public class RPirate extends Role{
 			if(e.getKilled().getCache().has("pirate_otage") && e.getKilled().isRoleActive()) {
 				LGPlayer otage = e.getKilled().getCache().remove("pirate_otage");
 				if(!otage.isDead() && otage.getCache().get("pirate_otage_d") == e.getKilled()) {
-					getGame().broadcastMessage("§7§l"+e.getKilled().getName()+"§6 est "+getName()+"§6, c'est son otage qui va mourir.");
+					getGame().broadcastMessage("§7§l" + e.getKilled().getFullName() + "§6 est " + getName() + "§6, c'est son otage qui va mourir.");
 					e.setKilled(otage);
 					e.setReason(Reason.PIRATE);
 				}

@@ -74,7 +74,7 @@ public class RChienLoupLG extends Role{
 				role.join(player, false);
 				for(LGPlayer lgp : role.getPlayers())
 					if(lgp != player)
-						lgp.sendMessage("§7§l"+player.getName()+"§6 a rejoint les §c§lLoups-Garous§6.");
+						lgp.sendMessage("§7§l" + player.getFullName() + "§6 a rejoint les §c§lLoups-Garous§6.");
 			}
 	}
 }

@@ -70,11 +70,11 @@ public class RChasseurDeVampire extends Role{
 				//	player.sendMessage("§6Tu as choisi de rendre visite à §7§l"+choosen.getName()+"§6.");
 					if(choosen.getCache().getBoolean("vampire") || choosen.getRole() instanceof RVampire) {
 						getGame().kill(choosen, Reason.CHASSEUR_DE_VAMPIRE);
-						player.sendMessage("§7§l"+choosen.getName()+"§6 est un §5§lVampire§6, à l'attaque.");
-						player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 va mourir");
+						player.sendMessage("§7§l" + choosen.getFullName() + "§6 est un §5§lVampire§6, à l'attaque.");
+						player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 va mourir");
 					} else {
-						player.sendMessage("§7§l"+choosen.getName()+"§6 n'est pas un §5§lVampire§6...");
-						player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 n'est pas un §5§lVampire");
+						player.sendMessage("§7§l" + choosen.getFullName() + "§6 n'est pas un §5§lVampire§6...");
+						player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 n'est pas un §5§lVampire");
 					}
 					
 					player.stopChoosing();

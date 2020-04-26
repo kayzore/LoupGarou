@@ -72,8 +72,8 @@ public class RAssassin extends Role{
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
 					getGame().kill(choosen, Reason.ASSASSIN);
-					player.sendActionBarMessage("§e§l"+choosen.getName()+"§6 va mourir");
-					player.sendMessage("§6Tu as choisi de tuer §7§l"+choosen.getName()+"§6.");
+					player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 va mourir");
+					player.sendMessage("§6Tu as choisi de tuer §7§l" + choosen.getFullName() + "§6.");
 					player.stopChoosing();
 					player.hideView();
 					callback.run();

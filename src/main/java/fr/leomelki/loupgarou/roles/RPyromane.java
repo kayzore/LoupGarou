@@ -141,7 +141,7 @@ public class RPyromane extends Role{
 			LGPyromaneGasoilEvent event = new LGPyromaneGasoilEvent(getGame(), first);
 			Bukkit.getPluginManager().callEvent(event);
 			if(event.isCancelled())
-				player.sendMessage("§7§l"+event.getPlayer().getName()+"§c est immunisé.");
+				player.sendMessage("§7§l" + event.getPlayer().getFullName() + "§c est immunisé.");
 			else {
 				event.getPlayer().sendMessage("§6Tu es recouvert de gasoil...");
 				liste.add(event.getPlayer());
@@ -207,29 +207,29 @@ public class RPyromane extends Role{
 				public void callback(LGPlayer choosen) {
 					if(choosen != null) {
 						if(choosen == first) {
-							lgp.sendMessage("§cTu as déjà versé du gasoil sur §7§l"+choosen.getName()+"§6.");
+							lgp.sendMessage("§cTu as déjà versé du gasoil sur §7§l" + choosen.getFullName() + "§6.");
 							return;
 						}
 						List<LGPlayer> liste = lgp.getCache().<List<LGPlayer>>get("pyromane_essence");
 						if(liste.contains(choosen)) {
-							lgp.sendMessage("§7§l"+choosen.getName()+"§c est déjà recouvert de gasoil.");
+							lgp.sendMessage("§7§l" + choosen.getFullName() + "§c est déjà recouvert de gasoil.");
 							return;
 						}
 						if(first == choosen) {
-							lgp.sendMessage("§cVous avez déjà sélectionné §7§l"+choosen.getName()+"§c.");
+							lgp.sendMessage("§cVous avez déjà sélectionné §7§l" + choosen.getFullName() + "§c.");
 							return;
 						}
 						player.getInventory().setItem(8, null);
 						player.updateInventory();
-						lgp.sendMessage("§6Tu as versé du gasoil sur §7§l"+choosen.getName()+"§6.");
-						lgp.sendActionBarMessage("§6§7§l"+choosen.getName()+"§6 est recouvert de gasoil");
+						lgp.sendMessage("§6Tu as versé du gasoil sur §7§l" + choosen.getFullName() + "§6.");
+						lgp.sendActionBarMessage("§6§7§l" + choosen.getFullName() + "§6 est recouvert de gasoil");
 						if(first != null || getGame().getAlive().size() == 2) {
 							lgp.hideView();
 							lgp.stopChoosing();
 							LGPyromaneGasoilEvent event = new LGPyromaneGasoilEvent(getGame(), choosen);
 							Bukkit.getPluginManager().callEvent(event);
 							if(event.isCancelled())
-								lgp.sendMessage("§7§l"+event.getPlayer().getName()+"§c est immunisée.");
+								lgp.sendMessage("§7§l" + event.getPlayer().getFullName() + "§c est immunisée.");
 							else {
 								event.getPlayer().sendMessage("§6Tu es recouvert de gasoil...");
 								liste.add(event.getPlayer());
@@ -238,7 +238,7 @@ public class RPyromane extends Role{
 								event = new LGPyromaneGasoilEvent(getGame(), first);
 								Bukkit.getPluginManager().callEvent(event);
 								if(event.isCancelled())
-									lgp.sendMessage("§7§l"+event.getPlayer().getName()+"§c est immunisée.");
+									lgp.sendMessage("§7§l" + event.getPlayer().getFullName() + "§c est immunisée.");
 								else {
 									event.getPlayer().sendMessage("§6Tu es recouvert de gasoil...");
 									liste.add(event.getPlayer());
