@@ -45,6 +45,7 @@ import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerUpdateHealth;
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerUpdateTime;
 import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
+import fr.leomelki.loupgarou.classes.LGStats;
 import fr.leomelki.loupgarou.classes.LGWinType;
 import fr.leomelki.loupgarou.events.LGSkinLoadEvent;
 import fr.leomelki.loupgarou.events.LGUpdatePrefixEvent;
@@ -95,15 +96,16 @@ public class MainLg extends JavaPlugin {
 	
 	@Getter @Setter private LGGame currentGame;//Because for now, only one game will be playable on one server (flemme)
 
-	static public FileConfiguration nicksFile;
+	public static FileConfiguration nicksFile;
 	private static List<String> startingMemes;
+	private LGStats stats;
 	
 	@Override
 	public void onEnable() {
 		instance = this;
 		loadRoles();
+		FileConfiguration config = getConfig();
 		if(!new File(getDataFolder(), "config.yml").exists()) {//Créer la config
-			FileConfiguration config = getConfig();
 			config.set("spawns", new ArrayList<List<Double>>());
 			config.set("startingMemes", new ArrayList<String>(Arrays.asList(
 				"Appuyez sur §bALT+F4§f pour débloquer un skin unique. Cette offre expirera dans 20 minutes.",
@@ -131,6 +133,7 @@ public class MainLg extends JavaPlugin {
 		}
 		loadConfig();
 
+		this.stats = new LGStats(config, getDataFolder(), roles.keySet());
 		final File f = new File(getDataFolder(), "nicks.yml");
 		nicksFile = YamlConfiguration.loadConfiguration(f);
 		try {
@@ -601,5 +604,9 @@ public class MainLg extends JavaPlugin {
 		} catch (NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void saveStats(LGWinType winType) {
+		this.stats.saveRound(winType);
 	}
 }

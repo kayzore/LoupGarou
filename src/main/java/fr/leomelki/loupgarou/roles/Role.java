@@ -15,10 +15,10 @@ import fr.leomelki.loupgarou.classes.LGPlayer;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class Role implements Listener{
+public abstract class Role implements Listener {
 	@Getter @Setter private int waitedPlayers;
 	@Getter private ArrayList<LGPlayer> players = new ArrayList<LGPlayer>();
-	@Getter private ArrayList<LGPlayer> playersThisRound = new ArrayList<LGPlayer>();
+	@Getter public ArrayList<LGPlayer> playersThisRound = new ArrayList<LGPlayer>();
 	@Getter private final LGGame game;
 	
 	public Role(LGGame game) {

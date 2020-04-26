@@ -600,6 +600,30 @@ public class LGGame implements Listener{
 		return true;
 	}
 
+	private void showcaseVillage(ArrayList<LGPlayer> winners, LGWinType winType) {
+		final Boolean shouldDisplayWinners = (winners.size() >= 1);
+
+		broadcastSpacer();
+		broadcastMessage("§9----------- §lFIN DE LA PARTIE -----------");
+		broadcastMessage(winType.getMessage());
+
+		if (shouldDisplayWinners) {
+			final List<String> winnerNames = winners.stream().map(lgp -> lgp.getName()).collect(Collectors.toList());
+			final String winnersFriendlyName = (winners.size() > 1) ? "aux vainqueurs" : "au vainqueur";
+			broadcastMessage("§6§l§oFélicitations " + winnersFriendlyName + ": §7§l" + String.join(", ", winnerNames));
+		}
+
+		broadcastSpacer();
+		broadcastMessage("§e§lLa composition du village à cette partie était la suivante");
+
+		//We unregister every role listener because they are unused after the game's end !
+		for(Role role : getRoles()) {
+			final List<String> playerNames = role.getPlayersThisRound().stream().map(lgp -> lgp.getName()).collect(Collectors.toList());
+			broadcastMessage("§e - " + role.getName() + " §e: §7§l" + String.join(", ", playerNames));
+			HandlerList.unregisterAll(role);
+		}
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onGameEnd(LGGameEndEvent e) {
 		if(e.getGame() == this && e.getWinType() == LGWinType.VILLAGEOIS)
@@ -627,27 +651,8 @@ public class LGGame implements Listener{
 		cancelWait();//Also avoid bugs
 		ended = true;
 
-		final Boolean shouldDisplayWinners = (winners.size() >= 1);
-
-		broadcastSpacer();
-		broadcastMessage("§9----------- §lFIN DE LA PARTIE -----------");
-		broadcastMessage(winType.getMessage());
-
-		if (shouldDisplayWinners) {
-			final List<String> winnerNames = winners.stream().map(lgp -> lgp.getName()).collect(Collectors.toList());
-			final String winnersFriendlyName = (winners.size() > 1) ? "aux vainqueurs" : "au vainqueur";
-			broadcastMessage("§6§l§oFélicitations " + winnersFriendlyName + ": §7§l" + String.join(", ", winnerNames));
-		}
-
-		broadcastSpacer();
-		broadcastMessage("§e§lLa composition du village à cette partie était la suivante");
-
-		//We unregister every role listener because they are unused after the game's end !
-		for(Role role : getRoles()) {
-			final List<String> playerNames = role.getPlayersThisRound().stream().map(lgp -> lgp.getName()).collect(Collectors.toList());
-			broadcastMessage("§e - " + role.getName() + " §e: §7§l" + String.join(", ", playerNames));
-			HandlerList.unregisterAll(role);
-		}
+		MainLg.getInstance().saveStats(winType);
+		this.showcaseVillage(winners, winType);
 
 		broadcastSpacer();
 
