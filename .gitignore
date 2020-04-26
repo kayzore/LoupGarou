@@ -28,3 +28,7 @@ hs_err_pid*
 # Editor configs
 .settings
 .vscode
+
+# Java garbage
+.classpath
+.factorypath
