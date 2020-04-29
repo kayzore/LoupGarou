@@ -279,11 +279,16 @@ public class LGGame implements Listener{
 	public void updateStart() {
 		if(!isStarted())
 			if(inGame.size() == maxPlayers) {//Il faut que la partie soit totalement remplie pour qu'elle démarre car sinon, tous les rôles ne seraient pas distribués
-				this.improvedScoreboard = new CustomScoreboard(this.inGame);
+				final MainLg mainLgInstance = MainLg.getInstance();
+				final boolean shouldShowScoreboard = mainLgInstance.getConfig().getBoolean("showScoreboard");
+
+				System.out.println("shouldShowScoreboard: " + shouldShowScoreboard);
+			
+				this.improvedScoreboard = new CustomScoreboard(this.inGame, shouldShowScoreboard);
 				this.improvedScoreboard.show();
 
 				for(LGPlayer lgp : getInGame()) {
-					final String meme = MainLg.getInstance().getRandomStartingMeme();
+					final String meme = mainLgInstance.getRandomStartingMeme();
 					if (meme != null) {
 						lgp.sendMessage(meme);
 					}

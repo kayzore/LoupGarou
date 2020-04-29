@@ -105,8 +105,14 @@ public class MainLg extends JavaPlugin {
 		instance = this;
 		loadRoles();
 		FileConfiguration config = getConfig();
-		if(!new File(getDataFolder(), "config.yml").exists()) {//Créer la config
-			config.set("spawns", new ArrayList<List<Double>>());
+		if(!new File(getDataFolder(), "config.yml").exists()) {
+			config.set("showScoreboard", true);
+
+			// Nombre de participant pour chaque rôle
+			for(String role : roles.keySet()) {
+				config.set("role."+role, 1);
+			}
+			
 			config.set("startingMemes", new ArrayList<String>(Arrays.asList(
 				"Appuyez sur §bALT+F4§f pour débloquer un skin unique. Cette offre expirera dans 20 minutes.",
 				"Appuyez sur §bF§f pour présenter vos condoléances",
@@ -127,8 +133,9 @@ public class MainLg extends JavaPlugin {
 				"Vous aussi pouvez avoir une vie aussi trépidente que §bl'Inspecteur Derrick§f en endossant le rôle du §bdétective§f",
 				"Vous risquez de finir en §bsandwich§f pour loup-garou. Pas très vegan tout ça.."
 			)));
-			for(String role : roles.keySet())//Nombre de participant pour chaque rôle
-				config.set("role."+role, 1);
+			
+			
+			config.set("spawns", new ArrayList<List<Double>>());
 			saveConfig();
 		}
 		loadConfig();

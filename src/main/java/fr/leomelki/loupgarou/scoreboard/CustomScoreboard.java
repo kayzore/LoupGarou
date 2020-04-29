@@ -22,9 +22,11 @@ public class CustomScoreboard {
 	@Getter private final ArrayList<LGPlayer> inGamePlayers;
 	private final String displayName = "§7";
 	private final ArrayList<CustomScoreboardEntry> entries = new ArrayList<CustomScoreboardEntry>();
+	private final boolean shouldShowScoreboard;
 
-	public CustomScoreboard(ArrayList<LGPlayer> inGamePlayers) {
+	public CustomScoreboard(ArrayList<LGPlayer> inGamePlayers, boolean shouldShowScoreboard) {
 		this.inGamePlayers = inGamePlayers;
+		this.shouldShowScoreboard = shouldShowScoreboard;
 	}
 
 	private void createEntry(String name, int amountOfPlayers) {
@@ -48,10 +50,13 @@ public class CustomScoreboard {
       final int amountOfPlayers = currentPlayers.getAmountOfPlayers();
 
 			if (amountOfPlayers > 0) {
-				final Role currentRole = currentPlayers.getRole();
-				final String sanitizedName = currentRole.getName(amountOfPlayers).replace("§l", "");
+				if (this.shouldShowScoreboard) {
+					final Role currentRole = currentPlayers.getRole();
+					final String sanitizedName = currentRole.getName(amountOfPlayers).replace("§l", "");
 
-				this.createEntry(sanitizedName, amountOfPlayers);
+					this.createEntry(sanitizedName, amountOfPlayers);
+				}
+
         totalRemaingPlayers += amountOfPlayers;
 			}
     }
