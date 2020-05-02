@@ -91,26 +91,30 @@ import lombok.Setter;
 
 public class MainLg extends JavaPlugin {
 	private static MainLg instance;
-	@Getter private HashMap<String, Constructor<? extends Role>> roles = new HashMap<String, Constructor<? extends Role>>();
+	@Getter private final HashMap<String, Constructor<? extends Role>> rolesBuilder = new HashMap<>();
 	@Getter private static String prefix = ""/*"§7[§9Loup-Garou§7] "*/;
-	
 	@Getter @Setter private LGGame currentGame;//Because for now, only one game will be playable on one server (flemme)
 
 	public static FileConfiguration nicksFile;
-	private static List<String> startingMemes;
+	private List<String> startingMemes;
 	private LGStats stats;
+	private static final String DISTRIBUTION_FIXED_KEY = "distributionFixed.";
 	
 	@Override
 	public void onEnable() {
 		instance = this;
-		loadRoles();
+		loadRolesBuilder();
 		FileConfiguration config = getConfig();
 		if(!new File(getDataFolder(), "config.yml").exists()) {
 			config.set("showScoreboard", true);
+			config.set("roleDistribution", "fixed");
+			config.set("distributionRandom.villageRoles", 5);
+			config.set("distributionRandom.evilRoles", 3);
+			config.set("distributionRandom.neutralRoles", 1);
 
 			// Nombre de participant pour chaque rôle
-			for(String role : roles.keySet()) {
-				config.set("role."+role, 1);
+			for(String role : rolesBuilder.keySet()) {
+				config.set(DISTRIBUTION_FIXED_KEY + role, 1);
 			}
 			
 			config.set("startingMemes", new ArrayList<String>(Arrays.asList(
@@ -138,9 +142,15 @@ public class MainLg extends JavaPlugin {
 			config.set("spawns", new ArrayList<List<Double>>());
 			saveConfig();
 		}
+
 		loadConfig();
 
-		this.stats = new LGStats(config, getDataFolder(), roles.keySet());
+		try {
+			this.stats = new LGStats(config, getDataFolder(), rolesBuilder.keySet());
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
 		final File f = new File(getDataFolder(), "nicks.yml");
 		nicksFile = YamlConfiguration.loadConfiguration(f);
 		try {
@@ -150,7 +160,7 @@ public class MainLg extends JavaPlugin {
 		}
 
 		Bukkit.getConsoleSender().sendMessage("/");
-		Bukkit.getPluginManager().registerEvents(new PlayerInteractListener(getRoles()), this);
+		Bukkit.getPluginManager().registerEvents(new PlayerInteractListener(rolesBuilder), this);
 		Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
 		Bukkit.getPluginManager().registerEvents(new CancelListener(), this);
 		Bukkit.getPluginManager().registerEvents(new VoteListener(), this);
@@ -186,7 +196,7 @@ public class MainLg extends JavaPlugin {
 			public void onPacketSending(PacketEvent event) {
 				LGPlayer player = LGPlayer.thePlayer(event.getPlayer());
 				WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo(event.getPacket());
-				ArrayList<PlayerInfoData> datas = new ArrayList<PlayerInfoData>();
+				ArrayList<PlayerInfoData> datas = new ArrayList<>();
 				for(PlayerInfoData data : info.getData()) {
 					LGPlayer lgp = LGPlayer.thePlayer(Bukkit.getPlayer(data.getProfile().getUUID()));
 					if(player.getGame() != null && player.getGame() == lgp.getGame()) {
@@ -198,8 +208,9 @@ public class MainLg extends JavaPlugin {
 								if(displayName != null) {
 									JSONObject obj = (JSONObject) new JSONParser().parse(displayName.getJson());
 									displayName = WrappedChatComponent.fromText(evt2.getPrefix()+obj.get("text"));
-								} else
+								} else {
 									displayName = WrappedChatComponent.fromText(evt2.getPrefix()+data.getProfile().getName());
+								}
 							} catch (ParseException e) {
 								e.printStackTrace();
 							}
@@ -217,8 +228,9 @@ public class MainLg extends JavaPlugin {
 						LGSkinLoadEvent evt = new LGSkinLoadEvent(lgp.getGame(), lgp, player, data.getProfile());
 						Bukkit.getPluginManager().callEvent(evt);
 						datas.add(new PlayerInfoData(evt.getProfile(), data.getLatency(), data.getGameMode(), displayName));
-					}else
+					} else {
 						datas.add(data);
+					}
 				}
 				info.setData(datas);
 			}
@@ -276,16 +288,16 @@ public class MainLg extends JavaPlugin {
 		if(label.equalsIgnoreCase("lg")) {
 			if(args[0].equalsIgnoreCase("roles") && args.length == 1){
 				sender.sendMessage(prefix + "§6Voici la liste des rôles:");
-				for (String role : getRoles().keySet())
-					if (MainLg.getInstance().getConfig().getInt("role." + role) > 0) {
-						sender.sendMessage(prefix + "  §e- §6" + role + " §e: " + MainLg.getInstance().getConfig().getInt("role." + role));
+				for (String role : rolesBuilder.keySet())
+					if (MainLg.getInstance().getConfig().getInt(DISTRIBUTION_FIXED_KEY + role) > 0) {
+						sender.sendMessage(prefix + "  §e- §6" + role + " §e: " + MainLg.getInstance().getConfig().getInt(DISTRIBUTION_FIXED_KEY + role));
 					}
 			} else if (args[0].equalsIgnoreCase("roles") && args.length == 2){
 				if(args[1].equalsIgnoreCase("list")){
 					sender.sendMessage(prefix + "§6Voici la liste des rôles:");
 					int index = 0;
-					for (String role : getRoles().keySet())
-						sender.sendMessage(prefix + "  §e- " + index++ + " - §6" + role + " §e> " + MainLg.getInstance().getConfig().getInt("role." + role));
+					for (String role : rolesBuilder.keySet())
+						sender.sendMessage(prefix + "  §e- " + index++ + " - §6" + role + " §e> " + MainLg.getInstance().getConfig().getInt(DISTRIBUTION_FIXED_KEY + role));
 					sender.sendMessage("\n" + prefix + " §7Écrivez §8§o/lg roles set <role_id/role_name> <nombre>§7 pour définir le nombre de joueurs qui devrons avoir ce rôle.");
 				}
 			}
@@ -394,7 +406,7 @@ public class MainLg extends JavaPlugin {
 							if(args[2].length() <= 2)
 								try {
 									Integer i = Integer.valueOf(args[2]);
-									Object[] array = getRoles().keySet().toArray();
+									Object[] array = rolesBuilder.keySet().toArray();
 									if(array.length <= i) {
 										sender.sendMessage(prefix+"§4Erreur: §cCe rôle n'existe pas.");
 										return true;
@@ -406,7 +418,7 @@ public class MainLg extends JavaPlugin {
 							
 							if(role != null) {
 								String real_role = null;
-								for(String real : getRoles().keySet())
+								for(String real : rolesBuilder.keySet())
 									if(real.equalsIgnoreCase(role)) {
 										real_role = real;
 										break;
@@ -414,7 +426,7 @@ public class MainLg extends JavaPlugin {
 								
 								if(real_role != null) {
 									try {
-										MainLg.getInstance().getConfig().set("role."+real_role, Integer.valueOf(args[3]));
+										MainLg.getInstance().getConfig().set(DISTRIBUTION_FIXED_KEY + real_role, Integer.valueOf(args[3]));
 										sender.sendMessage(prefix+"§6Il y aura §e"+args[3]+" §6"+real_role);
 										saveConfig();
 										loadConfig();
@@ -452,7 +464,7 @@ public class MainLg extends JavaPlugin {
 									return true;
 					}
 					
-					final ArrayList<String> nicknameTokens = new ArrayList<String>();
+					final ArrayList<String> nicknameTokens = new ArrayList<>();
 					for (int index = 2; index < args.length; index++) nicknameTokens.add(args[index]);
 					final String nickname = String.join(" ", nicknameTokens);
 
@@ -533,23 +545,24 @@ public class MainLg extends JavaPlugin {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		if(!sender.hasPermission("loupgarou.admin"))
-			return new ArrayList<String>(0);
+			return new ArrayList<>(0);
 		
 		if(args.length > 1) {
 			if(args[0].equalsIgnoreCase("roles"))
 				if(args.length == 2)
 					return getStartingList(args[1], "list", "set");
 				else if(args.length == 3 && args[1].equalsIgnoreCase("set"))
-					return getStartingList(args[2], getRoles().keySet().toArray(new String[getRoles().size()]));
+					return getStartingList(args[2], rolesBuilder.keySet().toArray(new String[rolesBuilder.size()]));
 				else if(args.length == 4)
 					return Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-		}else if(args.length == 1)
+		} else if(args.length == 1) {
 			return getStartingList(args[0], "addSpawn", "end", "start", "nextNight", "nextDay", "reloadConfig", "roles", "joinAll", "reloadPacks", "nick", "unnick");
-		return new ArrayList<String>(0);
+		}
+		return new ArrayList<>(0);
 	}
 	private List<String> getStartingList(String startsWith, String... list){
 		startsWith = startsWith.toLowerCase();
-		ArrayList<String> returnlist = new ArrayList<String>();
+		ArrayList<String> returnlist = new ArrayList<>();
 		if(startsWith.length() == 0)
 			return Arrays.asList(list);
 		for(String s : list)
@@ -559,17 +572,25 @@ public class MainLg extends JavaPlugin {
 	}
 	public void loadConfig() {
 		final FileConfiguration config = getConfig();
+		final String roleDistribution = config.getString("roleDistribution");
 		int players = 0;
-		
-		for(String role : roles.keySet()) {
-			players += config.getInt("role." + role);
+
+		if (roleDistribution.equals("fixed")) {
+			for(String role : rolesBuilder.keySet()) {
+				players += config.getInt(DISTRIBUTION_FIXED_KEY + role);
+			}
 		}
-		startingMemes = config.getStringList("startingMemes");
+
+		if (roleDistribution.equals("random")) {
+			players = config.getInt("distributionRandom.amountOfPlayers");
+		}
+
 		currentGame = new LGGame(players);
+		startingMemes = config.getStringList("startingMemes");
 	}
 
 	public String getRandomStartingMeme() {
-		return (startingMemes.size() > 0)
+		return (!startingMemes.isEmpty())
 			? "§6N'oubliez pas: §f" + startingMemes.get(ThreadLocalRandom.current().nextInt(startingMemes.size()))
 			: null;
 	}
@@ -581,43 +602,47 @@ public class MainLg extends JavaPlugin {
 	public static MainLg getInstance() {
 		return instance;
 	}
-	private void loadRoles() {
+	private void loadRolesBuilder() {
 		try {
-			roles.put("LoupGarou", RLoupGarou.class.getConstructor(LGGame.class));
-			roles.put("LoupGarouNoir", RLoupGarouNoir.class.getConstructor(LGGame.class));
-			roles.put("Garde", RGarde.class.getConstructor(LGGame.class));
-			roles.put("Sorciere", RSorciere.class.getConstructor(LGGame.class));
-			roles.put("Voyante", RVoyante.class.getConstructor(LGGame.class));
-			roles.put("Chasseur", RChasseur.class.getConstructor(LGGame.class));
-			roles.put("Villageois", RVillageois.class.getConstructor(LGGame.class));
-			roles.put("Medium", RMedium.class.getConstructor(LGGame.class));
-			roles.put("Dictateur", RDictateur.class.getConstructor(LGGame.class));
-			roles.put("Cupidon", RCupidon.class.getConstructor(LGGame.class));
-			roles.put("PetiteFille", RPetiteFille.class.getConstructor(LGGame.class));
-			roles.put("ChaperonRouge", RChaperonRouge.class.getConstructor(LGGame.class));
-			roles.put("LoupGarouBlanc", RLoupGarouBlanc.class.getConstructor(LGGame.class));
-			roles.put("Bouffon", RBouffon.class.getConstructor(LGGame.class));
-			roles.put("Ange", RAnge.class.getConstructor(LGGame.class));
-			roles.put("Survivant", RSurvivant.class.getConstructor(LGGame.class));
-			roles.put("Assassin", RAssassin.class.getConstructor(LGGame.class));
-			roles.put("GrandMechantLoup", RGrandMechantLoup.class.getConstructor(LGGame.class));
-			roles.put("Corbeau", RCorbeau.class.getConstructor(LGGame.class));
-			roles.put("Detective", RDetective.class.getConstructor(LGGame.class));
-			roles.put("ChienLoup", RChienLoup.class.getConstructor(LGGame.class));
-			roles.put("Pirate", RPirate.class.getConstructor(LGGame.class));
-			roles.put("Pyromane", RPyromane.class.getConstructor(LGGame.class));
-			roles.put("Pretre", RPretre.class.getConstructor(LGGame.class));
-			roles.put("Faucheur", RFaucheur.class.getConstructor(LGGame.class));
-			roles.put("EnfantSauvage", REnfantSauvage.class.getConstructor(LGGame.class));
-			roles.put("MontreurDOurs", RMontreurDOurs.class.getConstructor(LGGame.class));
-			roles.put("Vampire", RVampire.class.getConstructor(LGGame.class));
-			roles.put("ChasseurDeVampire", RChasseurDeVampire.class.getConstructor(LGGame.class));
+			rolesBuilder.put("LoupGarou", RLoupGarou.class.getConstructor(LGGame.class));
+			rolesBuilder.put("LoupGarouNoir", RLoupGarouNoir.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Garde", RGarde.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Sorciere", RSorciere.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Voyante", RVoyante.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Chasseur", RChasseur.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Villageois", RVillageois.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Medium", RMedium.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Dictateur", RDictateur.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Cupidon", RCupidon.class.getConstructor(LGGame.class));
+			rolesBuilder.put("PetiteFille", RPetiteFille.class.getConstructor(LGGame.class));
+			rolesBuilder.put("ChaperonRouge", RChaperonRouge.class.getConstructor(LGGame.class));
+			rolesBuilder.put("LoupGarouBlanc", RLoupGarouBlanc.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Bouffon", RBouffon.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Ange", RAnge.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Survivant", RSurvivant.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Assassin", RAssassin.class.getConstructor(LGGame.class));
+			rolesBuilder.put("GrandMechantLoup", RGrandMechantLoup.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Corbeau", RCorbeau.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Detective", RDetective.class.getConstructor(LGGame.class));
+			rolesBuilder.put("ChienLoup", RChienLoup.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Pirate", RPirate.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Pyromane", RPyromane.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Pretre", RPretre.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Faucheur", RFaucheur.class.getConstructor(LGGame.class));
+			rolesBuilder.put("EnfantSauvage", REnfantSauvage.class.getConstructor(LGGame.class));
+			rolesBuilder.put("MontreurDOurs", RMontreurDOurs.class.getConstructor(LGGame.class));
+			rolesBuilder.put("Vampire", RVampire.class.getConstructor(LGGame.class));
+			rolesBuilder.put("ChasseurDeVampire", RChasseurDeVampire.class.getConstructor(LGGame.class));
 		} catch (NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void saveStats(LGWinType winType) {
-		this.stats.saveRound(winType);
+		try {
+			this.stats.saveRound(winType);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

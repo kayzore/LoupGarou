@@ -1,0 +1,133 @@
+package fr.leomelki.loupgarou.classes;
+
+import java.lang.reflect.Constructor;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import fr.leomelki.loupgarou.roles.Role;
+import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerUpdateHealth;
+
+import org.bukkit.configuration.file.FileConfiguration;
+
+public class LGRoleDistributor {
+  private final LGGame game;
+  private final List<LGPlayer> players;
+  private final ArrayList<Role> roles = new ArrayList<>();
+  private final FileConfiguration config;
+  private final Map<String, Constructor<? extends Role>> rolesBuilder;
+  private final String roleDistribution;
+  
+  public LGRoleDistributor(final LGGame game, final FileConfiguration config, final Map<String, Constructor<? extends Role>> rolesBuilder) {
+    this.game = game;
+    this.players = game.getInGame();
+    this.config = config;
+    this.rolesBuilder = rolesBuilder;
+    this.roleDistribution = config.getString("roleDistribution");
+  }
+
+  private Role instantiateRole(Entry<String, Constructor<? extends Role>> currentRole) {
+    try {
+      final Role createdRole = currentRole.getValue().newInstance(this.game);
+      this.roles.add(createdRole);
+
+      return createdRole;
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+
+      throw new RuntimeException("Failed to instantiate role: " + currentRole, e);
+    }
+  }
+
+  private void setRoleToPlayer(LGPlayer selected, Role givenRole) {
+    givenRole.join(selected);
+        
+    WrapperPlayServerUpdateHealth update = new WrapperPlayServerUpdateHealth();
+    update.setFood(6);
+    update.setFoodSaturation(1);
+    update.setHealth(20);
+    update.sendPacket(selected.getPlayer());
+  }
+
+  public List<Role> assignRoles() {
+    if (this.roleDistribution.equals("fixed")) {
+      return useFixedAssignation();
+    }
+
+    if (this.roleDistribution.equals("random")) {
+      return useRandomAssignation();
+    }
+
+    throw new RuntimeException("Unsupported roleDistribution: '" + this.roleDistribution + "'");
+  }
+
+  private List<Role> useFixedAssignation() {
+    final SecureRandom random = new SecureRandom();
+    final List<LGPlayer> toGive = new ArrayList<>(players);
+
+    for(Entry<String, Constructor<? extends Role>> currentRole : this.rolesBuilder.entrySet()) {
+      if(this.config.getInt("distributionFixed." + currentRole.getKey()) > 0) {
+        this.instantiateRole(currentRole);
+      }
+    }
+    
+		for(Role currentRole : this.roles) {
+      while(currentRole.getWaitedPlayers() > 0) {
+        final int randomized = random.nextInt(toGive.size());
+				final LGPlayer selected = toGive.remove(randomized);
+        this.setRoleToPlayer(selected, currentRole);
+      }
+    }
+    
+    return this.roles;
+  }
+
+  private List<Role> useRandomAssignation() {
+    final SecureRandom random = new SecureRandom();
+    final ArrayList<LGPlayer> toGive = new ArrayList<>(players);
+
+    final int maxPlayers = this.players.size();
+    final Map<String,Object> categoryWeigths = config.getConfigurationSection("distributionRandom.categoryWeights").getValues(false);
+    final int totalRolesWeight = (int)categoryWeigths.get("evilRoles") + (int)categoryWeigths.get("neutralRoles") + (int)categoryWeigths.get("villagerRoles");
+    final double amountOfEvil = Math.floor((double)(maxPlayers * (int)categoryWeigths.get("evilRoles")) / totalRolesWeight);
+    final double amountOfNeutral = Math.ceil((double)(maxPlayers * (int)categoryWeigths.get("neutralRoles")) / totalRolesWeight);
+    final double amountOfVillagers = maxPlayers - (amountOfEvil + amountOfNeutral);
+
+    final Map<String,Object> evilWeigths = this.config.getConfigurationSection("distributionRandom.evilWeigths").getValues(false);
+    final Map<String,Object> neutralWeights = this.config.getConfigurationSection("distributionRandom.neutralWeights").getValues(false);
+    final Map<String,Object> villagerWeights = this.config.getConfigurationSection("distributionRandom.villagerWeights").getValues(false);
+
+    final LGRandomRolePicker evilRolePicker = new LGRandomRolePicker(game, evilWeigths, this.rolesBuilder);
+    final LGRandomRolePicker neutralRolePicker = new LGRandomRolePicker(game, neutralWeights, this.rolesBuilder);
+    final LGRandomRolePicker villagerRolePicker = new LGRandomRolePicker(game, villagerWeights, this.rolesBuilder);
+
+    for (int i = 0; i < amountOfEvil; i++) {
+      final Role pickedRole = evilRolePicker.roll();
+      final int randomized = random.nextInt(toGive.size());
+      final LGPlayer selected = toGive.remove(randomized);
+      this.setRoleToPlayer(selected, pickedRole);
+    }
+
+    for (int i = 0; i < amountOfNeutral; i++) {
+      final Role pickedRole = neutralRolePicker.roll();
+      final int randomized = random.nextInt(toGive.size());
+      final LGPlayer selected = toGive.remove(randomized);
+      this.setRoleToPlayer(selected, pickedRole);
+    }
+  
+    for (int i = 0; i < amountOfVillagers; i++) {
+      final Role pickedRole = villagerRolePicker.roll();
+      final int randomized = random.nextInt(toGive.size());
+      final LGPlayer selected = toGive.remove(randomized);
+      this.setRoleToPlayer(selected, pickedRole);
+    }
+
+    this.roles.addAll(evilRolePicker.getInstantiatedRoles());
+    this.roles.addAll(neutralRolePicker.getInstantiatedRoles());
+    this.roles.addAll(villagerRolePicker.getInstantiatedRoles());
+    
+    return this.roles;
+  }
+}
