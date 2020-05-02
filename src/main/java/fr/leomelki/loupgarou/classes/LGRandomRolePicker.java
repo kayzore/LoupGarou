@@ -13,6 +13,7 @@ import fr.leomelki.loupgarou.roles.Role;
 public class LGRandomRolePicker {
   private final LGGame game;
   private final Map<String, Constructor<? extends Role>> rolesBuilder;
+  private final Map<String,Object> weights;
   private final Map<String,Role> alreadyInstantiatedRoles = new HashMap<>();
   private final Map<Integer,String> valueMapping = new HashMap<>();
   private int totalWeights = 0;
@@ -20,6 +21,7 @@ public class LGRandomRolePicker {
   public LGRandomRolePicker(final LGGame game, final Map<String,Object> weigths, final Map<String, Constructor<? extends Role>> rolesBuilder) {
     this.game = game;
     this.rolesBuilder = rolesBuilder;
+    this.weights = weigths;
 
     for (Entry<String,Object> currentEntry : weigths.entrySet()) {
       final int intermediaryTotal = this.totalWeights + (int)currentEntry.getValue();
@@ -31,7 +33,15 @@ public class LGRandomRolePicker {
   public Role roll() {
     final SecureRandom random = new SecureRandom();
     final int seed = random.nextInt(this.totalWeights);
-    final Entry<Integer,String> matchingEntry = this.valueMapping.entrySet().stream().filter(e -> seed < e.getKey()).findFirst().orElse(null);
+    final Entry<Integer,String> matchingEntry = this.valueMapping.entrySet().stream()
+      .sorted(Entry.comparingByKey())
+      .filter(elem -> {
+        if (seed > elem.getKey()) return false;
+
+        return ((int)this.weights.get(elem.getValue()) > 0);
+      })
+      .findFirst()
+      .orElse(null);
     
     if (matchingEntry == null) {
       throw new RuntimeException("Failed to find a matching entry for seed:" + seed + " in RandomRolePicker"); 

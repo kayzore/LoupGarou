@@ -145,11 +145,7 @@ public class MainLg extends JavaPlugin {
 
 		loadConfig();
 
-		try {
-			this.stats = new LGStats(config, getDataFolder(), rolesBuilder.keySet());
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		this.stats = new LGStats(config, getDataFolder(), rolesBuilder.keySet());
 
 		final File f = new File(getDataFolder(), "nicks.yml");
 		nicksFile = YamlConfiguration.loadConfiguration(f);
@@ -639,10 +635,6 @@ public class MainLg extends JavaPlugin {
 	}
 
 	public void saveStats(LGWinType winType) {
-		try {
-			this.stats.saveRound(winType);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		this.stats.saveRound(winType);
 	}
 }

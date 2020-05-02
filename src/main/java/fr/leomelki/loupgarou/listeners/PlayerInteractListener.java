@@ -64,7 +64,7 @@ public class PlayerInteractListener implements Listener {
             } else if(e.isLeftClick()){
                 for(String role : getRoles().keySet()){
                     if(role.equals(e.getCurrentItem().getItemMeta().getDisplayName())){
-                        n = MainLg.getInstance().getConfig().getInt("role." + role);
+                        n = MainLg.getInstance().getConfig().getInt("distributionFixed." + role);
                         Bukkit.dispatchCommand(p, "lg roles set " + index + " " + (n+1));
                         return;
                     }
@@ -73,7 +73,7 @@ public class PlayerInteractListener implements Listener {
             } else if(e.isRightClick()){
                 for(String role : getRoles().keySet()){
                     if(role.equals(e.getCurrentItem().getItemMeta().getDisplayName())){
-                        n = MainLg.getInstance().getConfig().getInt("role." + role);
+                        n = MainLg.getInstance().getConfig().getInt("distributionFixed." + role);
                         if(n > 0)
                             Bukkit.dispatchCommand(p, "lg roles set " + index + " " + (n-1));
                         return;

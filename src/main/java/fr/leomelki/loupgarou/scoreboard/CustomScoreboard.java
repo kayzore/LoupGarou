@@ -19,12 +19,12 @@ import lombok.RequiredArgsConstructor;
 public class CustomScoreboard {
 	@Getter private boolean shown;
 	@Getter private final String name = RandomString.generate(16);
-	@Getter private final ArrayList<LGPlayer> inGamePlayers;
+	@Getter private final List<LGPlayer> inGamePlayers;
 	private final String displayName = "§7";
-	private final ArrayList<CustomScoreboardEntry> entries = new ArrayList<CustomScoreboardEntry>();
+	private final List<CustomScoreboardEntry> entries = new ArrayList<CustomScoreboardEntry>();
 	private final boolean shouldShowScoreboard;
 
-	public CustomScoreboard(ArrayList<LGPlayer> inGamePlayers, boolean shouldShowScoreboard) {
+	public CustomScoreboard(List<LGPlayer> inGamePlayers, boolean shouldShowScoreboard) {
 		this.inGamePlayers = inGamePlayers;
 		this.shouldShowScoreboard = shouldShowScoreboard;
 	}
@@ -34,7 +34,7 @@ public class CustomScoreboard {
 	}
 
 	private void removePreexistingEntries() {
-		final ArrayList<CustomScoreboardEntry> preexistingEntries = (ArrayList<CustomScoreboardEntry>) this.entries.clone();
+		final ArrayList<CustomScoreboardEntry> preexistingEntries = new ArrayList<>(this.entries);
 
 		for (CustomScoreboardEntry preexistingEntry: preexistingEntries) {
 			preexistingEntry.hide();
@@ -42,7 +42,7 @@ public class CustomScoreboard {
 		}
 	}
 
-	public void displayEntries(ArrayList<RolePlayers> activeRoles) {
+	public void displayEntries(List<RolePlayers> activeRoles) {
     this.removePreexistingEntries();
     int totalRemaingPlayers = 0;
 

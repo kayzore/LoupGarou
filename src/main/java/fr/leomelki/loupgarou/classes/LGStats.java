@@ -64,7 +64,7 @@ public class LGStats {
 			roundResults.add(winType.toString());
 
 			for(String role : this.rolesKeySet) {
-				final int numberOfPlayersThisRound = this.config.getInt("role." + role);
+				final int numberOfPlayersThisRound = this.config.getInt("distributionFixed." + role);
 				roundResults.add(String.valueOf(numberOfPlayersThisRound));
 			}
 

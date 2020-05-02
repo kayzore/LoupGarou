@@ -591,7 +591,7 @@ public class LGGame implements Listener{
 		if (Boolean.TRUE.equals(shouldDisplayWinners)) {
 			final List<String> winnerNames = winners.stream().map(LGPlayer::getFullName).collect(Collectors.toList());
 			final String winnersFriendlyName = (winners.size() > 1) ? "aux vainqueurs" : "au vainqueur";
-			broadcastMessage("§6§l§oFélicitations " + winnersFriendlyName + ": §7§l" + String.join(", ", winnerNames));
+			broadcastMessage("§6§l§oFélicitations " + winnersFriendlyName + ": §7§l" + String.join(", §7", winnerNames));
 		}
 
 		broadcastSpacer();
@@ -601,7 +601,7 @@ public class LGGame implements Listener{
 		if (this.roles != null) {
 			for(Role role : this.roles) {
 				final List<String> playerNames = role.getPlayersThisRound().stream().map(LGPlayer::getFullName).collect(Collectors.toList());
-				broadcastMessage("§e - " + role.getName() + " §e: §7§l" + String.join(", ", playerNames));
+				broadcastMessage("§e - " + role.getName() + " §e: §7§l" + String.join(", §7", playerNames));
 				HandlerList.unregisterAll(role);
 			}
 		}

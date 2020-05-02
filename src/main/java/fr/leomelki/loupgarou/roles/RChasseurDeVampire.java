@@ -21,11 +21,11 @@ public class RChasseurDeVampire extends Role{
 	public String getName(int amount) {
 		final String baseline = this.getName();
 
-		return (amount > 1) ? baseline.replace("hasseur", "hasseurs") : baseline;
+		return (amount > 1) ? baseline + "s" : baseline;
 	}
 	@Override
 	public String getName() {
-		return "§a§lChasseur de Vampires";
+		return "§a§lAnti-Vampire";
 	}
 	@Override
 	public String getFriendlyName() {

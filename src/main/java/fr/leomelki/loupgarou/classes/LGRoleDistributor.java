@@ -41,9 +41,22 @@ public class LGRoleDistributor {
     }
   }
 
+  private Role instantiateRole(String forcedRole) {
+    try {
+      final Role createdRole = this.rolesBuilder.get(forcedRole).newInstance(this.game);
+      this.roles.add(createdRole);
+
+      return createdRole;
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+
+      throw new RuntimeException("Failed to instantiate role: " + forcedRole, e);
+    }
+  }
+
   private void setRoleToPlayer(LGPlayer selected, Role givenRole) {
     givenRole.join(selected);
-        
+
     WrapperPlayServerUpdateHealth update = new WrapperPlayServerUpdateHealth();
     update.setFood(6);
     update.setFoodSaturation(1);
@@ -96,13 +109,8 @@ public class LGRoleDistributor {
     final double amountOfVillagers = maxPlayers - (amountOfEvil + amountOfNeutral);
 
     final Map<String,Object> evilWeigths = this.config.getConfigurationSection("distributionRandom.evilWeigths").getValues(false);
-    final Map<String,Object> neutralWeights = this.config.getConfigurationSection("distributionRandom.neutralWeights").getValues(false);
-    final Map<String,Object> villagerWeights = this.config.getConfigurationSection("distributionRandom.villagerWeights").getValues(false);
-
     final LGRandomRolePicker evilRolePicker = new LGRandomRolePicker(game, evilWeigths, this.rolesBuilder);
-    final LGRandomRolePicker neutralRolePicker = new LGRandomRolePicker(game, neutralWeights, this.rolesBuilder);
-    final LGRandomRolePicker villagerRolePicker = new LGRandomRolePicker(game, villagerWeights, this.rolesBuilder);
-
+    
     for (int i = 0; i < amountOfEvil; i++) {
       final Role pickedRole = evilRolePicker.roll();
       final int randomized = random.nextInt(toGive.size());
@@ -110,15 +118,29 @@ public class LGRoleDistributor {
       this.setRoleToPlayer(selected, pickedRole);
     }
 
+    final Map<String,Object> neutralWeights = this.config.getConfigurationSection("distributionRandom.neutralWeights").getValues(false);
+    final LGRandomRolePicker neutralRolePicker = new LGRandomRolePicker(game, neutralWeights, this.rolesBuilder);
+    int amountOfVampires = 0;
+
     for (int i = 0; i < amountOfNeutral; i++) {
       final Role pickedRole = neutralRolePicker.roll();
       final int randomized = random.nextInt(toGive.size());
       final LGPlayer selected = toGive.remove(randomized);
       this.setRoleToPlayer(selected, pickedRole);
+
+      if (pickedRole.getName().replaceAll("\\§.", "").equals("Vampire")) {
+        ++amountOfVampires;
+      }
     }
+
+    final Map<String,Object> villagerWeights = this.config.getConfigurationSection("distributionRandom.villagerWeights").getValues(false);
+    final LGRandomRolePicker villagerRolePicker = new LGRandomRolePicker(game, villagerWeights, this.rolesBuilder);
   
     for (int i = 0; i < amountOfVillagers; i++) {
-      final Role pickedRole = villagerRolePicker.roll();
+      final Role pickedRole = (amountOfVampires-- > 0) 
+        ? this.instantiateRole("ChasseurDeVampire")
+        : villagerRolePicker.roll();
+
       final int randomized = random.nextInt(toGive.size());
       final LGPlayer selected = toGive.remove(randomized);
       this.setRoleToPlayer(selected, pickedRole);
