@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -20,7 +19,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
@@ -47,6 +45,7 @@ import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.classes.LGStats;
 import fr.leomelki.loupgarou.classes.LGWinType;
+import fr.leomelki.loupgarou.cli.CommandInterpreter;
 import fr.leomelki.loupgarou.events.LGSkinLoadEvent;
 import fr.leomelki.loupgarou.events.LGUpdatePrefixEvent;
 import fr.leomelki.loupgarou.listeners.CancelListener;
@@ -55,37 +54,7 @@ import fr.leomelki.loupgarou.listeners.JoinListener;
 import fr.leomelki.loupgarou.listeners.LoupGarouListener;
 import fr.leomelki.loupgarou.listeners.PlayerInteractListener;
 import fr.leomelki.loupgarou.listeners.VoteListener;
-import fr.leomelki.loupgarou.roles.RAnge;
-import fr.leomelki.loupgarou.roles.RAssassin;
-import fr.leomelki.loupgarou.roles.RBouffon;
-import fr.leomelki.loupgarou.roles.RChaperonRouge;
-import fr.leomelki.loupgarou.roles.RChasseur;
-import fr.leomelki.loupgarou.roles.RChasseurDeVampire;
-import fr.leomelki.loupgarou.roles.RChienLoup;
-import fr.leomelki.loupgarou.roles.RCorbeau;
-import fr.leomelki.loupgarou.roles.RCupidon;
-import fr.leomelki.loupgarou.roles.RDetective;
-import fr.leomelki.loupgarou.roles.RDictateur;
-import fr.leomelki.loupgarou.roles.REnfantSauvage;
-import fr.leomelki.loupgarou.roles.RFaucheur;
-import fr.leomelki.loupgarou.roles.RGarde;
-import fr.leomelki.loupgarou.roles.RGrandMechantLoup;
-import fr.leomelki.loupgarou.roles.RLoupGarou;
-import fr.leomelki.loupgarou.roles.RLoupGarouBlanc;
-import fr.leomelki.loupgarou.roles.RLoupGarouNoir;
-import fr.leomelki.loupgarou.roles.RMedium;
-import fr.leomelki.loupgarou.roles.RMontreurDOurs;
-import fr.leomelki.loupgarou.roles.RPetiteFille;
-import fr.leomelki.loupgarou.roles.RPirate;
-import fr.leomelki.loupgarou.roles.RPretre;
-import fr.leomelki.loupgarou.roles.RPyromane;
-import fr.leomelki.loupgarou.roles.RSorciere;
-import fr.leomelki.loupgarou.roles.RSurvivant;
-import fr.leomelki.loupgarou.roles.RVampire;
-import fr.leomelki.loupgarou.roles.RVillageois;
-import fr.leomelki.loupgarou.roles.RVoyante;
-import fr.leomelki.loupgarou.roles.Role;
-import fr.leomelki.loupgarou.utils.ItemBuilder;
+import fr.leomelki.loupgarou.roles.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -98,8 +67,8 @@ public class MainLg extends JavaPlugin {
 	public static FileConfiguration nicksFile;
 	private List<String> startingMemes;
 	private LGStats stats;
-	private static final String DISTRIBUTION_FIXED_KEY = "distributionFixed.";
-	
+	public static final String DISTRIBUTION_FIXED_KEY = "distributionFixed.";
+
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -116,7 +85,7 @@ public class MainLg extends JavaPlugin {
 			for(String role : rolesBuilder.keySet()) {
 				config.set(DISTRIBUTION_FIXED_KEY + role, 1);
 			}
-			
+
 			config.set("startingMemes", new ArrayList<String>(Arrays.asList(
 				"Appuyez sur §bALT+F4§f pour débloquer un skin unique. Cette offre expirera dans 20 minutes.",
 				"Appuyez sur §bF§f pour présenter vos condoléances",
@@ -137,8 +106,8 @@ public class MainLg extends JavaPlugin {
 				"Vous aussi pouvez avoir une vie aussi trépidente que §bl'Inspecteur Derrick§f en endossant le rôle du §bdétective§f",
 				"Vous risquez de finir en §bsandwich§f pour loup-garou. Pas très vegan tout ça.."
 			)));
-			
-			
+
+
 			config.set("spawns", new ArrayList<List<Double>>());
 			saveConfig();
 		}
@@ -166,10 +135,10 @@ public class MainLg extends JavaPlugin {
 		Bukkit.getPluginManager().registerEvents(new VoteListener(), this);
 		Bukkit.getPluginManager().registerEvents(new ChatListener(), this);
 		Bukkit.getPluginManager().registerEvents(new LoupGarouListener(), this);
-		
+
 		for(Player player : Bukkit.getOnlinePlayers())
 			Bukkit.getPluginManager().callEvent(new PlayerJoinEvent(player, "is connected"));
-		
+
 	    ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 		protocolManager.addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.UPDATE_TIME) {
 				@Override
@@ -270,275 +239,18 @@ public class MainLg extends JavaPlugin {
 				}
 			}
 		});
-	
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if(label.equalsIgnoreCase("lg")) {
-			if(args[0].equalsIgnoreCase("roles") && args.length == 1){
-				sender.sendMessage(prefix + "§6Voici la liste des rôles:");
-				for (String role : rolesBuilder.keySet())
-					if (MainLg.getInstance().getConfig().getInt(DISTRIBUTION_FIXED_KEY + role) > 0) {
-						sender.sendMessage(prefix + "  §e- §6" + role + " §e: " + MainLg.getInstance().getConfig().getInt(DISTRIBUTION_FIXED_KEY + role));
-					}
-			} else if (args[0].equalsIgnoreCase("roles") && args.length == 2){
-				if(args[1].equalsIgnoreCase("list")){
-					sender.sendMessage(prefix + "§6Voici la liste des rôles:");
-					int index = 0;
-					for (String role : rolesBuilder.keySet())
-						sender.sendMessage(prefix + "  §e- " + index++ + " - §6" + role + " §e> " + MainLg.getInstance().getConfig().getInt(DISTRIBUTION_FIXED_KEY + role));
-					sender.sendMessage("\n" + prefix + " §7Écrivez §8§o/lg roles set <role_id/role_name> <nombre>§7 pour définir le nombre de joueurs qui devrons avoir ce rôle.");
-				}
-			}
-			if(!sender.hasPermission("loupgarou.admin")) {
-				sender.sendMessage(prefix+"§4Erreur: Vous n'avez pas la permission...");
-				return true;
-			}
-			if(args.length >= 1) {
-				if(args[0].equalsIgnoreCase("addspawn")) {
-					Player player = (Player)sender;
-					Location loc = player.getLocation();
-					List<Object> list = (List<Object>) getConfig().getList("spawns");
-					list.add(Arrays.asList((double)loc.getBlockX(), loc.getY(), (double)loc.getBlockZ(), (double)loc.getYaw(), (double)loc.getPitch()));
-					saveConfig();
-					loadConfig();
-					sender.sendMessage(prefix+"§aLa position a bien été ajoutée !");
-					return true;
-				}else if(args[0].equalsIgnoreCase("end")) {
-					Player selected = (args.length == 2)
-						? Bukkit.getPlayer(args[1])
-						: (Player)sender;
-
-					if(selected == null) {
-						sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'est pas connecté.");
-						return true;
-					}
-					LGGame game = LGPlayer.thePlayer(selected).getGame();
-					if(game == null) {
-						sender.sendMessage("§4Erreur : §cLe joueur §4"+selected.getName()+"§c n'est pas dans une partie.");
-						return true;
-					}
-					game.cancelWait();
-					game.endGame(LGWinType.EQUAL);
-					game.broadcastMessage("§cLa partie a été arrêtée de force !");
-					return true;
-				}else if(args[0].equalsIgnoreCase("start")) {
-					Player player = (args.length == 2)
-						? Bukkit.getPlayer(args[1])
-						: (Player)sender;
-
-					if(player == null) {
-						sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
-						return true;
-					}
-					LGPlayer lgp = LGPlayer.thePlayer(player);
-					if(lgp.getGame() == null) {
-						sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
-						return true;
-					}
-					if(MainLg.getInstance().getConfig().getList("spawns").size() < lgp.getGame().getMaxPlayers()) {
-						sender.sendMessage("§4Erreur : §cIl n'y a pas assez de points de spawn !");
-						sender.sendMessage("§8§oPour les définir, merci de faire §7/lg addSpawn");
-						return true;
-					}
-					sender.sendMessage("§aVous avez bien démarré une nouvelle partie !");
-					
-
-					lgp.getGame().updateStart();
-					return true;
-				}else if(args[0].equalsIgnoreCase("reloadconfig")) {
-					sender.sendMessage("§aVous avez bien reload la config !");
-					sender.sendMessage("§7§oSi vous avez changé les rôles, écriver §8§o/lg joinall§7§o !");
-					loadConfig();
-					return true;
-				}else if(args[0].equalsIgnoreCase("joinall")) {
-					for(Player p : Bukkit.getOnlinePlayers())
-						Bukkit.getPluginManager().callEvent(new PlayerQuitEvent(p, "joinall"));
-					for(Player p : Bukkit.getOnlinePlayers()){
-						Bukkit.getPluginManager().callEvent(new PlayerJoinEvent(p, "joinall"));
-						if(p.getPlayer().hasPermission("loupgarou.admin")){
-							p.getPlayer().getInventory().setItem(1,new ItemBuilder(Material.ENDER_EYE).setName("Choisir les rôles").build());
-							p.getPlayer().getInventory().setItem(3,new ItemBuilder(Material.EMERALD).setName("Lancer la partie").build());
-						}
-					}
-					return true;
-				}else if(args[0].equalsIgnoreCase("reloadPacks")) {
-					for(Player p : Bukkit.getOnlinePlayers())
-						Bukkit.getPluginManager().callEvent(new PlayerQuitEvent(p, "reloadPacks"));
-					for(Player p : Bukkit.getOnlinePlayers())
-						Bukkit.getPluginManager().callEvent(new PlayerJoinEvent(p, "reloadPacks"));
-					return true;
-				}else if(args[0].equalsIgnoreCase("nextNight")) {
-					sender.sendMessage("§aVous êtes passé à la prochaine nuit");
-					if(getCurrentGame() != null) {
-						getCurrentGame().broadcastMessage("§2§lLe passage à la prochaine nuit a été forcé !");
-						for(LGPlayer lgp : getCurrentGame().getInGame())
-							lgp.stopChoosing();
-						getCurrentGame().cancelWait();
-						getCurrentGame().nextNight();
-					}
-					return true;
-				}else if(args[0].equalsIgnoreCase("nextDay")) {
-					sender.sendMessage("§aVous êtes passé à la prochaine journée");
-					if(getCurrentGame() != null) {
-						getCurrentGame().broadcastMessage("§2§lLe passage à la prochaine journée a été forcé !");
-						getCurrentGame().cancelWait();
-						for(LGPlayer lgp : getCurrentGame().getInGame())
-							lgp.stopChoosing();
-						getCurrentGame().endNight();
-					}
-					return true;
-				}else if(args[0].equalsIgnoreCase("roles")) {
-					if(args.length != 1 && !args[1].equalsIgnoreCase("list")) {
-						if(args[1].equalsIgnoreCase("set") && args.length == 4) {
-							String role = null;
-							if(args[2].length() <= 2)
-								try {
-									Integer i = Integer.valueOf(args[2]);
-									Object[] array = rolesBuilder.keySet().toArray();
-									if(array.length <= i) {
-										sender.sendMessage(prefix+"§4Erreur: §cCe rôle n'existe pas.");
-										return true;
-									}
-									else
-										role = (String)array[i];
-								}catch(Exception err) {sender.sendMessage(prefix+"§4Erreur: §cCeci n'est pas un nombre");}
-							else
-								role = args[2];
-							
-							if(role != null) {
-								String real_role = null;
-								for(String real : rolesBuilder.keySet())
-									if(real.equalsIgnoreCase(role)) {
-										real_role = real;
-										break;
-									}
-								
-								if(real_role != null) {
-									try {
-										MainLg.getInstance().getConfig().set(DISTRIBUTION_FIXED_KEY + real_role, Integer.valueOf(args[3]));
-										sender.sendMessage(prefix+"§6Il y aura §e"+args[3]+" §6"+real_role);
-										saveConfig();
-										loadConfig();
-										sender.sendMessage("§7§oSi vous avez fini de changer les rôles, écriver §8§o/lg joinall§7§o !");
-									}catch(Exception err) {
-										sender.sendMessage(prefix+"§4Erreur: §c"+args[3]+" n'est pas un nombre");
-									}
-									return true;
-								}
-							}
-							sender.sendMessage(prefix+"§4Erreur: §cLe rôle que vous avez entré est incorrect");
-							
-						} else {
-							sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
-							sender.sendMessage(prefix+"§4Essayez §c/lg roles set <role_id/role_name> <nombre>§4 ou §c/lg roles list");
-						}
-					}
-					return true;
-				}else if(args[0].equalsIgnoreCase("nick")) {
-					if (args.length < 3) {
-						sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
-						sender.sendMessage(prefix+"§4Essayez §c/lg nick <pseudo_minecraft> <surnom>");
-						
-						return true;
-					}
-
-					Player player = Bukkit.getPlayer(args[1]);
-					if(player == null) {
-									sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
-									return true;
-					}
-					LGPlayer lgp = LGPlayer.thePlayer(player);
-					if(lgp.getGame() == null) {
-									sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
-									return true;
-					}
-					
-					final ArrayList<String> nicknameTokens = new ArrayList<>();
-					for (int index = 2; index < args.length; index++) nicknameTokens.add(args[index]);
-					final String nickname = String.join(" ", nicknameTokens);
-
-					Player detect = Bukkit.getPlayerExact(nickname);
-					if(detect != null) {    
-						sender.sendMessage("§4Erreur : §cCe surnom est déjà le pseudo d'un joueur !");
-						return true;
-					}
-					for(LGPlayer other : getCurrentGame().getInGame()) {
-									if(nickname.equalsIgnoreCase(other.getNick())){
-											sender.sendMessage("§4Erreur : §cCe surnom est déjà le surnom d'un joueur !");
-											return true;
-									}
-					}
-
-					lgp.setNick(nickname);
-					for(LGPlayer other : getCurrentGame().getInGame()) {
-									if(lgp != other) {
-													other.getPlayer().hidePlayer(MainLg.getInstance(), lgp.getPlayer());
-													other.getPlayer().showPlayer(MainLg.getInstance(), lgp.getPlayer());
-									}
-					}
-					lgp.updatePrefix();
-					sender.sendMessage("§7§o"+lgp.getName(true)+" s'appellera désormais §8§o"+nickname+"§7§o !");
-					nicksFile.set(lgp.getPlayer().getUniqueId().toString(), nickname);
-					File f = new File(getDataFolder(), "nicks.yml");
-					try{
-									nicksFile.save(f);
-					} catch (IOException e) {
-									sender.sendMessage("§4Erreur : §cImpossible de sauvegarder le surnom");
-					}
-
-					return true;
-
-
-					
-        }else if(args[0].equalsIgnoreCase("unnick")) {
-					if(args.length == 2) {
-                                            Player player = Bukkit.getPlayer(args[1]);
-                                            if(player == null) {
-                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+args[1]+"§c n'existe pas !");
-                                                    return true;
-                                            }
-                                            LGPlayer lgp = LGPlayer.thePlayer(player);
-                                            if(lgp.getGame() == null) {
-                                                    sender.sendMessage("§4Erreur : §cLe joueur §4"+lgp.getName()+"§c n'est pas dans une partie.");
-                                                    return true;
-                                            }
-                                            lgp.setNick(null);
-                                            for(LGPlayer other : getCurrentGame().getInGame()) {
-                                                    if(lgp != other) {
-                                                            other.getPlayer().hidePlayer(MainLg.getInstance(), lgp.getPlayer());
-                                                            other.getPlayer().showPlayer(MainLg.getInstance(), lgp.getPlayer());
-                                                    }
-                                            }
-                                            lgp.updatePrefix();
-                                            sender.sendMessage("§7§o"+lgp.getName(true)+" s'appellera désormais §8§o"+lgp.getName(false)+"§7§o !");
-                                            nicksFile.set(lgp.getPlayer().getUniqueId().toString(), null);
-                                            File f = new File(getDataFolder(), "nicks.yml");
-                                            try{
-                                                    nicksFile.save(f);
-                                            } catch (IOException e) {
-                                                    sender.sendMessage("§4Erreur : §cImpossible de sauvegarder le surnom");
-                                            }
-                                        }else{
-                                            sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
-                                            sender.sendMessage(prefix+"§4Essayez §c/lg unnick <pseudo_minecraft>");
-                                        }
-                                        return true;
-                                }
-			}
-			sender.sendMessage(prefix+"§4Erreur: §cCommande incorrecte.");
-			sender.sendMessage(prefix+"§4Essayez /lg §caddSpawn/end/start/nextNight/nextDay/reloadConfig/roles/reloadPacks/joinAll/nick/unnick");
-			return true;
-		}
-		return false;
+    return new CommandInterpreter(this).dispatch(sender, label, args);
 	}
+
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		if(!sender.hasPermission("loupgarou.admin"))
 			return new ArrayList<>(0);
-		
+
 		if(args.length > 1) {
 			if(args[0].equalsIgnoreCase("roles"))
 				if(args.length == 2)
