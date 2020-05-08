@@ -145,7 +145,11 @@ public class MainLg extends JavaPlugin {
 
 		loadConfig();
 
-		this.stats = new LGStats(config, getDataFolder(), rolesBuilder.keySet());
+		try {
+			this.stats = new LGStats(config, getDataFolder(), rolesBuilder.keySet());
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to load or create stats file", e);
+		}
 
 		final File f = new File(getDataFolder(), "nicks.yml");
 		nicksFile = YamlConfiguration.loadConfiguration(f);
@@ -211,15 +215,6 @@ public class MainLg extends JavaPlugin {
 								e.printStackTrace();
 							}
 						}
-
-                                                //try{
-                                                //        if (lgp.getNick()!=null){
-                                                            //JSONObject obj = (JSONObject) new JSONParser().parse(displayName.getJson());
-                                                            //displayName = WrappedChatComponent.fromText( obj.get("text") + " §l" + lgp.getName());
-                                                //        }
-                                                //} catch (ParseException e) {
-						//	e.printStackTrace();
-						//}
 
 						LGSkinLoadEvent evt = new LGSkinLoadEvent(lgp.getGame(), lgp, player, data.getProfile());
 						Bukkit.getPluginManager().callEvent(evt);
@@ -406,7 +401,8 @@ public class MainLg extends JavaPlugin {
 									if(array.length <= i) {
 										sender.sendMessage(prefix+"§4Erreur: §cCe rôle n'existe pas.");
 										return true;
-									}else
+									}
+									else
 										role = (String)array[i];
 								}catch(Exception err) {sender.sendMessage(prefix+"§4Erreur: §cCeci n'est pas un nombre");}
 							else
@@ -635,6 +631,10 @@ public class MainLg extends JavaPlugin {
 	}
 
 	public void saveStats(LGWinType winType) {
-		this.stats.saveRound(winType);
+		try {
+			this.stats.saveRound(winType);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to save stats", e);
+		}
 	}
 }
