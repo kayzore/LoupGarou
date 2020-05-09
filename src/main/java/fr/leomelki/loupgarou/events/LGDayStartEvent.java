@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class LGDayStartEvent extends LGEvent implements Cancellable{
+	@Getter @Setter private boolean cancelled;
+	
 	public LGDayStartEvent(LGGame game) {
 		super(game);
 	}
-	
-	@Getter @Setter private boolean cancelled;
 }

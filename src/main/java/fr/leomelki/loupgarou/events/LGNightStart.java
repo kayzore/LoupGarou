@@ -7,11 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class LGNightStart extends LGEvent implements Cancellable{
+	@Getter @Setter boolean cancelled;
 
 	public LGNightStart(LGGame game) {
 		super(game);
 	}
-
-	@Getter @Setter boolean cancelled;
-
 }

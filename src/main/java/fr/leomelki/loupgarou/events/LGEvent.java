@@ -10,13 +10,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LGEvent extends Event{
 	@Getter final LGGame game;
+	private static final HandlerList handlers = new HandlerList();
 	
-    private static final HandlerList handlers = new HandlerList();
 	@Override
 	public HandlerList getHandlers() {
 		return handlers;
 	}
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
+
+  public static HandlerList getHandlerList() {
+		return handlers;
+	}
 }

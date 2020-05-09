@@ -23,25 +23,21 @@ public class LGStats {
   private FileConfiguration config;
   private String absolutePath;
 
-  public LGStats(FileConfiguration config, File dataFolder, Set<String> rolesKeySet) {
+  public LGStats(FileConfiguration config, File dataFolder, Set<String> rolesKeySet) throws IOException {
     this.config = config;
     this.rolesKeySet = rolesKeySet;
     this.statsFile = new File(dataFolder + "/stats.csv");
     this.absolutePath = statsFile.getAbsolutePath();
 
     if(!this.statsFile.exists()) {
-			try {
-				final BufferedWriter writer = Files.newBufferedWriter(Paths.get(statsFile.getAbsolutePath()));	
-				final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-				
-				final List<String> header = this.rolesKeySet.stream().map(name -> this.escapeSpecialCharacters(name)).collect(Collectors.toList());
-				
-				header.add(0, "Winners");
+			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(statsFile.getAbsolutePath()))) {
+				try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+					final List<String> header = this.rolesKeySet.stream().map(this::escapeSpecialCharacters).collect(Collectors.toList());
+					header.add(0, "Winners");
 
-				csvPrinter.printRecord(header);
-				csvPrinter.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
+					csvPrinter.printRecord(header);
+					csvPrinter.flush();
+				}
 			}
 		}
   }
@@ -55,23 +51,21 @@ public class LGStats {
     return escapedData;
   }
 
-  public void saveRound(LGWinType winType) {
-    try {
-			final BufferedWriter writer = Files.newBufferedWriter(Paths.get(this.absolutePath), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-			final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-			final List<String> roundResults = new ArrayList<String>();
+  public void saveRound(LGWinType winType) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(this.absolutePath), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
+			try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+				final List<String> roundResults = new ArrayList<>();
 
-			roundResults.add(winType.toString());
+				roundResults.add(winType.toString());
 
-			for(String role : this.rolesKeySet) {
-				final int numberOfPlayersThisRound = this.config.getInt("distributionFixed." + role);
-				roundResults.add(String.valueOf(numberOfPlayersThisRound));
+				for(String role : this.rolesKeySet) {
+					final int numberOfPlayersThisRound = this.config.getInt("distributionFixed." + role);
+					roundResults.add(String.valueOf(numberOfPlayersThisRound));
+				}
+
+				csvPrinter.printRecord(roundResults);
+				csvPrinter.flush();
 			}
-
-			csvPrinter.printRecord(roundResults);
-			csvPrinter.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
   }
 }

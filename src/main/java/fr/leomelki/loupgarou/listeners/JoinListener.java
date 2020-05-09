@@ -72,7 +72,8 @@ public class JoinListener implements Listener{
 				p.getInventory().setItem(1,new fr.leomelki.loupgarou.utils.ItemBuilder(Material.ENDER_EYE).setName("Choisir les rôles").build());
 				p.getInventory().setItem(3,new fr.leomelki.loupgarou.utils.ItemBuilder(Material.EMERALD).setName("Lancer la partie").build());
 			}
-		}else if(e.getStatus() == Status.DECLINED || e.getStatus() == Status.FAILED_DOWNLOAD)
+		} 
+		else if(e.getStatus() == Status.DECLINED || e.getStatus() == Status.FAILED_DOWNLOAD)
 			e.getPlayer().kickPlayer(MainLg.getPrefix()+"§cIl vous faut le resourcepack pour jouer ! ("+e.getStatus()+")");
 	}
 	@EventHandler

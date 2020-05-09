@@ -44,10 +44,6 @@ public class CancelListener implements Listener{
 		e.setDeathMessage("");
 		e.setKeepInventory(true);
 	}
-/*	@EventHandler
-	public void onAchievement(PlayerAchievementAwardedEvent e) {
-		e.setCancelled(true);
-	}*/
 	@EventHandler
 	public void onEntitySpawn(EntitySpawnEvent e) {
 		e.setCancelled(true);

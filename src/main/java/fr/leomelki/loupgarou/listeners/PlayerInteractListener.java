@@ -18,12 +18,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.util.Map;
 
 public class PlayerInteractListener implements Listener {
 
     @Getter
-    private HashMap<String, Constructor<? extends Role>> roles = new HashMap<String, Constructor<? extends Role>>();
-    public PlayerInteractListener(HashMap<String, Constructor<? extends Role>> roles) {
+    private Map<String, Constructor<? extends Role>> roles = new HashMap<>();
+    public PlayerInteractListener(Map<String, Constructor<? extends Role>> roles) {
         this.roles = roles;
     }
 

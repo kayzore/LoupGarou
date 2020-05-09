@@ -3,14 +3,10 @@ package fr.leomelki.loupgarou.scoreboard;
 import java.util.Arrays;
 
 import com.comphenix.protocol.wrappers.EnumWrappers.ScoreboardAction;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardScore;
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardTeam;
 import fr.leomelki.loupgarou.classes.LGPlayer;
-import fr.leomelki.loupgarou.utils.VariousUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 public class CustomScoreboardEntry {
 	private final int amount;

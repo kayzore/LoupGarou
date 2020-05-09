@@ -51,7 +51,7 @@ public class LGPlayer {
 		return lgp;
 	}
 	public static LGPlayer removePlayer(Player player) {
-		return cachedPlayers.remove(player);//.remove();
+		return cachedPlayers.remove(player);
 	}
 	@Getter @Setter private int place;
 	@Getter private Player player;
@@ -109,9 +109,9 @@ public class LGPlayer {
 	}
 	public String getFullName() {
 		final String playerName = (player != null) ? getPlayer().getName() : name;
-		final String nick = (this.nick != null) ? "§8 => §b" + this.nick : "";
+		final String currentNick = (this.nick != null) ? "§8 => §b" + this.nick : "";
 
-		return playerName + nick;
+		return playerName + currentNick;
 	}
 
 	public String getName() {
@@ -142,7 +142,6 @@ public class LGPlayer {
 	public void choose(LGChooseCallback callback, LGPlayer... blacklisted) {
 		this.blacklistedChoice = blacklisted == null ? new ArrayList<LGPlayer>(0) : Arrays.asList(blacklisted);
 		this.chooseCallback = callback;
-		//sendMessage("§7§oTIP: Regardez un joueur et tapez le afin de le sélectionner.");
 	}
 	public void stopChoosing() {
 		this.blacklistedChoice = null;
@@ -168,7 +167,7 @@ public class LGPlayer {
 						team.sendPacket(getPlayer());
 						
 						WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
-						ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
+						ArrayList<PlayerInfoData> infos = new ArrayList<>();
 						info.setAction(PlayerInfoAction.ADD_PLAYER);
 						infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName(true))));
 						info.setData(infos);
@@ -186,7 +185,7 @@ public class LGPlayer {
 			List<String> meList = Arrays.asList(getName(true));
 			for(LGPlayer lgp : getGame().getInGame()) {
 				WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
-				ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
+				ArrayList<PlayerInfoData> infos = new ArrayList<>();
 				info.setAction(PlayerInfoAction.ADD_PLAYER);
 				infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName(true))));
 				info.setData(infos);
@@ -204,7 +203,7 @@ public class LGPlayer {
 	public void hideView() {
 		if(getGame() != null && player != null) {
 			WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
-			ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
+			ArrayList<PlayerInfoData> infos = new ArrayList<>();
 			info.setAction(PlayerInfoAction.ADD_PLAYER);
 			for(LGPlayer lgp : getGame().getAlive())
 				if(lgp != this && lgp.getPlayer() != null) {
@@ -225,7 +224,7 @@ public class LGPlayer {
 			for(LGPlayer lgp : getGame().getInGame()) {
 				if(lgp == this) {
 					WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
-					ArrayList<PlayerInfoData> infos = new ArrayList<PlayerInfoData>();
+					ArrayList<PlayerInfoData> infos = new ArrayList<>();
 					info.setAction(PlayerInfoAction.ADD_PLAYER);
 					infos.add(new PlayerInfoData(new WrappedGameProfile(getPlayer().getUniqueId(), getName(true)), 0, NativeGameMode.ADVENTURE, WrappedChatComponent.fromText(getName(true))));
 					info.setData(infos);
@@ -273,9 +272,9 @@ public class LGPlayer {
 				return this;
 		for(int i = 0;i<50;i++) {
 			loc.add(loc.getDirection());
-			for(LGPlayer player : list) {
-				if(player != this && !blacklistedChoice.contains(player) && (!player.isDead() || canSelectDead) && VariousUtils.distanceSquaredXZ(loc, player.getPlayer().getLocation()) < 0.35 && Math.abs(loc.getY()-player.getPlayer().getLocation().getY()) < 2) {
-					return player;
+			for(LGPlayer currentPlayer : list) {
+				if(currentPlayer != this && !blacklistedChoice.contains(currentPlayer) && (!currentPlayer.isDead() || canSelectDead) && VariousUtils.distanceSquaredXZ(loc, currentPlayer.getPlayer().getLocation()) < 0.35 && Math.abs(loc.getY()-currentPlayer.getPlayer().getLocation().getY()) < 2) {
+					return currentPlayer;
 				}
 			}
 		}

@@ -1,6 +1,5 @@
 package fr.leomelki.loupgarou.scoreboard;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +12,13 @@ import fr.leomelki.loupgarou.classes.RolePlayers;
 import fr.leomelki.loupgarou.roles.Role;
 import fr.leomelki.loupgarou.utils.RandomString;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 
 public class CustomScoreboard {
 	@Getter private boolean shown;
 	@Getter private final String name = RandomString.generate(16);
 	@Getter private final List<LGPlayer> inGamePlayers;
-	private final String displayName = "§7";
-	private final List<CustomScoreboardEntry> entries = new ArrayList<CustomScoreboardEntry>();
+	private static final  String DISPLAY_NAME = "§7";
+	private final List<CustomScoreboardEntry> entries = new ArrayList<>();
 	private final boolean shouldShowScoreboard;
 
 	public CustomScoreboard(List<LGPlayer> inGamePlayers, boolean shouldShowScoreboard) {
@@ -34,7 +31,7 @@ public class CustomScoreboard {
 	}
 
 	private void removePreexistingEntries() {
-		final ArrayList<CustomScoreboardEntry> preexistingEntries = new ArrayList<>(this.entries);
+		final List<CustomScoreboardEntry> preexistingEntries = new ArrayList<>(this.entries);
 
 		for (CustomScoreboardEntry preexistingEntry: preexistingEntries) {
 			preexistingEntry.hide();
@@ -73,7 +70,7 @@ public class CustomScoreboard {
 		WrapperPlayServerScoreboardObjective objective = new WrapperPlayServerScoreboardObjective();
 		objective.setMode(0);
 		objective.setName(name);
-		objective.setDisplayName(WrappedChatComponent.fromText(displayName));
+		objective.setDisplayName(WrappedChatComponent.fromText(DISPLAY_NAME));
 
 		WrapperPlayServerScoreboardDisplayObjective display = new WrapperPlayServerScoreboardDisplayObjective();
 		display.setPosition(1);
