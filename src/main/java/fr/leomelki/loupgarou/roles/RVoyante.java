@@ -34,7 +34,7 @@ public class RVoyante extends Role{
 	public String getShortDescription() {
 		return "Tu gagnes avec le §a§lVillage";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "Tu gagnes avec le §a§lVillage§f. Chaque nuit, tu peux espionner un joueur et découvrir sa véritable identité...";
@@ -51,11 +51,11 @@ public class RVoyante extends Role{
 	public int getTimeout() {
 		return 15;
 	}
-	
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		player.showView();
-		
+
 		player.choose(new LGChooseCallback() {
 			@Override
 			public void callback(LGPlayer choosen) {
@@ -73,7 +73,5 @@ public class RVoyante extends Role{
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez regardé aucun rôle", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§cVous n'avez pas utilisé votre pouvoir cette nuit.");
 	}
 }

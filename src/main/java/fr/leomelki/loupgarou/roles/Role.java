@@ -1,6 +1,7 @@
 package fr.leomelki.loupgarou.roles;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Bukkit;
@@ -17,10 +18,12 @@ import lombok.Setter;
 
 public abstract class Role implements Listener {
 	@Getter @Setter private int waitedPlayers;
-	@Getter private ArrayList<LGPlayer> players = new ArrayList<LGPlayer>();
-	@Getter public ArrayList<LGPlayer> playersThisRound = new ArrayList<LGPlayer>();
+	@Getter private ArrayList<LGPlayer> players = new ArrayList<>();
+	@Getter public List<LGPlayer> playersThisRound = new ArrayList<>();
 	@Getter private final LGGame game;
-	
+	protected static final String PERFORMED_NO_ACTION = "§6Tu n'as rien fait cette nuit.";
+	protected static final String IS_IMMUNE_FROM_WOLVES = "§cVotre cible est immunisée.";
+
 	public Role(LGGame game) {
 		this.game = game;
 		Bukkit.getPluginManager().registerEvents(this, MainLg.getInstance());
@@ -37,9 +40,11 @@ public abstract class Role implements Listener {
 	public abstract String getDescription();
 	public abstract String getTask();
 	public abstract String getBroadcastedTask();
+
 	public RoleType getType(LGPlayer lgp) {
 		return getType();
 	}
+	
 	public RoleWinType getWinType(LGPlayer lgp) {
 		return getWinType();
 	}
@@ -51,17 +56,17 @@ public abstract class Role implements Listener {
 	public abstract int getTimeout();
 	
 	public void onNightTurn(Runnable callback) {
-		 ArrayList<LGPlayer> players = (ArrayList<LGPlayer>) getPlayers().clone();
-		 new Runnable() {
+		ArrayList<LGPlayer> playersCopy = new ArrayList<>(getPlayers());
+		new Runnable() {
 			
 			@Override
 			public void run() {
 				getGame().cancelWait();
-				if(players.size() == 0) {
+				if(playersCopy.isEmpty()) {
 					onTurnFinish(callback);
 					return;
 				}
-				LGPlayer player = players.remove(0);
+				LGPlayer player = playersCopy.remove(0);
 				if(player.isRoleActive()) {
 					getGame().wait(getTimeout(), ()->{
 						try {
@@ -71,16 +76,11 @@ public abstract class Role implements Listener {
 							err.printStackTrace();
 						}
 						this.run();
-					}, (currentPlayer, secondsLeft)->{
-						return currentPlayer == player ? "§9§lC'est à ton tour !" : "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)";
-					});
+					}, (currentPlayer, secondsLeft)-> currentPlayer == player ? "§9§lC'est à ton tour !" : "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)");
 					player.sendMessage("§6"+getTask());
-				//	player.sendTitle("§6C'est à vous de jouer", "§a"+getTask(), 100);
 					onNightTurn(player, this);
 				} else {
-					getGame().wait(getTimeout(), ()->{}, (currentPlayer, secondsLeft)->{
-						return currentPlayer == player ? "§c§lTu ne peux pas jouer" : "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)";
-					});
+					getGame().wait(getTimeout(), ()->{}, (currentPlayer, secondsLeft) -> currentPlayer == player ? "§c§lTu ne peux pas jouer" : "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)");
 					Runnable run = this;
 					new BukkitRunnable() {
 						
@@ -88,7 +88,7 @@ public abstract class Role implements Listener {
 						public void run() {
 							run.run();
 						}
-					}.runTaskLater(MainLg.getInstance(), 20*(ThreadLocalRandom.current().nextInt(getTimeout()/3*2-4)+4));
+					}.runTaskLater(MainLg.getInstance(), (long)20*(ThreadLocalRandom.current().nextInt(getTimeout()/3*2-4)+4));
 				}
 			}
 		}.run();
@@ -124,7 +124,7 @@ public abstract class Role implements Listener {
 		try {
 			RoleSort role = RoleSort.valueOf(getClass().getSimpleName().substring(1));
 			return role == null ? -1 : role.ordinal();
-		}catch(Throwable e) {
+		}catch(Exception e) {
 			return -1;
 		}
 	}//En combientième ce rôle doit être appellé

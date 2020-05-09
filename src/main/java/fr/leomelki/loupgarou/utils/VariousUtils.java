@@ -12,6 +12,10 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 
 public class VariousUtils {
+	private VariousUtils() {
+    throw new IllegalStateException("Utility class");
+  }
+
 	public static double distanceSquaredXZ(Location from, Location to) {
 		return Math.pow(from.getX()-to.getX(), 2)+Math.pow(from.getZ()-to.getZ(), 2);
 	}

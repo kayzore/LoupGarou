@@ -25,7 +25,7 @@ public class REnfantSauvageLG extends Role{
 		for(LGPlayer lgp : getPlayers())
 			if(lgp.getPlayer() != null && lgp.getPlayer().hasPotionEffect(PotionEffectType.INVISIBILITY))
 				return "§c§lEnfant-Sauvage";
-		return (getPlayers().size() > 0 ? "§a" : "§c")+"§lEnfant-Sauvage";
+		return (!getPlayers().isEmpty() ? "§a" : "§c")+"§lEnfant-Sauvage";
 	}
 
 	@Override
@@ -77,7 +77,8 @@ public class REnfantSauvageLG extends Role{
 				lgRole = (RLoupGarou)role;
 		
 		if(lgRole == null) {
-			getGame().getRoles().add(lgRole = new RLoupGarou(getGame()));
+			lgRole = new RLoupGarou(getGame());
+			getGame().getRoles().add(lgRole);
 
 			getGame().getRoles().sort(new Comparator<Role>() {
 				@Override

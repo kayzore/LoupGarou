@@ -271,13 +271,14 @@ public class LGGame implements Listener{
 		}
 	}
 	public void updateStart() {
-		if(!isStarted())
-			if(inGame.size() == maxPlayers) {//Il faut que la partie soit totalement remplie pour qu'elle démarre car sinon, tous les rôles ne seraient pas distribués
-				final MainLg mainLgInstance = MainLg.getInstance();
-				final FileConfiguration config = mainLgInstance.getConfig();
-				final boolean shouldShowScoreboard = config.getBoolean("showScoreboard");
+		if(!isStarted()) {
 
-				this.roleDistributor = new LGRoleDistributor(this, config, mainLgInstance.getRolesBuilder());
+			if(inGame.size() == maxPlayers) {//Il faut que la partie soit totalement remplie pour qu'elle démarre car sinon, tous les rôles ne seraient pas distribués
+			final MainLg mainLgInstance = MainLg.getInstance();
+			final FileConfiguration config = mainLgInstance.getConfig();
+			final boolean shouldShowScoreboard = config.getBoolean("showScoreboard");
+			
+			this.roleDistributor = new LGRoleDistributor(this, config, mainLgInstance.getRolesBuilder());
 				this.improvedScoreboard = new CustomScoreboard(this.inGame, shouldShowScoreboard);
 				this.improvedScoreboard.show();
 
@@ -300,10 +301,12 @@ public class LGGame implements Listener{
 						}
 					}.runTaskTimer(MainLg.getInstance(), 20, 20);
 				}
-			} else if(startingTask != null) {
+			}
+			else if(startingTask != null) {
 				startingTask.cancel();
 				broadcastMessage("§c§oLe démarrage de la partie a été annulé car une personne l'a quittée !");
-			}
+      }
+		}
 	}
 	public void start() {
 		if(startingTask != null) {
@@ -317,6 +320,7 @@ public class LGGame implements Listener{
 		List<?> original = MainLg.getInstance().getConfig().getList("spawns");
 		List<Object> list = new ArrayList<>(original);
 		for(LGPlayer lgp : getInGame()) {
+			@SuppressWarnings("unchecked")
 			List<Double> location = (List<Double>) list.remove(random.nextInt(list.size()));
 			Player p = lgp.getPlayer();
 			p.setWalkSpeed(0);
@@ -368,7 +372,7 @@ public class LGGame implements Listener{
 			}
 		}.runTaskTimer(MainLg.getInstance(), 0, 4);
 	}
-	private void _start() {		
+	private void _start() {
 		broadcastMessage("§8§oDébut de la partie...");
 		started = true;
 
@@ -491,7 +495,7 @@ public class LGGame implements Listener{
 		for(LGPlayer player : getInGame())
 			player.hideView();
 
-		ArrayList<Role> rolesCopy = new ArrayList<Role>(roles);
+		ArrayList<Role> rolesCopy = new ArrayList<>(roles);
 		new Runnable() {
 			Role lastRole;
 
@@ -542,7 +546,7 @@ public class LGGame implements Listener{
 			if(vote != null)
 				vote.remove(killed);
 
-			final String deathLog = String.format(reason.getMessage(), killed.getFullName())+", il était "+killed.getRole().getName()+(killed.getCache().getBoolean("infected") ? " §c§l(Infecté)" : "")+(killed.getCache().getBoolean("vampire") ? " §5§l(Vampire)" : "")+"§4.";
+			final String deathLog = String.format(reason.getMessage(), killed.getFullName())+", il était "+killed.getRole().getName()+(killed.isInfected()? " §c§l(Infecté)" : "")+(killed.isVampire() ? " §5§l(Vampire)" : "")+"§4.";
 
 			broadcastMessage(deathLog);
 			System.out.println(deathLog.replaceAll("\\§.", ""));
@@ -582,13 +586,13 @@ public class LGGame implements Listener{
 	}
 
 	private void showcaseVillage(List<LGPlayer> winners, LGWinType winType) {
-		final Boolean shouldDisplayWinners = (!winners.isEmpty());
+		final boolean shouldDisplayWinners = (!winners.isEmpty());
 
 		broadcastSpacer();
 		broadcastMessage("§9----------- §lFIN DE LA PARTIE -----------");
 		broadcastMessage(winType.getMessage());
 
-		if (Boolean.TRUE.equals(shouldDisplayWinners)) {
+		if (shouldDisplayWinners) {
 			final List<String> winnerNames = winners.stream().map(LGPlayer::getFullName).collect(Collectors.toList());
 			final String winnersFriendlyName = (winners.size() > 1) ? "aux vainqueurs" : "au vainqueur";
 			broadcastMessage("§6§l§oFélicitations " + winnersFriendlyName + ": §7§l" + String.join(", §7", winnerNames));

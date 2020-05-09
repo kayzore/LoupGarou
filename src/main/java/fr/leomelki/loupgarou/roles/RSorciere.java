@@ -25,6 +25,9 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 public class RSorciere extends Role{
 	private static ItemStack[] items = new ItemStack[4];
 	private static ItemStack cancel;
+	protected static final String WICH_USED_DEATH_POTION = "wich_used_death_potion";
+	protected static final String WICH_USED_LIFE_POTION = "wich_used_life_potion";
+
 	static {
 		items[0] = new ItemStack(Material.PURPLE_DYE, 1);
 		ItemMeta meta = items[0].getItemMeta();
@@ -113,14 +116,12 @@ public class RSorciere extends Role{
 		closeInventory(player.getPlayer());
 		player.getPlayer().updateInventory();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez utilisé aucune potion", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§6Tu n'as rien fait cette nuit.");
 	}
 	private void openInventory(LGPlayer player) {
 		inMenu = true;
 		Inventory inventory = Bukkit.createInventory(null, InventoryType.BREWING, sauver == null ? "§7Personne n'a été ciblé" : "§7§l" + sauver.getFullName() + " §7est ciblé");
 		inventory.setContents(items.clone());//clone au cas où Bukkit prenne directement la liste pour éviter de la modifier avec setItem (jsp)
-		if(sauver == null || player.getCache().getBoolean("witch_used_life"))
+		if(sauver == null || player.getCache().getBoolean(RSorciere.WICH_USED_LIFE_POTION))
 			inventory.setItem(0, null);
 		
 		if(sauver != null) {
@@ -130,7 +131,7 @@ public class RSorciere extends Role{
 			head.setItemMeta(meta);
 			inventory.setItem(4, head);
 		}
-		if(player.getCache().getBoolean("witch_used_death"))
+		if(player.getCache().getBoolean(RSorciere.WICH_USED_DEATH_POTION))
 			inventory.setItem(2, null);
 		player.getPlayer().closeInventory();
 		player.getPlayer().openInventory(inventory);
@@ -157,7 +158,7 @@ public class RSorciere extends Role{
 		} else if (item.getItemMeta().getDisplayName().equals(items[1].getItemMeta().getDisplayName())) {// Cancel
 			e.setCancelled(true);
 			closeInventory(player);
-			lgp.sendMessage("§6Tu n'as rien fait cette nuit.");
+			lgp.sendMessage(Role.PERFORMED_NO_ACTION);
 			lgp.hideView();
 			callback.run();
 		} else if (item.getItemMeta().getDisplayName().equals(items[2].getItemMeta().getDisplayName())) {// Potion de mort
@@ -171,7 +172,7 @@ public class RSorciere extends Role{
 			hold.sendPacket(lgp.getPlayer());
 			
 			closeInventory(player);
-			lgp.choose((choosen) -> {
+			lgp.choose(choosen -> {
 				if (choosen != null) {
 					lgp.stopChoosing();
 					kill(choosen, lgp);
@@ -211,7 +212,7 @@ public class RSorciere extends Role{
 	private void kill(LGPlayer choosen, LGPlayer player) {
 		player.getPlayer().getInventory().setItem(8, null);
 		player.getPlayer().updateInventory();
-		player.getCache().set("witch_used_death", true);
+		player.getCache().set(RSorciere.WICH_USED_DEATH_POTION, true);
 		getGame().kill(choosen, Reason.SORCIERE);
 		player.sendMessage("§6Tu as décidé d'assassiner §7§l" + choosen.getFullName() + "§6.");
 		player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§9 a été tué.");
@@ -219,7 +220,7 @@ public class RSorciere extends Role{
 		callback.run();
 	}
 	private void saveLife(LGPlayer player) {
-		player.getCache().set("witch_used_life", true);
+		player.getCache().set(RSorciere.WICH_USED_LIFE_POTION, true);
 		getGame().getDeaths().remove(Reason.LOUP_GAROU, sauver);
 		player.sendMessage("§6Tu as décidé de sauver §7§l" + sauver.getFullName() + "§6.");
 		player.sendActionBarMessage("§7§l" + sauver.getFullName() + "§9 a été sauvé.");

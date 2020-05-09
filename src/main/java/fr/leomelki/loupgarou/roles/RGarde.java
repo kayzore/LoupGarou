@@ -14,6 +14,10 @@ import fr.leomelki.loupgarou.events.LGPreDayStartEvent;
 import fr.leomelki.loupgarou.events.LGVampiredEvent;
 
 public class RGarde extends Role{
+	private static final String IS_PROTECTED_BY_GUARD = "is_protected_by_guard";
+	private static final String WAS_PROTECTED_BY_GUARD_LAST_NIGHT = "was_protected_by_guard_last_night";
+	private static List<Reason> reasonsProtected = Arrays.asList(Reason.LOUP_GAROU, Reason.LOUP_BLANC, Reason.GM_LOUP_GAROU, Reason.ASSASSIN);
+
 	public RGarde(LGGame game) {
 		super(game);
 	}
@@ -69,7 +73,7 @@ public class RGarde extends Role{
 			@Override
 			public void callback(LGPlayer choosen) {
 				if(choosen != null) {
-					LGPlayer lastProtected = player.getCache().get("garde_lastProtected");
+					LGPlayer lastProtected = player.getCache().get(RGarde.WAS_PROTECTED_BY_GUARD_LAST_NIGHT);
 					if(choosen == lastProtected) {
 						if(lastProtected == player)
 							player.sendMessage("§4§oTu t'es déjà protégé la nuit dernière.");
@@ -83,8 +87,8 @@ public class RGarde extends Role{
 							player.sendMessage("§6Tu vas protéger §7§l" + choosen.getFullName() + "§6 cette nuit.");
 							player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§9 sera protégé.");
 						}
-						choosen.getCache().set("garde_protected", true);
-						player.getCache().set("garde_lastProtected", choosen);
+						choosen.getCache().set(RGarde.IS_PROTECTED_BY_GUARD, true);
+						player.getCache().set(RGarde.WAS_PROTECTED_BY_GUARD_LAST_NIGHT, choosen);
 						player.stopChoosing();
 						player.hideView();
 						callback.run();
@@ -95,31 +99,27 @@ public class RGarde extends Role{
 	}
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
-		player.getCache().remove("garde_lastProtected");
+		player.getCache().remove(RGarde.WAS_PROTECTED_BY_GUARD_LAST_NIGHT);
 		player.stopChoosing();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez protégé personne.", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§cVous n'avez protégé personne cette nuit.");
 	}
-	
-	private static List<Reason> reasonsProtected = Arrays.asList(Reason.LOUP_GAROU, Reason.LOUP_BLANC, Reason.GM_LOUP_GAROU, Reason.ASSASSIN);
 	
 	@EventHandler
 	public void onPlayerKill(LGNightPlayerPreKilledEvent e) {
-		if(e.getGame() == getGame() && reasonsProtected.contains(e.getReason()) && e.getKilled().getCache().getBoolean("garde_protected")) {
-			e.getKilled().getCache().remove("garde_protected");
+		if(e.getGame() == getGame() && reasonsProtected.contains(e.getReason()) && e.getKilled().getCache().getBoolean(RGarde.IS_PROTECTED_BY_GUARD)) {
+			e.getKilled().getCache().remove(RGarde.IS_PROTECTED_BY_GUARD);
 			e.setReason(Reason.DONT_DIE);
 		}
 	}
 	@EventHandler
 	public void onVampired(LGVampiredEvent e) {
-		if(e.getGame() == getGame() && e.getPlayer().getCache().getBoolean("garde_protected"))
+		if(e.getGame() == getGame() && e.getPlayer().getCache().getBoolean(RGarde.IS_PROTECTED_BY_GUARD))
 			e.setProtect(true);
 	}
 	@EventHandler
 	public void onDayStart(LGPreDayStartEvent e) {
 		if(e.getGame() == getGame())
 			for(LGPlayer lgp : getGame().getInGame())
-				lgp.getCache().remove("garde_protected");
+				lgp.getCache().remove(RGarde.IS_PROTECTED_BY_GUARD);
 	}
 }

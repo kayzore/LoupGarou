@@ -61,7 +61,7 @@ public class RMontreurDOurs extends Role{
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onDay(LGDayStartEvent e) {
-		if (e.getGame() == getGame() && getPlayers().size() > 0) {
+		if (e.getGame() == getGame() && !getPlayers().isEmpty()) {
 			if(lastNight == getGame().getNight())
 				return;
 			lastNight = getGame().getNight();

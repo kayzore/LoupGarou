@@ -110,9 +110,9 @@ public class RPretre extends Role{
 					return super.hasPlayersLeft();
 		return false;
 	}
-	
+
 	Runnable callback;
-	
+
 	public void openInventory(Player player) {
 		inMenu = true;
 		Inventory inventory = Bukkit.createInventory(null, 9, "§7Veux-tu réssusciter quelqu'un ?");
@@ -133,8 +133,9 @@ public class RPretre extends Role{
 					meta.setMetadata(Arrays.asList(new WrappedWatchableObject(invisible, (byte)0)));
 					meta.sendPacket(player.getPlayer());
 				}
-			}else
-				player.getPlayer().hidePlayer(lgp.getPlayer());
+      } else {
+			  player.getPlayer().hidePlayer(lgp.getPlayer());
+      }
 		this.callback = callback;
 		openInventory(player.getPlayer());
 	}
@@ -143,11 +144,10 @@ public class RPretre extends Role{
 		player.getPlayer().getInventory().setItem(8, null);
 		player.stopChoosing();
 		closeInventory(player.getPlayer());
-		player.canSelectDead = false;
+		player.disableAbilityToSelectDead();
 		player.getPlayer().updateInventory();
 		hidePlayers(player);
-		//player.sendTitle("§cVous n'infectez personne", "§4Vous avez mis trop de temps à vous décider...", 80);
-		player.sendMessage("§6Tu n'as rien fait cette nuit.");
+		player.sendMessage(Role.PERFORMED_NO_ACTION);
 	}
 
 	private void hidePlayers(LGPlayer player) {
@@ -159,8 +159,8 @@ public class RPretre extends Role{
 	}
 
 	boolean inMenu = false;
-	ArrayList<LGPlayer> ressucited = new ArrayList<LGPlayer>();
-	
+	ArrayList<LGPlayer> resurrected = new ArrayList<>();
+
 	private void closeInventory(Player p) {
 		inMenu = false;
 		p.closeInventory();
@@ -170,13 +170,13 @@ public class RPretre extends Role{
 		ItemStack item = e.getCurrentItem();
 		Player player = (Player)e.getWhoClicked();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-			
+
 		if(lgp.getRole() != this || item == null || item.getItemMeta() == null)return;
 
 		if(item.getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
 			e.setCancelled(true);
 			closeInventory(player);
-			lgp.sendMessage("§6Tu n'as rien fait cette nuit.");
+			lgp.sendMessage(Role.PERFORMED_NO_ACTION);
 			hidePlayers(lgp);
 			lgp.hideView();
 			callback.run();
@@ -189,10 +189,10 @@ public class RPretre extends Role{
 			WrapperPlayServerHeldItemSlot held = new WrapperPlayServerHeldItemSlot();
 			held.setSlot(0);
 			held.sendPacket(player);
-			lgp.sendMessage("§6Choisissez qui réssusciter.");
-			lgp.canSelectDead = true;
+      lgp.sendMessage("§6Choisissez qui réssusciter.");
+      lgp.enableAbilityToSelectDead();
 			lgp.choose(new LGChooseCallback() {
-				
+
 				@Override
 				public void callback(LGPlayer choosen) {
 					if(choosen != null) {
@@ -206,12 +206,12 @@ public class RPretre extends Role{
 						} else {
 							player.getInventory().setItem(8, null);
 							player.updateInventory();
-							lgp.stopChoosing();
-							lgp.canSelectDead = false;
+              lgp.stopChoosing();
+              lgp.disableAbilityToSelectDead();
 							lgp.sendMessage("§6Tu as ramené §7§l"+choosenName+"§6 à la vie.");
 							lgp.sendActionBarMessage("§7§l"+choosenName+"§6 sera réssuscité");
-							
-							ressucited.add(choosen);
+
+							resurrected.add(choosen);
 							getPlayers().remove(lgp);//Pour éviter qu'il puisse sauver plusieurs personnes.
 							choosen.sendMessage("§6Tu vas être réssuscité en tant que §a§lVillageois§6.");
 							hidePlayers(lgp);
@@ -231,25 +231,22 @@ public class RPretre extends Role{
 	public void onClick(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-		if(lgp.getRole() == this) {
-			if(e.getItem() != null && e.getItem().hasItemMeta() && e.getItem().getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
+		if(lgp.getRole() == this && e.getItem() != null && e.getItem().hasItemMeta() && e.getItem().getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
 				e.setCancelled(true);
 				player.getInventory().setItem(8, null);
 				player.updateInventory();
 				lgp.stopChoosing();
-				lgp.sendMessage("§6Tu n'as rien fait cette nuit.");
-				lgp.canSelectDead = false;
+        lgp.sendMessage(Role.PERFORMED_NO_ACTION);
+        lgp.disableAbilityToSelectDead();
 				hidePlayers(lgp);
 				callback.run();
-			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onDayStart(LGPreDayStartEvent e) {
-		if(e.getGame() == getGame())
-			if(ressucited.size() > 0) {
-				for(LGPlayer lgp : ressucited) {
+		if(e.getGame() == getGame() && !resurrected.isEmpty()) {
+				for(LGPlayer lgp : resurrected) {
 					if(lgp.getPlayer() == null || !lgp.isDead())
 						continue;
 					lgp.setDead(false);
@@ -258,8 +255,10 @@ public class RPretre extends Role{
 					for(Role role : getGame().getRoles())
 						if(role instanceof RVillageois)
 							villagers = (RVillageois)role;
-					if(villagers == null)
-						getGame().getRoles().add(villagers = new RVillageois(getGame()));
+					if(villagers == null) {
+            villagers = new RVillageois(getGame());
+						getGame().getRoles().add(villagers);
+          }
 					villagers.join(lgp, false);//Le joueur réssuscité rejoint les villageois.
 					lgp.setRole(villagers);
 					lgp.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -269,9 +268,9 @@ public class RPretre extends Role{
 
 					lgp.joinChat(getGame().getDayChat());//Pour qu'il ne parle plus dans le chat des morts (et ne le voit plus) et qu'il parle dans le chat des vivants
 					VariousUtils.setWarning(lgp.getPlayer(), true);
-					
+
 					getGame().updateRoleScoreboard();
-					
+
 					getGame().broadcastMessage("§7§l" + lgp.getFullName() + "§6 a été ressuscité cette nuit.");
 
 					for(LGPlayer player : getGame().getInGame())
@@ -279,7 +278,7 @@ public class RPretre extends Role{
 							player.getPlayer().showPlayer(lgp.getPlayer());
 						}
 				}
-				ressucited.clear();
+				resurrected.clear();
 			}
 	}
 	@EventHandler
@@ -288,7 +287,7 @@ public class RPretre extends Role{
 			LGPlayer player = LGPlayer.thePlayer((Player)e.getPlayer());
 			if(player.getRole() == this && inMenu) {
 				new BukkitRunnable() {
-					
+
 					@Override
 					public void run() {
 						e.getPlayer().openInventory(e.getInventory());
@@ -297,5 +296,5 @@ public class RPretre extends Role{
 			}
 		}
 	}
-	
+
 }

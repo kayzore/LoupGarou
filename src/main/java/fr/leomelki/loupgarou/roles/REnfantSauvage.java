@@ -9,9 +9,12 @@ import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.classes.LGPlayer.LGChooseCallback;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent;
-import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
 public class REnfantSauvage extends Role{
+	private static final String WILD_CHILD_SOURCE = "wild_child_source";
+	private static final String WILD_CHILD_TARGET = "wild_child_target";
+	private static Random random = new Random();
+
 	public REnfantSauvage(LGGame game) {
 		super(game);
 	}
@@ -78,8 +81,8 @@ public class REnfantSauvage extends Role{
 					player.stopChoosing();
 					player.sendMessage("§6Si §7§l" + choosen.getFullName() + "§6 meurt, tu deviendras §c§lLoup-Garou§6.");
 					player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§6 est ton modèle");
-					player.getCache().set("enfant_svg", choosen);
-					choosen.getCache().set("enfant_svg_d", player);
+					player.getCache().set(REnfantSauvage.WILD_CHILD_SOURCE, choosen);
+					choosen.getCache().set(REnfantSauvage.WILD_CHILD_TARGET, player);
 					getPlayers().remove(player);//Pour éviter qu'il puisse avoir plusieurs modèles
 					player.hideView();
 					callback.run();
@@ -87,7 +90,6 @@ public class REnfantSauvage extends Role{
 			}
 		}, player);
 	}
-	private static Random random = new Random();
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
@@ -97,29 +99,30 @@ public class REnfantSauvage extends Role{
 			choosen = getGame().getAlive().get(random.nextInt(getGame().getAlive().size()));
 		player.sendMessage("§6Si §7§l" + choosen.getFullName() + "§6 meurt, tu deviendras §c§lLoup-Garou§6.");
 		player.sendActionBarMessage("§7§l" + choosen.getFullName() + "§6 est ton modèle");
-		player.getCache().set("enfant_svg", choosen);
-		choosen.getCache().set("enfant_svg_d", player);
+		player.getCache().set(REnfantSauvage.WILD_CHILD_SOURCE, choosen);
+		choosen.getCache().set(REnfantSauvage.WILD_CHILD_TARGET, player);
 		getPlayers().remove(player);
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerKilled(LGPlayerKilledEvent e) {
-		if(e.getGame() == getGame())
-			if(e.getKilled().getCache().has("enfant_svg_d")) {
-				LGPlayer enfant = e.getKilled().getCache().remove("enfant_svg_d");
-				if(!enfant.isDead() && enfant.getCache().remove("enfant_svg") == e.getKilled() && enfant.isRoleActive()) {
-					enfant.sendMessage("§7§l" + e.getKilled().getFullName() + "§6 est mort, tu deviens un §c§lLoup-Garou§6.");
-					REnfantSauvageLG lgEnfantSvg = null;
-					for(Role role : getGame().getRoles())
-						if(role instanceof REnfantSauvageLG)
-							lgEnfantSvg = (REnfantSauvageLG)role;
-					
-					if(lgEnfantSvg == null)
-						getGame().getRoles().add(lgEnfantSvg = new REnfantSauvageLG(getGame()));
-					
-					lgEnfantSvg.join(enfant, false);
+		if(e.getGame() == getGame() && e.getKilled().getCache().has(REnfantSauvage.WILD_CHILD_TARGET)) {
+			LGPlayer enfant = e.getKilled().getCache().remove(REnfantSauvage.WILD_CHILD_TARGET);
+			if(!enfant.isDead() && enfant.getCache().remove(REnfantSauvage.WILD_CHILD_SOURCE) == e.getKilled() && enfant.isRoleActive()) {
+				enfant.sendMessage("§7§l" + e.getKilled().getFullName() + "§6 est mort, tu deviens un §c§lLoup-Garou§6.");
+				REnfantSauvageLG lgEnfantSvg = null;
+				for(Role role : getGame().getRoles())
+					if(role instanceof REnfantSauvageLG)
+						lgEnfantSvg = (REnfantSauvageLG)role;
+				
+				if(lgEnfantSvg == null) {
+					lgEnfantSvg = new REnfantSauvageLG(getGame());
+					getGame().getRoles().add(lgEnfantSvg);
 				}
+				
+				lgEnfantSvg.join(enfant, false);
 			}
+		}
 	}
 	
 }

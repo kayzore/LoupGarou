@@ -58,17 +58,16 @@ public class RChasseurDeVampire extends Role{
 				return super.hasPlayersLeft();
 		return false;
 	}
-	
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		player.showView();
-		
+
 		player.choose(new LGChooseCallback() {
 			@Override
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
-				//	player.sendMessage("§6Tu as choisi de rendre visite à §7§l"+choosen.getName()+"§6.");
-					if(choosen.getCache().getBoolean("vampire") || choosen.getRole() instanceof RVampire) {
+					if(choosen.isVampire() || choosen.getRole() instanceof RVampire) {
 						getGame().kill(choosen, Reason.CHASSEUR_DE_VAMPIRE);
 						player.sendMessage("§7§l" + choosen.getFullName() + "§6 est un §5§lVampire§6, à l'attaque.");
 						player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 va mourir");
@@ -76,7 +75,6 @@ public class RChasseurDeVampire extends Role{
 						player.sendMessage("§7§l" + choosen.getFullName() + "§6 n'est pas un §5§lVampire§6...");
 						player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 n'est pas un §5§lVampire");
 					}
-					
 					player.stopChoosing();
 					player.hideView();
 					callback.run();
@@ -84,13 +82,10 @@ public class RChasseurDeVampire extends Role{
 			}
 		});
 	}
-	
-	
+
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez regardé aucun rôle", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§cVous n'avez pas utilisé votre pouvoir cette nuit.");
 	}
 }

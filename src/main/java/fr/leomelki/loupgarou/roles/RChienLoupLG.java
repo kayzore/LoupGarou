@@ -10,7 +10,7 @@ public class RChienLoupLG extends Role{
 	public RChienLoupLG(LGGame game) {
 		super(game);
 	}
-	
+
 	@Override
 	public String getName(int amount) {
 		final String baseline = this.getName();
@@ -23,7 +23,7 @@ public class RChienLoupLG extends Role{
 		for(LGPlayer lgp : getPlayers())
 			if(lgp.getPlayer() != null && lgp.getPlayer().hasPotionEffect(PotionEffectType.INVISIBILITY))
 				return "§c§lChien-Loup";
-		return (getPlayers().size() > 0 ? "§a" : "§c")+"§lChien-Loup";
+		return (!getPlayers().isEmpty() ? "§a" : "§c")+"§lChien-Loup";
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class RChienLoupLG extends Role{
 	public int getTimeout() {
 		return -1;
 	}
-	
+
 	@Override
 	public void join(LGPlayer player, boolean sendMessage) {
 		super.join(player, sendMessage);

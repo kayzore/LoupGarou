@@ -20,6 +20,10 @@ import fr.leomelki.loupgarou.classes.LGPlayer;
 
 public class RChienLoup extends Role{
 	static ItemStack[] items = new ItemStack[9];
+	Runnable callback;
+	boolean already;
+	boolean inMenu;
+
 	static {
 		items[3] = new ItemStack(Material.GOLDEN_APPLE);
 		ItemMeta meta = items[3].getItemMeta();
@@ -87,15 +91,12 @@ public class RChienLoup extends Role{
 	public int getTimeout() {
 		return 15;
 	}
-	
+
 	@Override
 	public boolean hasPlayersLeft() {
 		return super.hasPlayersLeft() && !already;
 	}
-	
-	Runnable callback;
-	boolean already;
-	
+
 	public void openInventory(Player player) {
 		inMenu = true;
 		Inventory inventory = Bukkit.createInventory(null, 9, "§7Choisis ton camp.");
@@ -114,13 +115,10 @@ public class RChienLoup extends Role{
 	protected void onNightTurnTimeout(LGPlayer player) {
 		closeInventory(player.getPlayer());
 		player.hideView();
-		//player.sendTitle("§cVous n'infectez personne", "§4Vous avez mis trop de temps à vous décider...", 80);
 		player.sendActionBarMessage("§6Tu rejoins le §a§lVillage.");
 		player.sendMessage("§6Tu rejoins le §a§lVillage.");
 	}
 
-	boolean inMenu;
-	
 	private void closeInventory(Player p) {
 		inMenu = false;
 		p.closeInventory();
@@ -130,7 +128,7 @@ public class RChienLoup extends Role{
 		ItemStack item = e.getCurrentItem();
 		Player player = (Player)e.getWhoClicked();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-			
+
 		if(lgp.getRole() != this || item == null || item.getItemMeta() == null)return;
 
 		if(item.getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
@@ -146,19 +144,20 @@ public class RChienLoup extends Role{
 
 			lgp.sendActionBarMessage("§6Tu as changé de camp.");
 			lgp.sendMessage("§6Tu as changé de camp.");
-			
+
 			//On le fait aussi rejoindre le camp des loups pour le tour pendant la nuit.
 			RChienLoupLG lgChienLoup = null;
 			for(Role role : getGame().getRoles())
 				if(role instanceof RChienLoupLG)
 					lgChienLoup = (RChienLoupLG)role;
-			
-			if(lgChienLoup == null)
-				getGame().getRoles().add(lgChienLoup = new RChienLoupLG(getGame()));
-			
+
+			if(lgChienLoup == null) {
+        lgChienLoup = new RChienLoupLG(getGame());
+      }
+
 			lgChienLoup.join(lgp, false);
 			lgp.updateOwnSkin();
-			
+
 			lgp.hideView();
 			callback.run();
 		}
@@ -170,7 +169,7 @@ public class RChienLoup extends Role{
 			LGPlayer player = LGPlayer.thePlayer((Player)e.getPlayer());
 			if(player.getRole() == this && inMenu) {
 				new BukkitRunnable() {
-					
+
 					@Override
 					public void run() {
 						e.getPlayer().openInventory(e.getInventory());
@@ -179,5 +178,5 @@ public class RChienLoup extends Role{
 			}
 		}
 	}
-	
+
 }

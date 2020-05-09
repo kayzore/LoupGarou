@@ -28,6 +28,8 @@ import fr.leomelki.loupgarou.MainLg;
 import fr.leomelki.loupgarou.classes.chat.LGChat;
 import fr.leomelki.loupgarou.classes.chat.LGChat.LGChatCallback;
 import fr.leomelki.loupgarou.classes.chat.LGNoChat;
+import fr.leomelki.loupgarou.roles.RLoupGarouNoir;
+import fr.leomelki.loupgarou.roles.RVampire;
 import fr.leomelki.loupgarou.roles.Role;
 import fr.leomelki.loupgarou.roles.RoleType;
 import fr.leomelki.loupgarou.roles.RoleWinType;
@@ -41,18 +43,8 @@ import net.minecraft.server.v1_15_R1.PacketPlayOutRespawn;
 import net.minecraft.server.v1_15_R1.WorldType;
 
 public class LGPlayer {
-	private static HashMap<Player, LGPlayer> cachedPlayers = new HashMap<Player, LGPlayer>();
-	public static LGPlayer thePlayer(Player player) {
-		LGPlayer lgp = cachedPlayers.get(player);
-		if(lgp == null) {
-			lgp = new LGPlayer(player);
-			cachedPlayers.put(player, lgp);
-		}
-		return lgp;
-	}
-	public static LGPlayer removePlayer(Player player) {
-		return cachedPlayers.remove(player);
-	}
+	private static HashMap<Player, LGPlayer> cachedPlayers = new HashMap<>();
+
 	@Getter @Setter private int place;
 	@Getter private Player player;
 	@Getter @Setter private boolean dead;
@@ -63,21 +55,31 @@ public class LGPlayer {
 	@Getter @Setter private LGGame game;
 	@Getter @Setter private String latestObjective;
 	@Getter @Setter private String nick;
-	private String name;
+
+	@Getter boolean muted;
+  private boolean canSelectDead;
+  private String name;
 
 	public LGPlayer(Player player) {
 		this.player = player;
 	}
 	public LGPlayer(String name) {
 		this.name = name;
+  }
+
+  public static LGPlayer thePlayer(Player player) {
+    return cachedPlayers.computeIfAbsent(player, LGPlayer::new);
 	}
-	
+	public static LGPlayer removePlayer(Player player) {
+		return cachedPlayers.remove(player);
+	}
+
 	public void sendActionBarMessage(String msg) {
 		if(this.player != null) {
-			WrapperPlayServerChat chat = new WrapperPlayServerChat();
-			chat.setPosition((byte)2);
-			chat.setMessage(WrappedChatComponent.fromText(msg));
-			chat.sendPacket(getPlayer());
+			WrapperPlayServerChat serverChat = new WrapperPlayServerChat();
+			serverChat.setPosition((byte)2);
+			serverChat.setMessage(WrappedChatComponent.fromText(msg));
+			serverChat.sendPacket(getPlayer());
 		}
 	}
 	public void sendMessage(String msg) {
@@ -92,12 +94,12 @@ public class LGPlayer {
 			titlePacket.setStay(stay);
 			titlePacket.setFadeOut(10);
 			titlePacket.sendPacket(player);
-			
+
 			titlePacket = new WrapperPlayServerTitle();
 			titlePacket.setAction(TitleAction.TITLE);
 			titlePacket.setTitle(WrappedChatComponent.fromText(title));
 			titlePacket.sendPacket(player);
-			
+
 			titlePacket = new WrapperPlayServerTitle();
 			titlePacket.setAction(TitleAction.SUBTITLE);
 			titlePacket.setTitle(WrappedChatComponent.fromText(subTitle));
@@ -115,13 +117,18 @@ public class LGPlayer {
 	}
 
 	public String getName() {
-		return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
+    final String baselineName = player != null ? getPlayer().getName() : name;
+
+		return (this.nick != null) ? this.nick : baselineName;
 	}
 	public String getName(boolean real) { // si true, alors on renvoie le vrai pseudo minecraft et pas le nick
-		if (real)
-				return (player != null ? getPlayer().getName() : name);
-		else
-				return (this.nick != null ? this.nick : (player != null ? getPlayer().getName() : name));
+    final String baselineName = player != null ? getPlayer().getName() : name;
+
+    if (real) {
+      return baselineName;
+    }
+
+    return (this.nick != null) ? this.nick : baselineName;
 	}
 
 	public boolean join(LGGame game) {
@@ -140,14 +147,14 @@ public class LGPlayer {
 	}
 
 	public void choose(LGChooseCallback callback, LGPlayer... blacklisted) {
-		this.blacklistedChoice = blacklisted == null ? new ArrayList<LGPlayer>(0) : Arrays.asList(blacklisted);
+		this.blacklistedChoice = blacklisted == null ? new ArrayList<>(0) : Arrays.asList(blacklisted);
 		this.chooseCallback = callback;
 	}
 	public void stopChoosing() {
 		this.blacklistedChoice = null;
 		this.chooseCallback = null;
 	}
-	
+
 	public static interface LGChooseCallback{
 		public void callback(LGPlayer choosen);
 	}
@@ -165,7 +172,7 @@ public class LGPlayer {
 						team.setPrefix(WrappedChatComponent.fromText(""));
 						team.setPlayers(Arrays.asList(lgp.getName(true)));
 						team.sendPacket(getPlayer());
-						
+
 						WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo();
 						ArrayList<PlayerInfoData> infos = new ArrayList<>();
 						info.setAction(PlayerInfoAction.ADD_PLAYER);
@@ -178,7 +185,7 @@ public class LGPlayer {
 		getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
 		getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20, 2, false, false));
 	}
-	
+
 	//TODO Update prefix for only one guy
 	public void updatePrefix() {
 		if(getGame() != null && !isDead() && player != null) {
@@ -218,7 +225,7 @@ public class LGPlayer {
 		getPlayer().removePotionEffect(PotionEffectType.BLINDNESS);
 		getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 999999, 1, false, false));
 	}
-	
+
 	public void updateSkin() {
 		if(getGame() != null && player != null) {
 			for(LGPlayer lgp : getGame().getInGame()) {
@@ -252,7 +259,7 @@ public class LGPlayer {
 			float speed = getPlayer().getWalkSpeed();
 			getPlayer().setWalkSpeed(0.2f);
 			new BukkitRunnable() {
-				
+
 				@Override
 				public void run() {
 					getPlayer().updateInventory();
@@ -262,14 +269,12 @@ public class LGPlayer {
 			//Et c'est bon, le joueur se voit avec un nouveau skin avec quasiment aucun problème visible à l'écran :D
 		}
 	}
-	public boolean canSelectDead;
-	public LGPlayer getPlayerOnCursor(List<LGPlayer> list) {
+
+  public LGPlayer getPlayerOnCursor(List<LGPlayer> list) {
 		Location loc = getPlayer().getLocation();
-		if(loc.getPitch() > 60)
-			if(blacklistedChoice.contains(this))
-				return null;
-			else
-				return this;
+		if (loc.getPitch() > 60) {
+      return (blacklistedChoice.contains(this)) ? null : this;
+    }
 		for(int i = 0;i<50;i++) {
 			loc.add(loc.getDirection());
 			for(LGPlayer currentPlayer : list) {
@@ -279,27 +284,60 @@ public class LGPlayer {
 			}
 		}
 		return null;
+  }
+
+  public boolean isVampire() {
+    return this.getCache().getBoolean(RVampire.INFECTED_BY_VAMPIRE);
+  }
+
+  public boolean isInfected() {
+    return this.getCache().getBoolean(RLoupGarouNoir.INFECTED_BY_BLACK_WOLF);
+  }
+
+  public boolean hasProperty(String property) {
+    return this.getCache().getBoolean(property);
+  }
+
+  public void setProperty(String property) {
+    this.getCache().set(property, true);
+  }
+
+  public void removeProperty(String property) {
+    this.getCache().remove(property);
 	}
 	
 	public RoleType getRoleType() {
-		return this.getCache().getBoolean("vampire") ? RoleType.VAMPIRE : this.getCache().getBoolean("infected") ? RoleType.LOUP_GAROU : getRole().getType(this);
-	}
+    if (this.isVampire()) {
+      return RoleType.VAMPIRE;
+    }
+
+    if (this.isInfected()) {
+      return RoleType.LOUP_GAROU;
+    }
+
+    return getRole().getType(this);
+  }
+
 	public RoleWinType getRoleWinType() {
-		return this.getCache().getBoolean("vampire") ? RoleWinType.VAMPIRE : this.getCache().getBoolean("infected") ? RoleWinType.LOUP_GAROU : getRole().getWinType(this);
+    if (this.isVampire()) {
+      return RoleWinType.VAMPIRE;
+    }
+
+    if (this.isInfected()) {
+      return RoleWinType.LOUP_GAROU;
+    }
+
+    return getRole().getWinType(this);
 	}
-	
+
 	public boolean isRoleActive() {
-		return !this.getCache().getBoolean("vampire");
+		return !this.isVampire();
 	}
-	
-	@Getter
-	boolean muted;
-	
+
 	public void die() {
 		setMuted();
 	}
-	
-	
+
 	private void setMuted() {
 		if(player != null)
 			for(LGPlayer lgp : getGame().getInGame())
@@ -310,9 +348,9 @@ public class LGPlayer {
 	public void resetMuted() {
 		muted = false;
 	}
-	
+
 	@Getter private LGChat chat;
-	
+
 	public void joinChat(LGChat chat, LGChatCallback callback) {
 		joinChat(chat, callback, false);
 	}
@@ -325,26 +363,26 @@ public class LGPlayer {
 	public void joinChat(LGChat chat, LGChatCallback callback, boolean muted) {
 		if(this.chat != null && !muted)
 			this.chat.leave(this);
-		
+
 		if(!muted)
 			this.chat = chat;
-		
+
 		if(chat != null && player != null)
 			chat.join(this, callback == null ? chat.getDefaultCallback() : callback);
 	}
-	
-	
+
+
 	public void leaveChat() {
 		joinChat(new LGNoChat(), null);
 	}
-	
+
 	public void onChat(String message) {
 		if(chat != null) {
 			chat.sendMessage(this, message);
 		}
 	}
-	
-	
+
+
 	public void playAudio(LGSound sound, double volume) {
 		if(player != null)
 			getPlayer().playSound(getPlayer().getLocation(), sound.getSound(), (float)volume, 1);
@@ -353,7 +391,7 @@ public class LGPlayer {
 		if(player != null)
 			getPlayer().stopSound(sound.getSound());
 	}
-	
+
 	long lastChoose;
 	public void chooseAction() {
 		long now = System.currentTimeMillis();
@@ -363,9 +401,17 @@ public class LGPlayer {
 			lastChoose = now;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return super.toString()+" ("+getName()+")";
-	}
+  }
+
+  public void disableAbilityToSelectDead() {
+    this.canSelectDead = false;
+  }
+
+  public void enableAbilityToSelectDead() {
+    this.canSelectDead = true;
+  }
 }

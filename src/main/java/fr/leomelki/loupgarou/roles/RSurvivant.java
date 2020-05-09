@@ -26,6 +26,9 @@ import fr.leomelki.loupgarou.events.LGVampiredEvent;
 import fr.leomelki.loupgarou.utils.VariableCache;
 
 public class RSurvivant extends Role{
+	protected static final String AMOUNT_OF_PROTECTIONS_REMAINING = "survivor_amount_of_protections_remaining";
+	private static final String IMMUNITY_FROM_WOLVES = "immunity_from_wolves_survivor";
+
 	public RSurvivant(LGGame game) {
 		super(game);
 	}
@@ -77,7 +80,7 @@ public class RSurvivant extends Role{
 		Inventory inventory = Bukkit.createInventory(null, 9, "§7Veux-tu te protéger ?");
 		ItemStack[] items = new ItemStack[9];
 		VariableCache cache = LGPlayer.thePlayer(player).getCache();
-		if(cache.<Integer>get("survivant_left") > 0) {
+		if(cache.<Integer>get(RSurvivant.AMOUNT_OF_PROTECTIONS_REMAINING) > 0) {
 			items[3] = new ItemStack(Material.IRON_NUGGET);
 			ItemMeta meta = items[3].getItemMeta();
 			meta.setDisplayName("§7§lNe rien faire");
@@ -85,7 +88,7 @@ public class RSurvivant extends Role{
 			items[3].setItemMeta(meta);
 			items[5] = new ItemStack(Material.GOLD_NUGGET);
 			meta = items[5].getItemMeta();
-			meta.setDisplayName("§2§lSe protéger (§6§l"+cache.<Integer>get("survivant_left")+"§2§l restant)");
+			meta.setDisplayName("§2§lSe protéger (§6§l"+cache.<Integer>get(RSurvivant.AMOUNT_OF_PROTECTIONS_REMAINING)+"§2§l restant)");
 			meta.setLore(Arrays.asList(
 					"§8Tu ne pourras pas être tué par",
 					"§8  les §c§lLoups§8 cette nuit."));
@@ -104,7 +107,7 @@ public class RSurvivant extends Role{
 	@Override
 	public void join(LGPlayer player) {
 		super.join(player);
-		player.getCache().set("survivant_left", 2);
+		player.getCache().set(RSurvivant.AMOUNT_OF_PROTECTIONS_REMAINING, 2);
 	}
 
 	Runnable callback;
@@ -144,8 +147,8 @@ public class RSurvivant extends Role{
 			closeInventory(player);
 			lgp.sendActionBarMessage("§9§lTu as décidé de te protéger.");
 			lgp.sendMessage("§6Tu as décidé de te protéger.");
-			lgp.getCache().set("survivant_left", lgp.getCache().<Integer>get("survivant_left")-1);
-			lgp.getCache().set("survivant_protected", true);
+			lgp.getCache().set(RSurvivant.AMOUNT_OF_PROTECTIONS_REMAINING, lgp.getCache().<Integer>get(RSurvivant.AMOUNT_OF_PROTECTIONS_REMAINING)-1);
+			lgp.getCache().set(RSurvivant.IMMUNITY_FROM_WOLVES, true);
 			lgp.hideView();
 			callback.run();
 		}
@@ -153,13 +156,13 @@ public class RSurvivant extends Role{
 
 	@EventHandler
 	public void onPlayerKill(LGNightPlayerPreKilledEvent e) {
-		if(e.getGame() == getGame() && (e.getReason() == Reason.LOUP_GAROU || e.getReason() == Reason.LOUP_BLANC || e.getReason() == Reason.GM_LOUP_GAROU || e.getReason() == Reason.ASSASSIN) && e.getKilled().getCache().getBoolean("survivant_protected") && e.getKilled().isRoleActive()) {
+		if(e.getGame() == getGame() && (e.getReason() == Reason.LOUP_GAROU || e.getReason() == Reason.LOUP_BLANC || e.getReason() == Reason.GM_LOUP_GAROU || e.getReason() == Reason.ASSASSIN) && e.getKilled().getCache().getBoolean(RSurvivant.IMMUNITY_FROM_WOLVES) && e.getKilled().isRoleActive()) {
 			e.setReason(Reason.DONT_DIE);
 		}
 	}
 	@EventHandler
 	public void onVampired(LGVampiredEvent e) {
-		if(e.getGame() == getGame() && e.getPlayer().getCache().getBoolean("survivant_protected"))
+		if(e.getGame() == getGame() && e.getPlayer().getCache().getBoolean(RSurvivant.IMMUNITY_FROM_WOLVES))
 			e.setProtect(true);
 	}
 	@EventHandler
@@ -167,7 +170,7 @@ public class RSurvivant extends Role{
 		if(e.getGame() == getGame())
 			for(LGPlayer lgp : getGame().getInGame())
 				if(lgp.isRoleActive())
-					lgp.getCache().remove("survivant_protected");
+					lgp.getCache().remove(RSurvivant.IMMUNITY_FROM_WOLVES);
 	}
 	
 	@EventHandler
@@ -186,13 +189,9 @@ public class RSurvivant extends Role{
 		}
 	}
 	
-	
-	
-	
-	
 	@EventHandler
 	public void onWin(LGGameEndEvent e) {
-		if(e.getGame() == getGame() && getPlayers().size() > 0 && e.getWinType() != LGWinType.ANGE) {
+		if(e.getGame() == getGame() && !getPlayers().isEmpty() && e.getWinType() != LGWinType.ANGE) {
 			for(LGPlayer lgp : getPlayers())
 				e.getWinners().add(lgp);
 			new BukkitRunnable() {

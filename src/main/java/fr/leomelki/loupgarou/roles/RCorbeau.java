@@ -11,6 +11,8 @@ import fr.leomelki.loupgarou.events.LGDayEndEvent;
 import fr.leomelki.loupgarou.events.LGVoteEvent;
 
 public class RCorbeau extends Role{
+	private static final String CHOSEN_BY_RAVEN = "chosen_by_raven";
+
 	public RCorbeau(LGGame game) {
 		super(game);
 	}
@@ -65,7 +67,7 @@ public class RCorbeau extends Role{
 			@Override
 			public void callback(LGPlayer choosen) {
 				if(choosen != null && choosen != player) {
-					choosen.getCache().set("corbeau_selected", true);
+					choosen.setProperty(RCorbeau.CHOSEN_BY_RAVEN);
 					player.sendActionBarMessage("§e§l" + choosen.getFullName() + "§6 aura deux votes contre lui");
 					player.sendMessage("§6Tu nuis à la réputation de §7§l" + choosen.getFullName() + "§6.");
 					player.stopChoosing();
@@ -80,15 +82,15 @@ public class RCorbeau extends Role{
 	public void onNightStart(LGDayEndEvent e) {
 		if(e.getGame() == getGame())
 			for(LGPlayer lgp : getGame().getAlive())
-				lgp.getCache().remove("corbeau_selected");
+				lgp.removeProperty(RCorbeau.CHOSEN_BY_RAVEN);
 	}
 	
 	@EventHandler
 	public void onVoteStart(LGVoteEvent e) {
 		if(e.getGame() == getGame())
 			for(LGPlayer lgp : getGame().getAlive())
-				if(lgp.getCache().getBoolean("corbeau_selected")) {
-					lgp.getCache().remove("corbeau_selected");
+				if(lgp.hasProperty(RCorbeau.CHOSEN_BY_RAVEN)) {
+					lgp.removeProperty(RCorbeau.CHOSEN_BY_RAVEN);
 					LGPlayer lg = lgp;
 					new BukkitRunnable() {
 						
@@ -107,7 +109,5 @@ public class RCorbeau extends Role{
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez regardé aucun rôle", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§cVous n'avez pas utilisé votre pouvoir cette nuit.");
 	}
 }

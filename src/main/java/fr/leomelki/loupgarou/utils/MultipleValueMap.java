@@ -11,16 +11,14 @@ import lombok.Getter;
 public class MultipleValueMap<K, V> {
 	private HashMap<K, List<V>> map = new HashMap<>();
 	public void put(K key, V value) {
-		List<V> list = map.get(key);
-		if(list == null)
-			map.put(key, list = new ArrayList<>());
+		final List<V> list = map.computeIfAbsent(key, e -> new ArrayList<>());
 		list.add(value);
 	}
 	public V remove(K key, V value) {
 		List<V> list = map.get(key);
 		if(list != null) {
 			boolean removed = list.remove(value);
-			if(list.size() == 0)
+			if(list.isEmpty())
 				map.remove(key);
 			if(removed)
 				return value;
@@ -42,7 +40,7 @@ public class MultipleValueMap<K, V> {
 		return map.containsKey(key) ? map.get(key).get(0) : null;
 	}
 	public List<Entry<K, V>> entrySet(){
-		ArrayList<Entry<K, V>> toReturn = new ArrayList<Entry<K,V>>();
+		ArrayList<Entry<K, V>> toReturn = new ArrayList<>();
 		for(Entry<K, List<V>> entry : map.entrySet())
 			for(V v : entry.getValue())
 				toReturn.add(new MultipleValueKeyEntry<K, V>(entry.getKey(), v));
@@ -60,7 +58,8 @@ public class MultipleValueMap<K, V> {
 		private V value;
 		@Override
 		public V setValue(V value) {
-			return this.value = value;
+			this.value = value;
+			return this.value;
 		}
 	}
 }

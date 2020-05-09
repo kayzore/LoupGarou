@@ -5,6 +5,8 @@ import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.classes.LGPlayer.LGChooseCallback;
 
 public class RDetective extends Role{
+	private static final String DETECTIVE_FIRST = "detective_first";
+
 	public RDetective(LGGame game) {
 		super(game);
 	}
@@ -63,8 +65,8 @@ public class RDetective extends Role{
 						player.sendMessage("§cVous ne pouvez pas vous sélectionner !");
 						return;
 					}
-					if(player.getCache().has("detective_first")) {
-						LGPlayer first = player.getCache().remove("detective_first");
+					if(player.getCache().has(RDetective.DETECTIVE_FIRST)) {
+						LGPlayer first = player.getCache().remove(RDetective.DETECTIVE_FIRST);
 						if(first == choosen) {
 							player.sendMessage("§cVous ne pouvez pas comparer §7§l" + first.getFullName() + "§c avec lui même !");
 						} else {
@@ -78,7 +80,7 @@ public class RDetective extends Role{
 							callback.run();
 						}
 					} else {
-						player.getCache().set("detective_first", choosen);
+						player.getCache().set(RDetective.DETECTIVE_FIRST, choosen);
 						player.sendMessage("§9Choisis un joueur avec qui tu souhaites comparer le rôle de §7§l" + choosen.getFullName());
 					}
 				}
@@ -88,12 +90,8 @@ public class RDetective extends Role{
 
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
-		player.getCache().remove("detective_first");
+		player.getCache().remove(RDetective.DETECTIVE_FIRST);
 		player.stopChoosing();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez mis personne en couple", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§9Tu n'as pas créé de couple.");
 	}
-	
-	
 }

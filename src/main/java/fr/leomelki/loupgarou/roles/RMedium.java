@@ -65,7 +65,6 @@ public class RMedium extends Role{
 			}
 	}
 	
-	
 	private void joinChat(LGPlayer lgp) {
 		lgp.joinChat(getGame().getSpectatorChat(), new LGChat.LGChatCallback() {
 
@@ -83,13 +82,12 @@ public class RMedium extends Role{
 	}
 	@EventHandler
 	public void onRoleTurn(LGRoleTurnEndEvent e) {
-		if(e.getGame() == getGame())
-			if(e.getPreviousRole() instanceof RLoupGarou)
-				for(LGPlayer lgp : getPlayers())
-					if(lgp.getChat() != getGame().getSpectatorChat() && lgp.isRoleActive()) {
-						lgp.sendMessage("§6§oTu peux de nouveau parler aux morts...");
-						joinChat(lgp);
-					}
+		if(e.getGame() == getGame() && e.getPreviousRole() instanceof RLoupGarou)
+			for(LGPlayer lgp : getPlayers())
+				if(lgp.getChat() != getGame().getSpectatorChat() && lgp.isRoleActive()) {
+					lgp.sendMessage("§6§oTu peux de nouveau parler aux morts...");
+					joinChat(lgp);
+				}
 	}
 	
 	@EventHandler

@@ -25,6 +25,9 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
 public class RPirate extends Role{
+	protected static final String PIRATE_HAS_HOSTAGE = "pirate_has_hostage";
+	protected static final String IS_HOSTAGE_OF_PIRATE = "is_hostage_of_pirate";
+
 	static ItemStack[] items = new ItemStack[9];
 	static {
 		items[3] = new ItemStack(Material.IRON_NUGGET);
@@ -117,8 +120,7 @@ public class RPirate extends Role{
 		closeInventory(player.getPlayer());
 		player.getPlayer().updateInventory();
 		player.hideView();
-		//player.sendTitle("§cVous n'infectez personne", "§4Vous avez mis trop de temps à vous décider...", 80);
-		player.sendMessage("§6Tu n'as rien fait cette nuit.");
+		player.sendMessage(Role.PERFORMED_NO_ACTION);
 	}
 
 	boolean inMenu = false;
@@ -138,7 +140,7 @@ public class RPirate extends Role{
 		if(item.getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
 			e.setCancelled(true);
 			closeInventory(player);
-			lgp.sendMessage("§6Tu n'as rien fait cette nuit.");
+			lgp.sendMessage(Role.PERFORMED_NO_ACTION);
 			lgp.hideView();
 			callback.run();
 		}else if(item.getItemMeta().getDisplayName().equals(items[5].getItemMeta().getDisplayName())) {
@@ -161,8 +163,8 @@ public class RPirate extends Role{
 						lgp.stopChoosing();
 						lgp.sendMessage("§6Tu as pris §7§l" + choosen.getFullName() + "§6 en otage.");
 						lgp.sendActionBarMessage("§7§l" + choosen.getFullName() + "§6 est ton otage");
-						lgp.getCache().set("pirate_otage", choosen);
-						choosen.getCache().set("pirate_otage_d", lgp);
+						lgp.getCache().set(RPirate.IS_HOSTAGE_OF_PIRATE, choosen);
+						choosen.getCache().set(RPirate.PIRATE_HAS_HOSTAGE, lgp);
 						getPlayers().remove(lgp);//Pour éviter qu'il puisse prendre plusieurs otages
 						choosen.sendMessage("§7§l" + lgp.getFullName() + "§6 t'a pris en otage, il est " + getName() + "§6.");
 						lgp.hideView();
@@ -174,31 +176,28 @@ public class RPirate extends Role{
 	}
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerKilled(LGPlayerKilledEvent e) {
-		if(e.getGame() == getGame() && e.getReason() == Reason.VOTE)
-			if(e.getKilled().getCache().has("pirate_otage") && e.getKilled().isRoleActive()) {
-				LGPlayer otage = e.getKilled().getCache().remove("pirate_otage");
-				if(!otage.isDead() && otage.getCache().get("pirate_otage_d") == e.getKilled()) {
-					getGame().broadcastMessage("§7§l" + e.getKilled().getFullName() + "§6 est " + getName() + "§6, c'est son otage qui va mourir.");
-					e.setKilled(otage);
-					e.setReason(Reason.PIRATE);
-				}
+		if(e.getGame() == getGame() && e.getReason() == Reason.VOTE && e.getKilled().getCache().has(RPirate.IS_HOSTAGE_OF_PIRATE) && e.getKilled().isRoleActive()) {
+			LGPlayer otage = e.getKilled().getCache().remove(RPirate.IS_HOSTAGE_OF_PIRATE);
+			if(!otage.isDead() && otage.getCache().get(RPirate.PIRATE_HAS_HOSTAGE) == e.getKilled()) {
+				getGame().broadcastMessage("§7§l" + e.getKilled().getFullName() + "§6 est " + getName() + "§6, c'est son otage qui va mourir.");
+				e.setKilled(otage);
+				e.setReason(Reason.PIRATE);
 			}
+		}
 	}
 	
 	@EventHandler
 	public void onClick(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-		if(lgp.getRole() == this) {
-			if(e.getItem() != null && e.getItem().hasItemMeta() && e.getItem().getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
-				e.setCancelled(true);
-				player.getInventory().setItem(8, null);
-				player.updateInventory();
-				lgp.stopChoosing();
-				lgp.sendMessage("§6Tu n'as rien fait cette nuit.");
-				lgp.hideView();
-				callback.run();
-			}
+		if(lgp.getRole() == this && e.getItem() != null && e.getItem().hasItemMeta() && e.getItem().getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
+			e.setCancelled(true);
+			player.getInventory().setItem(8, null);
+			player.updateInventory();
+			lgp.stopChoosing();
+			lgp.sendMessage(Role.PERFORMED_NO_ACTION);
+			lgp.hideView();
+			callback.run();
 		}
 	}
 	@EventHandler

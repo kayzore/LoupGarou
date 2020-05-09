@@ -15,6 +15,9 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
 public class RBouffon extends Role{
+	private static final String VICTORY_AS_BUFFOON = "buffoon_victory";
+	private final ArrayList<LGPlayer> needToPlay = new ArrayList<>();
+
 	public RBouffon(LGGame game) {
 		super(game);
 	}
@@ -61,51 +64,49 @@ public class RBouffon extends Role{
 		return 15;
 	}
 
+	@Override
 	public void onNightTurn(Runnable callback) {
-		 ArrayList<LGPlayer> players = (ArrayList<LGPlayer>) needToPlay.clone();
-		 new Runnable() {
-			
+		final ArrayList<LGPlayer> players = new ArrayList<>(needToPlay);
+		new Runnable() {
+
 			@Override
 			public void run() {
 				getGame().cancelWait();
-				if(players.size() == 0) {
+				if (players.isEmpty()) {
 					onTurnFinish(callback);
 					return;
 				}
 				LGPlayer player = players.remove(0);
-				getGame().wait(getTimeout(), ()->{RBouffon.this.onNightTurnTimeout(player);this.run();}, (currentPlayer, secondsLeft)->{
-					return currentPlayer == player ? "§9§lC'est à ton tour !" : "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)";
-				});
+				getGame().wait(getTimeout(), ()->{RBouffon.this.onNightTurnTimeout(player);this.run();}, (currentPlayer, secondsLeft) -> currentPlayer == player ? "§9§lC'est à ton tour !" : "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)");
 				player.sendMessage("§6"+getTask());
-				//	player.sendTitle("§6C'est à vous de jouer", "§a"+getTask(), 100);
 				onNightTurn(player, this);
 			}
 		}.run();
 	}
+
+	@Override
 	public boolean hasPlayersLeft() {
-		return needToPlay.size() > 0;
+		return !needToPlay.isEmpty();
 	}
-	
-	
-	
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		needToPlay.remove(player);
 		player.showView();
-		player.getCache().set("bouffon_win", true);
+		player.setProperty(RBouffon.VICTORY_AS_BUFFOON);
 		List<LGPlayer> choosable = getGame().getVote().getVotes(player);
 		StringJoiner sj = new StringJoiner("§6§o, §6§o§l");
 		for(LGPlayer lgp : choosable)
 			if(lgp.getPlayer() != null && lgp != player)
 				sj.add(lgp.getName());
-		
+
 		String toPut = sj.toString();
 		if(toPut.length() == 0)
 			player.sendMessage("§6§o§lPersonne§6§o n'a voté pour toi.");
 		else
 			player.sendMessage("§6§o§l"+toPut+"§6§o "+(toPut.contains(",") ? "ont" : "a")+" voté pour toi.");
-				
-		player.choose((choosen)->{
+
+		player.choose(choosen -> {
 			if(choosen != null) {
 				if(!choosable.contains(choosen))
 					player.sendMessage("§7§l" + choosen.getFullName() + "§4 n'a pas voté pour vous.");
@@ -121,14 +122,12 @@ public class RBouffon extends Role{
 			}
 		}, player);
 	}
-	
+
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
 	}
-	
-	ArrayList<LGPlayer> needToPlay = new ArrayList<LGPlayer>();
-	
+
 	@EventHandler
 	public void onPlayerKill(LGPlayerKilledEvent e) {
 		if(e.getKilled().getRole() == this && e.getReason() == Reason.VOTE && e.getKilled().isRoleActive()) {
@@ -137,15 +136,15 @@ public class RBouffon extends Role{
 			e.getKilled().sendMessage("§6Tu as rempli ta mission, l'heure de la vengeance a sonné.");
 		}
 	}
-	
+
 	@EventHandler
 	public void onWin(LGGameEndEvent e) {
 		if(e.getGame() == getGame())
 			for(LGPlayer lgp : getGame().getInGame())
-				if(lgp.getRole() == this && lgp.getCache().getBoolean("bouffon_win")) {
+				if(lgp.getRole() == this && lgp.hasProperty(RBouffon.VICTORY_AS_BUFFOON)) {
 					e.getWinners().add(lgp);
 					new BukkitRunnable() {
-						
+
 						@Override
 						public void run() {
 							getGame().broadcastMessage("§6§oLe "+getName()+"§6§o a rempli son objectif.");

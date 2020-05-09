@@ -9,6 +9,8 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
 public class RGrandMechantLoup extends Role{
+	boolean lgDied;
+	Runnable callback;
 
 	public RGrandMechantLoup(LGGame game) {
 		super(game);
@@ -66,8 +68,6 @@ public class RGrandMechantLoup extends Role{
 	public boolean hasPlayersLeft() {
 		return super.hasPlayersLeft() && !lgDied;
 	}
-	boolean lgDied;
-	Runnable callback;
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		this.callback = callback;
@@ -90,12 +90,9 @@ public class RGrandMechantLoup extends Role{
 	
 	@EventHandler
 	public void onPlayerDie(LGPlayerKilledEvent e) {//Quand un Loup-Garou meurt, les grands méchants loups ne peuvent plus jouer.
-		if(e.getGame() == getGame())
-			if(e.getKilled().getRoleType() == RoleType.LOUP_GAROU)
-				lgDied = true;
+		if(e.getGame() == getGame() &&e.getKilled().getRoleType() == RoleType.LOUP_GAROU)
+			lgDied = true;
 	}
-	
-	
 	
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
@@ -111,5 +108,4 @@ public class RGrandMechantLoup extends Role{
 			if(role instanceof RLoupGarou)
 				role.join(player, false);
 	}
-	
 }

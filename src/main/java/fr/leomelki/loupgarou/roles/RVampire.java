@@ -24,6 +24,10 @@ import fr.leomelki.loupgarou.events.LGVampiredEvent;
 import lombok.Getter;
 
 public class RVampire extends Role{
+	public static final String INFECTED_BY_VAMPIRE = "infected_by_vampire";
+	protected static final String INFECTED_BY_VAMPIRE_THIS_NIGHT = "infected_by_vampire_this_night";
+	int nextCanInfect = 0;
+	LGVote vote;
 
 	public RVampire(LGGame game) {
 		super(game);
@@ -82,12 +86,9 @@ public class RVampire extends Role{
 	public boolean hasPlayersLeft() {
 		return nextCanInfect < getGame().getNight() && super.hasPlayersLeft();
 	}
+
+	@Getter private LGChat chat = new LGChat((sender, message) -> "§5" + sender.getFullName() + " §6» §f" + message);
 	
-	@Getter private LGChat chat = new LGChat((sender, message) -> {
-		return "§5" + sender.getFullName() + " §6» §f" + message;
-	});
-	int nextCanInfect = 0;
-	LGVote vote;
 	@Override
 	public void join(LGPlayer player, boolean sendMessage) {
 		super.join(player, sendMessage);
@@ -95,16 +96,24 @@ public class RVampire extends Role{
 			p.updatePrefix();
 	}
 
+	@Override
 	public void onNightTurn(Runnable callback) {
 		vote = new LGVote(getTimeout(), getTimeout()/3, getGame(), false, false, (player, secondsLeft)-> {
-			return !getPlayers().contains(player) ? "§6C'est au tour " + getFriendlyName() + " §6(§e" + secondsLeft + " s§6)" : player.getCache().has("vote") ? "§l§9Vous votez pour §c§l" + player.getCache().<LGPlayer>get("vote").getFullName() : "§6Il vous reste §e" + secondsLeft + " seconde"+(secondsLeft > 1 ? "s" : "") + "§6 pour voter";
+			if (!getPlayers().contains(player)) {
+				return "§6C'est au tour " + getFriendlyName() + " §6(§e" + secondsLeft + " s§6)";
+			}
+
+			if (player.getCache().has("vote")) {
+				return "§l§9Vous votez pour §c§l" + player.getCache().<LGPlayer>get("vote").getFullName();
+			}
+
+			return  "§6Il vous reste §e" + secondsLeft + " seconde"+(secondsLeft > 1 ? "s" : "") + "§6 pour voter";
 		});
 		for(LGPlayer lgp : getGame().getAlive())
 			if(lgp.getRoleType() == RoleType.VAMPIRE)
 				lgp.showView();
 		for(LGPlayer player : getPlayers()) {
 			player.sendMessage("§6"+getTask());
-		//	player.sendTitle("§6C'est à vous de jouer", "§a"+getTask(), 100);
 			player.joinChat(chat);
 		}
 		vote.start(getPlayers(), getPlayers(), ()->{
@@ -120,45 +129,44 @@ public class RVampire extends Role{
 			player.leaveChat();
 
 		LGPlayer choosen = vote.getChoosen();
-		if(choosen == null) {
-			if(vote.getVotes().size() > 0) {
-				int max = 0;
-				boolean equal = false;
-				for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
-					if(entry.getValue().size() > max) {
-						equal = false;
-						max = entry.getValue().size();
-						choosen = entry.getKey();
-					}else if(entry.getValue().size() == max)
-						equal = true;
-				if(equal) {
-					choosen = null;
-					ArrayList<LGPlayer> choosable = new ArrayList<LGPlayer>();
-					for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
-						if(entry.getValue().size() == max && entry.getKey().getRoleType() != RoleType.VAMPIRE)
-							choosable.add(entry.getKey());
-					if(choosable.size() > 0)
-						choosen = choosable.get(getGame().getRandom().nextInt(choosable.size()));
+		if(choosen == null && !vote.getVotes().isEmpty()) {
+			int max = 0;
+			boolean equal = false;
+			for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
+				if(entry.getValue().size() > max) {
+					equal = false;
+					max = entry.getValue().size();
+					choosen = entry.getKey();
+				} else if(entry.getValue().size() == max) {
+					equal = true;
 				}
+			if(equal) {
+				choosen = null;
+				ArrayList<LGPlayer> choosable = new ArrayList<>();
+				for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
+					if(entry.getValue().size() == max && entry.getKey().getRoleType() != RoleType.VAMPIRE)
+						choosable.add(entry.getKey());
+				if(!choosable.isEmpty())
+					choosen = choosable.get(getGame().getRandom().nextInt(choosable.size()));
 			}
 		}
 		if(choosen != null) {
 			if(choosen.getRoleType() == RoleType.LOUP_GAROU || choosen.getRoleType() == RoleType.VAMPIRE) {
 				for(LGPlayer player : getPlayers())
-					player.sendMessage("§cVotre cible est immunisée.");
+					player.sendMessage(Role.IS_IMMUNE_FROM_WOLVES);
 				return;
 			}else if(choosen.getRole() instanceof RChasseurDeVampire) {
 				for(LGPlayer player : getPlayers())
-					player.sendMessage("§cVotre cible est immunisée.");
+					player.sendMessage(Role.IS_IMMUNE_FROM_WOLVES);
 				getGame().kill(getPlayers().get(getPlayers().size()-1), Reason.CHASSEUR_DE_VAMPIRE);
 				return;
 			}
-			
+
 			LGVampiredEvent event = new LGVampiredEvent(getGame(), choosen);
 			Bukkit.getPluginManager().callEvent(event);
 			if(event.isImmuned()) {
 				for(LGPlayer player : getPlayers())
-					player.sendMessage("§cVotre cible est immunisée.");
+					player.sendMessage(Role.IS_IMMUNE_FROM_WOLVES);
 				return;
 			}else if(event.isProtect()) {
 				for(LGPlayer player : getPlayers())
@@ -169,42 +177,35 @@ public class RVampire extends Role{
 				player.sendMessage("§7§l" + choosen.getFullName() + " s'est transformé en §5§lVampire§6.");
 			choosen.sendMessage("§6Tu as été infecté par les §5§lVampires §6pendant la nuit. Tu as perdu tes pouvoirs.");
 			choosen.sendMessage("§6§oTu gagnes désormais avec les §5§l§oVampires§6§o.");
-			choosen.getCache().set("vampire", true);
-			choosen.getCache().set("just_vampire", true);
+			choosen.getCache().set(RVampire.INFECTED_BY_VAMPIRE, true);
+			choosen.getCache().set(RVampire.INFECTED_BY_VAMPIRE_THIS_NIGHT, true);
 			nextCanInfect = getGame().getNight()+1;
 			join(choosen, false);
 			LGCustomItems.updateItem(choosen);
-		}else
+		}else {
 			for(LGPlayer player : getPlayers())
 				player.sendMessage("§6Personne n'a été infecté.");
+		}
 	}
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onDayStart(LGNightEndEvent e) {
 		if(e.getGame() == getGame())
 			for(LGPlayer player : getGame().getAlive()) {
-				if(player.getCache().getBoolean("just_vampire")) {
-					player.getCache().remove("just_vampire");
+				if(player.getCache().getBoolean(RVampire.INFECTED_BY_VAMPIRE_THIS_NIGHT)) {
+					player.getCache().remove(RVampire.INFECTED_BY_VAMPIRE_THIS_NIGHT);
 					for(LGPlayer lgp : getGame().getInGame()) {
 						if(lgp.getRoleType() == RoleType.VAMPIRE)
 							lgp.sendMessage("§7§l" + player.getFullName() + "§6 s'est transformé en §5§lVampire§6...");
 						else
 							lgp.sendMessage("§6Quelqu'un s'est transformé en §5§lVampire§6...");
 					}
-					
+
 					if(getGame().checkEndGame())
 						e.setCancelled(true);
 				}
 			}
 	}
-	
-/*	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onSkinChange(LGSkinLoadEvent e) {
-		if(e.getGame() == getGame())
-			if(getPlayers().contains(e.getPlayer()) && getPlayers().contains(e.getTo()) && showSkins) {
-				e.getProfile().getProperties().removeAll("textures");
-				e.getProfile().getProperties().put("textures", LGCustomSkin.WEREWOLF.getProperty());
-			}
-	}*/
+
 	@EventHandler
 	public void onGameEnd(LGGameEndEvent e) {
 		if(e.getGame() == getGame() && e.getWinType() == LGWinType.VAMPIRE)
@@ -212,19 +213,16 @@ public class RVampire extends Role{
 				if(lgp.getRoleWinType() == RoleWinType.VAMPIRE)//Changed to wintype
 					e.getWinners().add(lgp);
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onUpdatePrefix (LGUpdatePrefixEvent e) {
-		if(e.getGame() == getGame())
-			if(getPlayers().contains(e.getTo()) && getPlayers().contains(e.getPlayer()))
-				e.setPrefix(e.getPrefix()+"§5");
+		if(e.getGame() == getGame() && getPlayers().contains(e.getTo()) && getPlayers().contains(e.getPlayer()))
+			e.setPrefix(e.getPrefix()+"§5");
 	}
-	
+
 	@EventHandler
 	public void onCustomItemChange(LGCustomItemChangeEvent e) {
-		if(e.getGame() == getGame())
-			if(e.getPlayer().getCache().getBoolean("vampire"))
-				e.getConstraints().add(LGCustomItemsConstraints.VAMPIRE_INFECTE.getName());
+		if(e.getGame() == getGame() && e.getPlayer().getCache().getBoolean(RVampire.INFECTED_BY_VAMPIRE))
+			e.getConstraints().add(LGCustomItemsConstraints.VAMPIRE_INFECTE.getName());
 	}
-	
 }

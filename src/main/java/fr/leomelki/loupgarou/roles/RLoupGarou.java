@@ -76,9 +76,7 @@ public class RLoupGarou extends Role{
 		return 30;
 	}
 	
-	@Getter private LGChat chat = new LGChat((sender, message) -> {
-		return "§c" + sender.getFullName() + " §6» §f" + message;
-	});
+	@Getter private LGChat chat = new LGChat((sender, message) ->  "§c" + sender.getFullName() + " §6» §f" + message);
 
 	boolean showSkins = false;
 	LGVote vote;
@@ -90,16 +88,24 @@ public class RLoupGarou extends Role{
 			p.updatePrefix();
 	}
 
+	@Override
 	public void onNightTurn(Runnable callback) {
 		vote = new LGVote(getTimeout(), getTimeout()/3, getGame(), false, false, (player, secondsLeft)-> {
-			return !getPlayers().contains(player) ? "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)" : player.getCache().has("vote") ? "§l§9Vous votez contre §c§l"+player.getCache().<LGPlayer>get("vote").getFullName() : "§6Il vous reste §e"+secondsLeft+" seconde"+(secondsLeft > 1 ? "s" : "")+"§6 pour voter";
+			if (!getPlayers().contains(player)) {
+				return "§6C'est au tour "+getFriendlyName()+" §6(§e"+secondsLeft+" s§6)";
+			}
+
+			if (player.getCache().has("vote")) {
+				return "§l§9Vous votez contre §c§l"+player.getCache().<LGPlayer>get("vote").getFullName();
+			}
+			
+			return "§6Il vous reste §e"+secondsLeft+" seconde"+(secondsLeft > 1 ? "s" : "")+"§6 pour voter";
 		});
 		for(LGPlayer lgp : getGame().getAlive())
 			if(lgp.getRoleType() == RoleType.LOUP_GAROU)
 				lgp.showView();
 		for(LGPlayer player : getPlayers()) {
 			player.sendMessage("§6"+getTask());
-		//	player.sendTitle("§6C'est à vous de jouer", "§a"+getTask(), 100);
 			player.joinChat(chat);
 		}
 		vote.start(getPlayers(), getPlayers(), ()->{
@@ -116,35 +122,35 @@ public class RLoupGarou extends Role{
 		}
 
 		LGPlayer choosen = vote.getChoosen();
-		if(choosen == null) {
-			if(vote.getVotes().size() > 0) {
-				int max = 0;
-				boolean equal = false;
-				for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
-					if(entry.getValue().size() > max) {
-						equal = false;
-						max = entry.getValue().size();
-						choosen = entry.getKey();
-					}else if(entry.getValue().size() == max)
-						equal = true;
-				if(equal) {
-					choosen = null;
-					ArrayList<LGPlayer> choosable = new ArrayList<LGPlayer>();
-					for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
-						if(entry.getValue().size() == max && entry.getKey().getRoleType() != RoleType.LOUP_GAROU)
-							choosable.add(entry.getKey());
-					if(choosable.size() > 0)
-						choosen = choosable.get(getGame().getRandom().nextInt(choosable.size()));
+		if(choosen == null && vote.getVotes().size() > 0) {
+			int max = 0;
+			boolean equal = false;
+			for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
+				if(entry.getValue().size() > max) {
+					equal = false;
+					max = entry.getValue().size();
+					choosen = entry.getKey();
+				}else if(entry.getValue().size() == max) {
+					equal = true;
 				}
+			if(equal) {
+				choosen = null;
+				ArrayList<LGPlayer> choosable = new ArrayList<>();
+				for(Entry<LGPlayer, List<LGPlayer>> entry : vote.getVotes().entrySet())
+					if(entry.getValue().size() == max && entry.getKey().getRoleType() != RoleType.LOUP_GAROU)
+						choosable.add(entry.getKey());
+				if(!choosable.isEmpty())
+					choosen = choosable.get(getGame().getRandom().nextInt(choosable.size()));
 			}
 		}
 		if(choosen != null) {
 			getGame().kill(choosen, Reason.LOUP_GAROU);
 			for(LGPlayer player : getPlayers())
 				player.sendMessage("§6Les §c§lLoups§6 ont décidé de tuer §7§l" + choosen.getFullName() + "§6.");
-		}else
+		} else {
 			for(LGPlayer player : getPlayers())
 				player.sendMessage("§6Personne n'a été désigné pour mourir.");
+		}
 	}
 	
 	@EventHandler
@@ -161,11 +167,10 @@ public class RLoupGarou extends Role{
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onSkinChange(LGSkinLoadEvent e) {
-		if(e.getGame() == getGame())
-			if(getPlayers().contains(e.getPlayer()) && getPlayers().contains(e.getTo()) && showSkins) {
-				e.getProfile().getProperties().removeAll("textures");
-				e.getProfile().getProperties().put("textures", LGCustomSkin.WEREWOLF.getProperty());
-			}
+		if(e.getGame() == getGame() && getPlayers().contains(e.getPlayer()) && getPlayers().contains(e.getTo()) && showSkins) {
+			e.getProfile().getProperties().removeAll("textures");
+			e.getProfile().getProperties().put("textures", LGCustomSkin.WEREWOLF.getProperty());
+		}
 	}
 	@EventHandler
 	public void onGameEnd(LGGameEndEvent e) {
@@ -177,8 +182,7 @@ public class RLoupGarou extends Role{
 	
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onUpdatePrefix (LGUpdatePrefixEvent e) {
-		if(e.getGame() == getGame())
-			if(getPlayers().contains(e.getTo()) && getPlayers().contains(e.getPlayer()))
+		if(e.getGame() == getGame() && getPlayers().contains(e.getTo()) && getPlayers().contains(e.getPlayer()))
 				e.setPrefix(e.getPrefix()+"§c");
 	}
 	

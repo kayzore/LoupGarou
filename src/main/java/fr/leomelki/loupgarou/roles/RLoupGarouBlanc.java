@@ -20,6 +20,8 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
 public class RLoupGarouBlanc extends Role{
 	private static ItemStack skip;
+	RLoupGarou wolfRole;
+	
 	static {
 		skip = new ItemStack(Material.IRON_NUGGET);
 		ItemMeta meta = skip.getItemMeta();
@@ -88,14 +90,14 @@ public class RLoupGarouBlanc extends Role{
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		this.callback = callback;
-		RLoupGarou lg_ = null;
+		RLoupGarou wolves = null;
 		for(Role role : getGame().getRoles())
 			if(role instanceof RLoupGarou) {
-				lg_ = (RLoupGarou)role;
+				wolves = (RLoupGarou)role;
 				break;
 			}
 		
-		RLoupGarou lg = lg_;
+		final RLoupGarou lg = wolves;
 		player.showView();
 		player.getPlayer().getInventory().setItem(8, skip);
 		player.choose(new LGChooseCallback() {
@@ -139,25 +141,23 @@ public class RLoupGarouBlanc extends Role{
 		player.hideView();
 		player.sendMessage("§6Tu n'as tué personne.");
 	}
-	
-	RLoupGarou lg;
 	@Override
 	public void join(LGPlayer player, boolean sendMessage) {
 		super.join(player, sendMessage);
 		for(Role role : getGame().getRoles())
-			if(role instanceof RLoupGarou)
-				(lg = (RLoupGarou) role).join(player, false);
+			if(role instanceof RLoupGarou) {
+				wolfRole = (RLoupGarou) role;
+				wolfRole.join(player, false);
+			}
 	}
 	
 	@EventHandler
 	public void onEndgameCheck(LGEndCheckEvent e) {
-		if(e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO) {
-			if(getPlayers().size() > 0) {
-				if(lg.getPlayers().size() > getPlayers().size())
-					e.setWinType(LGWinType.NONE);
-				else if(lg.getPlayers().size() == getPlayers().size())
-					e.setWinType(LGWinType.LOUPGAROUBLANC);
-			}
+		if(e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO && !getPlayers().isEmpty()) {
+			if(wolfRole.getPlayers().size() > getPlayers().size())
+				e.setWinType(LGWinType.NONE);
+			else if(wolfRole.getPlayers().size() == getPlayers().size())
+				e.setWinType(LGWinType.LOUPGAROUBLANC);
 		}
 	}
 	

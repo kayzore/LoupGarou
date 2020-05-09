@@ -11,6 +11,7 @@ public class LGSkinLoadEvent extends LGEvent {
 	@Getter private final LGPlayer player;
 	@Getter private final LGPlayer to;
 	@Getter @Setter private WrappedGameProfile profile;
+
 	public LGSkinLoadEvent(LGGame game, LGPlayer player, LGPlayer to, WrappedGameProfile profile) {
 		super(game);
 		this.player = player;

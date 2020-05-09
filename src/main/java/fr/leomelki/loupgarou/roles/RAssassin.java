@@ -17,6 +17,8 @@ import fr.leomelki.loupgarou.events.LGRoleTurnEndEvent;
 import fr.leomelki.loupgarou.events.LGVampiredEvent;
 
 public class RAssassin extends Role{
+	private static final String IMMUNITY_FROM_WOLVES = "immunity_from_wolves_assassin";
+
 	public RAssassin(LGGame game) {
 		super(game);
 	}
@@ -62,11 +64,11 @@ public class RAssassin extends Role{
 	public int getTimeout() {
 		return 15;
 	}
-	
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		player.showView();
-		
+
 		player.choose(new LGChooseCallback() {
 			@Override
 			public void callback(LGPlayer choosen) {
@@ -81,35 +83,35 @@ public class RAssassin extends Role{
 			}
 		});
 	}
-	
+
 	@EventHandler
 	public void onKill(LGNightPlayerPreKilledEvent e) {
 		if(e.getKilled().getRole() == this && e.getReason() == Reason.LOUP_GAROU || e.getReason() == Reason.GM_LOUP_GAROU && e.getKilled().isRoleActive()) {//Les assassins ne peuvent pas mourir la nuit !
 			e.setReason(Reason.DONT_DIE);
-			e.getKilled().getCache().set("assassin_protected", true);
+			e.getKilled().setProperty(RAssassin.IMMUNITY_FROM_WOLVES);
 		}
 	}
-	
+
 	@EventHandler
 	public void onTour(LGRoleTurnEndEvent e) {
 		if(e.getGame() == getGame()) {
 			if(e.getPreviousRole() instanceof RLoupGarou) {
 				for(LGPlayer lgp : getGame().getAlive())
-					if(lgp.getCache().getBoolean("assassin_protected")) {
+					if(lgp.hasProperty(RAssassin.IMMUNITY_FROM_WOLVES)) {
 						for(LGPlayer l : getGame().getInGame())
 							if(l.getRoleType() == RoleType.LOUP_GAROU)
-								l.sendMessage("§cVotre cible est immunisée.");
+								l.sendMessage(Role.IS_IMMUNE_FROM_WOLVES);
 					}
-			}else if(e.getPreviousRole() instanceof RGrandMechantLoup) {
+			} else if(e.getPreviousRole() instanceof RGrandMechantLoup) {
 				for(LGPlayer lgp : getGame().getAlive())
-					if(lgp.getCache().getBoolean("assassin_protected")) {
+					if(lgp.hasProperty(RAssassin.IMMUNITY_FROM_WOLVES)) {
 						for(LGPlayer l : e.getPreviousRole().getPlayers())
-							l.sendMessage("§cVotre cible est immunisée.");
+							l.sendMessage(Role.IS_IMMUNE_FROM_WOLVES);
 					}
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onPyroGasoil(LGPyromaneGasoilEvent e) {
 		if(e.getPlayer().getRole() == this && e.getPlayer().isRoleActive())
@@ -120,29 +122,29 @@ public class RAssassin extends Role{
 		if(e.getPlayer().getRole() == this && e.getPlayer().isRoleActive())
 			e.setImmuned(true);
 	}
-	
+
 	@EventHandler
 	public void onDayStart(LGNightEndEvent e) {
 		if(e.getGame() == getGame()) {
-			for(LGPlayer lgp : getGame().getAlive())
-				if(lgp.getCache().getBoolean("assassin_protected"))
-					lgp.getCache().remove("assassin_protected");
-		}
-	}
-	
-	@EventHandler
-	public void onEndgameCheck(LGEndCheckEvent e) {
-		if(e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO) {
-			if(getPlayers().size() > 0) {
-				if(getPlayers().size() > 1)
-					for(LGPlayer lgp : getPlayers())
-						if(!lgp.isRoleActive())
-							return;
-				e.setWinType(LGWinType.ASSASSIN);
+			for(LGPlayer lgp : getGame().getAlive()) {
+				if (lgp.hasProperty(RAssassin.IMMUNITY_FROM_WOLVES)) {
+					lgp.removeProperty(RAssassin.IMMUNITY_FROM_WOLVES);
+				}
 			}
 		}
 	}
-	
+
+	@EventHandler
+	public void onEndgameCheck(LGEndCheckEvent e) {
+		if(e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO && !getPlayers().isEmpty()) {
+			if(getPlayers().size() > 1)
+				for(LGPlayer lgp : getPlayers())
+					if(!lgp.isRoleActive())
+						return;
+			e.setWinType(LGWinType.ASSASSIN);
+		}
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEndGame(LGGameEndEvent e) {
 		if(e.getWinType() == LGWinType.ASSASSIN) {
@@ -150,12 +152,10 @@ public class RAssassin extends Role{
 			e.getWinners().addAll(getPlayers());
 		}
 	}
-	
+
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
 		player.hideView();
-		//player.sendTitle("§cVous n'avez regardé aucun rôle", "§4Vous avez mis trop de temps à vous décider...", 80);
-		//player.sendMessage("§cVous n'avez pas utilisé votre pouvoir cette nuit.");
 	}
 }

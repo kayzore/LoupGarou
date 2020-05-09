@@ -29,8 +29,14 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 import fr.leomelki.loupgarou.events.LGVoteEvent;
 
 public class RDictateur extends Role{
-	static private ItemStack[] items = new ItemStack[9];
-	static private Inventory inventory;
+	private static final String DICTATOR_OVERTHROW = "dictator_overthow";
+	private static ItemStack[] items = new ItemStack[9];
+	private static Inventory inventory;
+
+	Runnable callback;
+	Runnable run;
+	boolean inMenu = false;
+
 	static {
 		items[3] = new ItemStack(Material.IRON_NUGGET);
 		ItemMeta meta = items[3].getItemMeta();
@@ -102,7 +108,7 @@ public class RDictateur extends Role{
 		player.closeInventory();
 		player.openInventory(inventory);
 	}
-	Runnable callback, run;
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		player.showView();
@@ -113,12 +119,7 @@ public class RDictateur extends Role{
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.hideView();
 		closeInventory(player.getPlayer());
-		/*player.sendTitle("§cVous ne faites pas votre coup d'état.", "§4Vous avez mis trop de temps à vous décider...", 80);
-		player.sendMessage("§cVous ne faites pas votre coup d'état.");
-		player.sendMessage("§7§oVous aurez de nouveau le choix lors de la prochaine nuit.");*/
 	}
-
-	boolean inMenu = false;
 	
 	private void closeInventory(Player p) {
 		inMenu = false;
@@ -135,8 +136,6 @@ public class RDictateur extends Role{
 		if(item.getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
 			e.setCancelled(true);
 			closeInventory(player);
-			/*lgp.sendMessage("§cVous ne faites pas votre coup d'état.");
-			lgp.sendMessage("§7§oVous aurez de nouveau le choix lors de la prochaine nuit.");*/
 			lgp.hideView();
 			callback.run();
 		}else if(item.getItemMeta().getDisplayName().equals(items[5].getItemMeta().getDisplayName())) {
@@ -144,8 +143,7 @@ public class RDictateur extends Role{
 			closeInventory(player);
 			lgp.sendActionBarMessage("§9§lTu effectueras un coup d'état");
 			lgp.sendMessage("§6Tu as décidé de faire un coup d'état.");
-			lgp.getCache().set("coup_d_etat", true);
-			lgp.getCache().set("just_coup_d_etat", true);
+			lgp.setProperty(RDictateur.DICTATOR_OVERTHROW);
 			lgp.hideView();
 			callback.run();
 		}
@@ -194,23 +192,22 @@ public class RDictateur extends Role{
 	}
 	public void onTurn(Cancellable e) {
 		for(LGPlayer lgp : getPlayers())
-			if(lgp.getCache().getBoolean("just_coup_d_etat") && lgp.isRoleActive())
+			if(lgp.hasProperty(RDictateur.DICTATOR_OVERTHROW) && lgp.isRoleActive())
 				e.setCancelled(true);
 		
 		if(!e.isCancelled())
 			return;
 		
-		Iterator<LGPlayer> ite = ((ArrayList<LGPlayer>)getPlayers().clone()).iterator();
+		Iterator<LGPlayer> ite = (new ArrayList<LGPlayer>(getPlayers())).iterator();
 		new Runnable() {
 			public void run() {
 				run = this;
 				if(ite.hasNext()) {
 					LGPlayer lgp = ite.next();
-					if(lgp.getCache().getBoolean("just_coup_d_etat")) {
+					if(lgp.hasProperty(RDictateur.DICTATOR_OVERTHROW)) {
 						getPlayers().remove(lgp);
-						lgp.getCache().remove("just_coup_d_etat");
+						lgp.removeProperty(RDictateur.DICTATOR_OVERTHROW);
 						getGame().broadcastMessage("§7§l" + lgp.getFullName() + " §9réalise un coup d'état.");
-						//lgp.sendTitle("§6Vous faites votre coup d'état", "§aChoisissez qui tuer", 60);
 						
 						//On le met sur le slot 0 pour éviter un missclick sur la croix
 						WrapperPlayServerHeldItemSlot hold = new WrapperPlayServerHeldItemSlot();
@@ -224,10 +221,9 @@ public class RDictateur extends Role{
 							lgp.getPlayer().getInventory().setItem(8, null);
 							lgp.getPlayer().updateInventory();
 							this.run();
-						}, (player, secondsLeft)->{
-							return lgp == player ? "§9§lC'est à ton tour !" : "§6Le Dictateur choisit sa victime (§e"+secondsLeft+" s§6)";
-						});
-						lgp.choose((choosen)->{
+						}, (player, secondsLeft)-> (lgp == player) ? "§9§lC'est à ton tour !" : "§6Le Dictateur choisit sa victime (§e"+secondsLeft+" s§6)");
+						
+						lgp.choose(choosen -> {
 							if(choosen != null) {
 								getGame().cancelWait();
 								lgp.stopChoosing();
@@ -239,8 +235,9 @@ public class RDictateur extends Role{
 						lgp.getPlayer().getInventory().setItem(8, items[3]);
 						lgp.getPlayer().updateInventory();
 					}
-				}else
+				} else {
 					getGame().nextNight();
+				}
 			}
 		}.run();
 	}
