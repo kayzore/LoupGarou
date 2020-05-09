@@ -19,13 +19,14 @@ class ParserSpawnpoints extends ParserAbstract {
   protected void processSpawn(CommandSender sender) {
     @SuppressWarnings("unchecked")
     final List<Object> list = (List<Object>) this.instanceMainLg.getConfig().getList("spawns");
-    final Player player = (Player)sender;
+    final Player player = (Player) sender;
     final Location loc = player.getLocation();
 
-    list.add(Arrays.asList((double)loc.getBlockX(), loc.getY(), (double)loc.getBlockZ(), (double)loc.getYaw(), (double)loc.getPitch()));
+    list.add(Arrays.asList((double) loc.getBlockX(), loc.getY(), (double) loc.getBlockZ(), (double) loc.getYaw(),
+        (double) loc.getPitch()));
 
     this.instanceMainLg.saveConfig();
-		this.instanceMainLg.loadConfig();
+    this.instanceMainLg.loadConfig();
 
     sender.sendMessage("\n§aLa position a bien été ajoutée !");
   }

@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class LGEvent extends Event{
+public class LGEvent extends Event {
 	@Getter final LGGame game;
 	private static final HandlerList handlers = new HandlerList();
 
@@ -17,7 +17,7 @@ public class LGEvent extends Event{
 		return LGEvent.getHandlerList();
 	}
 
-  public static HandlerList getHandlerList() {
+	public static HandlerList getHandlerList() {
 		return handlers;
 	}
 }

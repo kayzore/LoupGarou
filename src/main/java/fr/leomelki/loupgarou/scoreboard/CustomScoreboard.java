@@ -17,7 +17,7 @@ public class CustomScoreboard {
 	@Getter private boolean shown;
 	@Getter private final String name = RandomString.generate(16);
 	@Getter private final List<LGPlayer> inGamePlayers;
-	private static final  String DISPLAY_NAME = "§7";
+	private static final String DISPLAY_NAME = "§7";
 	private final List<CustomScoreboardEntry> entries = new ArrayList<>();
 	private final boolean shouldShowScoreboard;
 
@@ -33,18 +33,18 @@ public class CustomScoreboard {
 	private void removePreexistingEntries() {
 		final List<CustomScoreboardEntry> preexistingEntries = new ArrayList<>(this.entries);
 
-		for (CustomScoreboardEntry preexistingEntry: preexistingEntries) {
+		for (CustomScoreboardEntry preexistingEntry : preexistingEntries) {
 			preexistingEntry.hide();
 			this.entries.remove(preexistingEntry);
 		}
 	}
 
 	public void displayEntries(List<RolePlayers> activeRoles) {
-    this.removePreexistingEntries();
-    int totalRemaingPlayers = 0;
+		this.removePreexistingEntries();
+		int totalRemaingPlayers = 0;
 
 		for (RolePlayers currentPlayers : activeRoles) {
-      final int amountOfPlayers = currentPlayers.getAmountOfPlayers();
+			final int amountOfPlayers = currentPlayers.getAmountOfPlayers();
 
 			if (amountOfPlayers > 0) {
 				if (this.shouldShowScoreboard) {
@@ -54,11 +54,11 @@ public class CustomScoreboard {
 					this.createEntry(sanitizedName, amountOfPlayers);
 				}
 
-        totalRemaingPlayers += amountOfPlayers;
+				totalRemaingPlayers += amountOfPlayers;
 			}
-    }
+		}
 
-    this.createEntry("§e[TOTAL]", totalRemaingPlayers);
+		this.createEntry("§e[TOTAL]", totalRemaingPlayers);
 	}
 
 	public void announce(String message, int fakeDuration) {
@@ -91,9 +91,9 @@ public class CustomScoreboard {
 
 		for (LGPlayer currentPlayer : inGamePlayers) {
 			remove.sendPacket(currentPlayer.getPlayer());
-    }
+		}
 
-    this.removePreexistingEntries();
+		this.removePreexistingEntries();
 		shown = false;
 	}
 }

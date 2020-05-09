@@ -23,7 +23,7 @@ class ParserRounds extends ParserAbstract {
     }
 
     currentGame.broadcastMessage("§2§lLe passage à la prochaine journée a été forcé !");
-    for(LGPlayer lgp : currentGame.getInGame()) {
+    for (LGPlayer lgp : currentGame.getInGame()) {
       lgp.stopChoosing();
     }
 
@@ -46,7 +46,7 @@ class ParserRounds extends ParserAbstract {
     sender.sendMessage("§aVous êtes passé à la prochaine nuit");
     currentGame.broadcastMessage("§2§lLe passage à la prochaine nuit a été forcé !");
 
-    for(LGPlayer lgp : currentGame.getInGame()) {
+    for (LGPlayer lgp : currentGame.getInGame()) {
       lgp.stopChoosing();
     }
 

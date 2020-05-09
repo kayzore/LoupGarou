@@ -18,10 +18,10 @@ import fr.leomelki.loupgarou.events.LGEndCheckEvent;
 import fr.leomelki.loupgarou.events.LGGameEndEvent;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
-public class RLoupGarouBlanc extends Role{
+public class RLoupGarouBlanc extends Role {
 	private static ItemStack skip;
 	RLoupGarou wolfRole;
-	
+
 	static {
 		skip = new ItemStack(Material.IRON_NUGGET);
 		ItemMeta meta = skip.getItemMeta();
@@ -46,7 +46,7 @@ public class RLoupGarouBlanc extends Role{
 
 	@Override
 	public String getFriendlyName() {
-		return "du "+getName();
+		return "du " + getName();
 	}
 
 	@Override
@@ -66,12 +66,14 @@ public class RLoupGarouBlanc extends Role{
 
 	@Override
 	public String getBroadcastedTask() {
-		return "Le "+getName()+"§9 pourrait faire un ravage cette nuit...";
+		return "Le " + getName() + "§9 pourrait faire un ravage cette nuit...";
 	}
+
 	@Override
 	public RoleType getType() {
 		return RoleType.LOUP_GAROU;
 	}
+
 	@Override
 	public RoleWinType getWinType() {
 		return RoleWinType.SEUL;
@@ -81,30 +83,32 @@ public class RLoupGarouBlanc extends Role{
 	public int getTimeout() {
 		return 15;
 	}
-	
+
 	@Override
 	public boolean hasPlayersLeft() {
-		return super.hasPlayersLeft() && getGame().getNight()%2 == 0;
+		return super.hasPlayersLeft() && getGame().getNight() % 2 == 0;
 	}
+
 	Runnable callback;
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		this.callback = callback;
 		RLoupGarou wolves = null;
-		for(Role role : getGame().getRoles())
-			if(role instanceof RLoupGarou) {
-				wolves = (RLoupGarou)role;
+		for (Role role : getGame().getRoles())
+			if (role instanceof RLoupGarou) {
+				wolves = (RLoupGarou) role;
 				break;
 			}
-		
+
 		final RLoupGarou lg = wolves;
 		player.showView();
 		player.getPlayer().getInventory().setItem(8, skip);
 		player.choose(new LGChooseCallback() {
 			@Override
 			public void callback(LGPlayer choosen) {
-				if(choosen != null && choosen != player) {
-					if(!lg.getPlayers().contains(choosen)) {
+				if (choosen != null && choosen != player) {
+					if (!lg.getPlayers().contains(choosen)) {
 						player.sendMessage("§7§l" + choosen.getFullName() + "§4 n'est pas un Loup-Garou.");
 						return;
 					}
@@ -120,11 +124,12 @@ public class RLoupGarouBlanc extends Role{
 			}
 		});
 	}
+
 	@EventHandler
 	public void onClick(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
 		LGPlayer player = LGPlayer.thePlayer(p);
-		if(e.getItem() != null && e.getItem().getType() == Material.IRON_NUGGET && player.getRole() == this) {
+		if (e.getItem() != null && e.getItem().getType() == Material.IRON_NUGGET && player.getRole() == this) {
 			player.stopChoosing();
 			p.getInventory().setItem(8, null);
 			p.updateInventory();
@@ -133,6 +138,7 @@ public class RLoupGarouBlanc extends Role{
 			callback.run();
 		}
 	}
+
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.stopChoosing();
@@ -141,32 +147,33 @@ public class RLoupGarouBlanc extends Role{
 		player.hideView();
 		player.sendMessage("§6Tu n'as tué personne.");
 	}
+
 	@Override
 	public void join(LGPlayer player, boolean sendMessage) {
 		super.join(player, sendMessage);
-		for(Role role : getGame().getRoles())
-			if(role instanceof RLoupGarou) {
+		for (Role role : getGame().getRoles())
+			if (role instanceof RLoupGarou) {
 				wolfRole = (RLoupGarou) role;
 				wolfRole.join(player, false);
 			}
 	}
-	
+
 	@EventHandler
 	public void onEndgameCheck(LGEndCheckEvent e) {
-		if(e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO && !getPlayers().isEmpty()) {
-			if(wolfRole.getPlayers().size() > getPlayers().size())
+		if (e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO && !getPlayers().isEmpty()) {
+			if (wolfRole.getPlayers().size() > getPlayers().size())
 				e.setWinType(LGWinType.NONE);
-			else if(wolfRole.getPlayers().size() == getPlayers().size())
+			else if (wolfRole.getPlayers().size() == getPlayers().size())
 				e.setWinType(LGWinType.LOUPGAROUBLANC);
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEndGame(LGGameEndEvent e) {
-		if(e.getWinType() == LGWinType.LOUPGAROUBLANC) {
+		if (e.getWinType() == LGWinType.LOUPGAROUBLANC) {
 			e.getWinners().clear();
 			e.getWinners().addAll(getPlayers());
 		}
 	}
-	
+
 }

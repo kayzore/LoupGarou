@@ -11,11 +11,13 @@ public enum LGWinType {
 	COUPLE("§6§l§oLa partie a été gagnée par le §d§lcouple§6§l§o !"),
 	ANGE("§6§l§oLa partie a été gagnée par l'§d§lAnge§6§l§o !"),
 	EQUAL("§7§l§oÉgalité§6§l§o, personne n'a gagné la partie !"),
-	SOLO("§6§l§oUn joueur solitaire a gagné la partie!"),//bug si ça s'affiche
+	// bug si ça s'affiche
+	SOLO("§6§l§oUn joueur solitaire a gagné la partie!"),
 	ASSASSIN("§6§l§oLa partie a été gagnée par l'§1§lAssassin§6§l§o !"),
 	PYROMANE("§6§l§oLa partie a été gagnée par le §6§lPyromane§6§l§o !"),
 	VAMPIRE("§6§l§oLa partie a été gagnée par les §5§lVampires§6§l§o !"),
 	NONE("§4Erreur: §cpersonne n'a gagné la partie.");
-	
-	@Getter private final String message;
+
+	@Getter
+	private final String message;
 }

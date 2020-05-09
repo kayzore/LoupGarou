@@ -14,9 +14,8 @@ public class ItemBuilder implements Cloneable {
    *
    * @param material The material to create the ItemBuilder with.
    */
-  @ConstructorProperties({"material"})
-  public ItemBuilder(Material material)
-  {
+  @ConstructorProperties({ "material" })
+  public ItemBuilder(Material material) {
     this(material, 1);
   }
 
@@ -25,8 +24,7 @@ public class ItemBuilder implements Cloneable {
    *
    * @param is The itemstack to create the ItemBuilder over.
    */
-  public ItemBuilder(ItemStack is)
-  {
+  public ItemBuilder(ItemStack is) {
     this.is = is;
   }
 
@@ -36,8 +34,7 @@ public class ItemBuilder implements Cloneable {
    * @param m      The material of the item.
    * @param amount The amount of the item.
    */
-  public ItemBuilder(Material m, int amount)
-  {
+  public ItemBuilder(Material m, int amount) {
     is = new ItemStack(m, amount);
   }
 
@@ -47,8 +44,7 @@ public class ItemBuilder implements Cloneable {
    * @return The cloned instance.
    */
   @Override
-  public ItemBuilder clone()
-  {
+  public ItemBuilder clone() {
     return new ItemBuilder(is);
   }
 
@@ -58,8 +54,7 @@ public class ItemBuilder implements Cloneable {
    * @param name The name to change it to.
    * @return
    */
-  public ItemBuilder setName(String name)
-  {
+  public ItemBuilder setName(String name) {
     ItemMeta im = is.getItemMeta();
     im.setDisplayName(name);
     is.setItemMeta(im);
@@ -71,8 +66,7 @@ public class ItemBuilder implements Cloneable {
    *
    * @return The itemstack created/modified by the ItemBuilder instance.
    */
-  public ItemStack build()
-  {
+  public ItemStack build() {
     return is;
   }
 }

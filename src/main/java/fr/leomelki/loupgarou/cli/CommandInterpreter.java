@@ -82,6 +82,7 @@ public class CommandInterpreter extends ParserAbstract {
     }
 
     sender.sendMessage("§4Erreur: §cCommande incorrecte.");
-    sender.sendMessage("§4Essayez /lg §caddSpawn/end/start/nextNight/nextDay/reloadConfig/roles/reloadPacks/joinAll/nick/unnick");
+    sender.sendMessage(
+        "§4Essayez /lg §caddSpawn/end/start/nextNight/nextDay/reloadConfig/roles/reloadPacks/joinAll/nick/unnick");
   }
 }

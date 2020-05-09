@@ -15,7 +15,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.bukkit.configuration.file.FileConfiguration;
 
-
 public class LGStats {
 
   private Set<String> rolesKeySet;
@@ -29,43 +28,45 @@ public class LGStats {
     this.statsFile = new File(dataFolder + "/stats.csv");
     this.absolutePath = statsFile.getAbsolutePath();
 
-    if(!this.statsFile.exists()) {
-			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(statsFile.getAbsolutePath()))) {
-				try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-					final List<String> header = this.rolesKeySet.stream().map(this::escapeSpecialCharacters).collect(Collectors.toList());
-					header.add(0, "Winners");
+    if (!this.statsFile.exists()) {
+      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(statsFile.getAbsolutePath()))) {
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+          final List<String> header = this.rolesKeySet.stream().map(this::escapeSpecialCharacters)
+              .collect(Collectors.toList());
+          header.add(0, "Winners");
 
-					csvPrinter.printRecord(header);
-					csvPrinter.flush();
-				}
-			}
-		}
+          csvPrinter.printRecord(header);
+          csvPrinter.flush();
+        }
+      }
+    }
   }
 
   private String escapeSpecialCharacters(String data) {
     String escapedData = data.replaceAll("\\R", " ");
     if (data.contains(",") || data.contains("\"") || data.contains("'")) {
-        data = data.replace("\"", "\"\"");
-        escapedData = "\"" + data + "\"";
+      data = data.replace("\"", "\"\"");
+      escapedData = "\"" + data + "\"";
     }
     return escapedData;
   }
 
   public void saveRound(LGWinType winType) throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(this.absolutePath), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
-			try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
-				final List<String> roundResults = new ArrayList<>();
+    try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(this.absolutePath), StandardOpenOption.APPEND,
+        StandardOpenOption.CREATE)) {
+      try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+        final List<String> roundResults = new ArrayList<>();
 
-				roundResults.add(winType.toString());
+        roundResults.add(winType.toString());
 
-				for(String role : this.rolesKeySet) {
-					final int numberOfPlayersThisRound = this.config.getInt("distributionFixed." + role);
-					roundResults.add(String.valueOf(numberOfPlayersThisRound));
-				}
+        for (String role : this.rolesKeySet) {
+          final int numberOfPlayersThisRound = this.config.getInt("distributionFixed." + role);
+          roundResults.add(String.valueOf(numberOfPlayersThisRound));
+        }
 
-				csvPrinter.printRecord(roundResults);
-				csvPrinter.flush();
-			}
-		}
+        csvPrinter.printRecord(roundResults);
+        csvPrinter.flush();
+      }
+    }
   }
 }

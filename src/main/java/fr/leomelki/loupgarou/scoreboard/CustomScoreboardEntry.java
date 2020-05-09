@@ -48,7 +48,7 @@ public class CustomScoreboardEntry {
 		final int limit = rawName.charAt(14) == '§' && rawName.charAt(13) != '§' ? 14 : rawName.charAt(15) == '§' ? 15 : 16;
 		final String prefix = rawName.substring(0, limit);
 		String suffix;
-		
+
 		if (limit != 16) {
 			suffix = rawName.substring(limit);
 		} else {
@@ -58,7 +58,7 @@ public class CustomScoreboardEntry {
 				if (storeColorCode) {
 					storeColorCode = false;
 					colorCode = c;
-				} else if(c == '§') {
+				} else if (c == '§') {
 					storeColorCode = true;
 				}
 			}
@@ -67,9 +67,11 @@ public class CustomScoreboardEntry {
 
 		return prefix + suffix;
 	}
+
 	public void delete() {
 		hide();
 	}
+
 	public void hide() {
 		if (scoreboard.isShown()) {
 			WrapperPlayServerScoreboardScore score = new WrapperPlayServerScoreboardScore();

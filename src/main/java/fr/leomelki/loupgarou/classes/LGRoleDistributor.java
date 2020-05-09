@@ -19,7 +19,7 @@ public class LGRoleDistributor {
   private final FileConfiguration config;
   private final Map<String, Constructor<? extends Role>> rolesBuilder;
   private final String roleDistribution;
-  
+
   public LGRoleDistributor(final LGGame game, final FileConfiguration config, final Map<String, Constructor<? extends Role>> rolesBuilder) {
     this.game = game;
     this.players = game.getInGame();
@@ -80,20 +80,20 @@ public class LGRoleDistributor {
     final SecureRandom random = new SecureRandom();
     final List<LGPlayer> toGive = new ArrayList<>(players);
 
-    for(Entry<String, Constructor<? extends Role>> currentRole : this.rolesBuilder.entrySet()) {
-      if(this.config.getInt("distributionFixed." + currentRole.getKey()) > 0) {
+    for (Entry<String, Constructor<? extends Role>> currentRole : this.rolesBuilder.entrySet()) {
+      if (this.config.getInt("distributionFixed." + currentRole.getKey()) > 0) {
         this.instantiateRole(currentRole);
       }
     }
-    
-		for(Role currentRole : this.roles) {
-      while(currentRole.getWaitedPlayers() > 0) {
+
+    for (Role currentRole : this.roles) {
+      while (currentRole.getWaitedPlayers() > 0) {
         final int randomized = random.nextInt(toGive.size());
-				final LGPlayer selected = toGive.remove(randomized);
+        final LGPlayer selected = toGive.remove(randomized);
         this.setRoleToPlayer(selected, currentRole);
       }
     }
-    
+
     return this.roles;
   }
 
@@ -102,15 +102,15 @@ public class LGRoleDistributor {
     final ArrayList<LGPlayer> toGive = new ArrayList<>(players);
 
     final int maxPlayers = this.players.size();
-    final Map<String,Object> categoryWeigths = config.getConfigurationSection("distributionRandom.categoryWeights").getValues(false);
-    final int totalRolesWeight = (int)categoryWeigths.get("evilRoles") + (int)categoryWeigths.get("neutralRoles") + (int)categoryWeigths.get("villagerRoles");
-    final double amountOfEvil = Math.floor((double)(maxPlayers * (int)categoryWeigths.get("evilRoles")) / totalRolesWeight);
-    final double amountOfNeutral = Math.ceil((double)(maxPlayers * (int)categoryWeigths.get("neutralRoles")) / totalRolesWeight);
+    final Map<String, Object> categoryWeigths = config.getConfigurationSection("distributionRandom.categoryWeights").getValues(false);
+    final int totalRolesWeight = (int) categoryWeigths.get("evilRoles") + (int) categoryWeigths.get("neutralRoles")+ (int) categoryWeigths.get("villagerRoles");
+    final double amountOfEvil = Math.floor((double) (maxPlayers * (int) categoryWeigths.get("evilRoles")) / totalRolesWeight);
+    final double amountOfNeutral = Math.ceil((double) (maxPlayers * (int) categoryWeigths.get("neutralRoles")) / totalRolesWeight);
     final double amountOfVillagers = maxPlayers - (amountOfEvil + amountOfNeutral);
 
-    final Map<String,Object> evilWeigths = this.config.getConfigurationSection("distributionRandom.evilWeigths").getValues(false);
+    final Map<String, Object> evilWeigths = this.config.getConfigurationSection("distributionRandom.evilWeigths").getValues(false);
     final LGRandomRolePicker evilRolePicker = new LGRandomRolePicker(game, evilWeigths, this.rolesBuilder);
-    
+
     for (int i = 0; i < amountOfEvil; i++) {
       final Role pickedRole = evilRolePicker.roll();
       final int randomized = random.nextInt(toGive.size());
@@ -118,7 +118,7 @@ public class LGRoleDistributor {
       this.setRoleToPlayer(selected, pickedRole);
     }
 
-    final Map<String,Object> neutralWeights = this.config.getConfigurationSection("distributionRandom.neutralWeights").getValues(false);
+    final Map<String, Object> neutralWeights = this.config.getConfigurationSection("distributionRandom.neutralWeights").getValues(false);
     final LGRandomRolePicker neutralRolePicker = new LGRandomRolePicker(game, neutralWeights, this.rolesBuilder);
     int amountOfVampires = 0;
 
@@ -133,12 +133,12 @@ public class LGRoleDistributor {
       }
     }
 
-    final Map<String,Object> villagerWeights = this.config.getConfigurationSection("distributionRandom.villagerWeights").getValues(false);
+    final Map<String, Object> villagerWeights = this.config.getConfigurationSection("distributionRandom.villagerWeights").getValues(false);
     final LGRandomRolePicker villagerRolePicker = new LGRandomRolePicker(game, villagerWeights, this.rolesBuilder);
-  
+
     for (int i = 0; i < amountOfVillagers; i++) {
       final Role pickedRole = (amountOfVampires-- > 0) 
-        ? this.instantiateRole("ChasseurDeVampire")
+        ? this.instantiateRole("ChasseurDeVampire") 
         : villagerRolePicker.roll();
 
       final int randomized = random.nextInt(toGive.size());
@@ -149,7 +149,7 @@ public class LGRoleDistributor {
     this.roles.addAll(evilRolePicker.getInstantiatedRoles());
     this.roles.addAll(neutralRolePicker.getInstantiatedRoles());
     this.roles.addAll(villagerRolePicker.getInstantiatedRoles());
-    
+
     return this.roles;
   }
 }

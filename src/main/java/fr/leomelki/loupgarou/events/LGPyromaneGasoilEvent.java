@@ -7,10 +7,10 @@ import fr.leomelki.loupgarou.classes.LGPlayer;
 import lombok.Getter;
 import lombok.Setter;
 
-public class LGPyromaneGasoilEvent extends LGEvent implements Cancellable{
+public class LGPyromaneGasoilEvent extends LGEvent implements Cancellable {
 	@Getter @Setter private boolean cancelled;
 	@Getter @Setter private LGPlayer player;
-	
+
 	public LGPyromaneGasoilEvent(LGGame game, LGPlayer player) {
 		super(game);
 		this.player = player;

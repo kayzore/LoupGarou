@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public class RolePlayers {
 	@Getter private final Role role;
 	@Getter private int amountOfPlayers = 1;
+
 	public void increment() {
 		amountOfPlayers++;
 	}

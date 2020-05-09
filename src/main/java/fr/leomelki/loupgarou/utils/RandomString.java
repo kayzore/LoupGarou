@@ -11,7 +11,8 @@ public class RandomString {
   }
 
   /**
-   * Generates random string of given length from Base65 alphabet (numbers, lowercase letters, uppercase letters).
+   * Generates random string of given length from Base65 alphabet (numbers,
+   * lowercase letters, uppercase letters).
    *
    * @param count length
    * @return random string of given length

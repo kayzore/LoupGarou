@@ -30,11 +30,11 @@ class ParserConfig extends ParserAbstract {
   protected void processReloadPacks(CommandSender sender) {
     final Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
 
-    for(Player p : onlinePlayers) {
+    for (Player p : onlinePlayers) {
       Bukkit.getPluginManager().callEvent(new PlayerQuitEvent(p, "reloadPacks"));
     }
 
-    for(Player p : onlinePlayers) {
+    for (Player p : onlinePlayers) {
       Bukkit.getPluginManager().callEvent(new PlayerJoinEvent(p, "reloadPacks"));
     }
 

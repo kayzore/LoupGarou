@@ -30,7 +30,7 @@ import fr.leomelki.loupgarou.events.LGPlayerKilledEvent;
 import fr.leomelki.loupgarou.events.LGPyromaneGasoilEvent;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
-public class RPyromane extends Role{
+public class RPyromane extends Role {
 	static ItemStack[] items = new ItemStack[9];
 	static ItemStack cancel;
 	static ItemStack nothing;
@@ -50,15 +50,12 @@ public class RPyromane extends Role{
 		items[3] = new ItemStack(Material.FLINT_AND_STEEL);
 		meta = items[3].getItemMeta();
 		meta.setDisplayName("§e§lMettre le feu");
-		meta.setLore(Arrays.asList(
-				"§8Tuez les joueurs que vous avez",
-				"§8Précédemment recouvert de gasoil."));
+		meta.setLore(Arrays.asList("§8Tuez les joueurs que vous avez", "§8Précédemment recouvert de gasoil."));
 		items[3].setItemMeta(meta);
 		items[5] = new ItemStack(Material.LAVA_BUCKET);
 		meta = items[5].getItemMeta();
 		meta.setDisplayName("§c§lRecouvrir d'essence");
-		meta.setLore(Arrays.asList(
-				"§8Recouvres deux joueurs d'essence"));
+		meta.setLore(Arrays.asList("§8Recouvres deux joueurs d'essence"));
 		items[5].setItemMeta(meta);
 	}
 
@@ -80,7 +77,7 @@ public class RPyromane extends Role{
 
 	@Override
 	public String getFriendlyName() {
-		return "du "+getName();
+		return "du " + getName();
 	}
 
 	@Override
@@ -100,37 +97,40 @@ public class RPyromane extends Role{
 
 	@Override
 	public String getBroadcastedTask() {
-		return "Le "+getName()+"§9 joue avec une allumette...";
+		return "Le " + getName() + "§9 joue avec une allumette...";
 	}
+
 	@Override
 	public RoleType getType() {
 		return RoleType.NEUTRAL;
 	}
+
 	@Override
 	public RoleWinType getWinType() {
 		return RoleWinType.SEUL;
 	}
-	
+
 	@Override
 	public int getTimeout() {
 		return 30;
 	}
-	
+
 	Runnable callback;
-	
+
 	public void openInventory(Player player) {
 		inMenu = true;
 		Inventory inventory = Bukkit.createInventory(null, 9, "§7Que veux-tu faire ?");
 		ItemStack[] content = items.clone();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-		if(!lgp.getCache().has(RPyromane.COVERED_IN_GASOLINE))
+		if (!lgp.getCache().has(RPyromane.COVERED_IN_GASOLINE))
 			lgp.getCache().set(RPyromane.COVERED_IN_GASOLINE, new ArrayList<>());
-		if(lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE).isEmpty())
+		if (lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE).isEmpty())
 			content[3] = nothing;
 		inventory.setContents(content);
 		player.closeInventory();
 		player.openInventory(inventory);
 	}
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		first = null;
@@ -138,13 +138,14 @@ public class RPyromane extends Role{
 		this.callback = callback;
 		openInventory(player.getPlayer());
 	}
+
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
-		if(first != null) {
+		if (first != null) {
 			List<LGPlayer> liste = player.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE);
 			LGPyromaneGasoilEvent event = new LGPyromaneGasoilEvent(getGame(), first);
 			Bukkit.getPluginManager().callEvent(event);
-			if(event.isCancelled())
+			if (event.isCancelled())
 				player.sendMessage("§7§l" + event.getPlayer().getFullName() + "§c est immunisé.");
 			else {
 				event.getPlayer().sendMessage(RPyromane.COVERED_IN_GASOLINE_MESSAGE);
@@ -161,31 +162,33 @@ public class RPyromane extends Role{
 
 	boolean inMenu = false;
 	LGPlayer first;
-	
+
 	private void closeInventory(Player p) {
 		inMenu = false;
 		p.closeInventory();
 	}
+
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		ItemStack item = e.getCurrentItem();
-		Player player = (Player)e.getWhoClicked();
+		Player player = (Player) e.getWhoClicked();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-			
-		if(lgp.getRole() != this || item == null || item.getItemMeta() == null)return;
-		if(item.getItemMeta().getDisplayName().equals(nothing.getItemMeta().getDisplayName())) {
+
+		if (lgp.getRole() != this || item == null || item.getItemMeta() == null)
+			return;
+		if (item.getItemMeta().getDisplayName().equals(nothing.getItemMeta().getDisplayName())) {
 			lgp.stopChoosing();
 			closeInventory(player);
 			lgp.hideView();
 			lgp.sendMessage(Role.PERFORMED_NO_ACTION);
 			callback.run();
-		}else if(item.getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
+		} else if (item.getItemMeta().getDisplayName().equals(items[3].getItemMeta().getDisplayName())) {
 			e.setCancelled(true);
 			closeInventory(player);
-			if(!lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE).isEmpty()) {
+			if (!lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE).isEmpty()) {
 				List<LGPlayer> liste = lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE);
-				for(LGPlayer scndPlayer : liste) {
-					if(!scndPlayer.isDead() && scndPlayer.getPlayer() != null) {
+				for (LGPlayer scndPlayer : liste) {
+					if (!scndPlayer.isDead() && scndPlayer.getPlayer() != null) {
 						getGame().kill(scndPlayer, Reason.PYROMANE);
 					}
 				}
@@ -197,12 +200,12 @@ public class RPyromane extends Role{
 			}
 			lgp.hideView();
 			callback.run();
-		}else if(item.getItemMeta().getDisplayName().equals(items[5].getItemMeta().getDisplayName())) {
+		} else if (item.getItemMeta().getDisplayName().equals(items[5].getItemMeta().getDisplayName())) {
 			e.setCancelled(true);
 			closeInventory(player);
 			player.getInventory().setItem(8, cancel);
 			player.updateInventory();
-			//Pour éviter les missclick
+			// Pour éviter les missclick
 			WrapperPlayServerHeldItemSlot held = new WrapperPlayServerHeldItemSlot();
 			held.setSlot(0);
 			held.sendPacket(player);
@@ -210,13 +213,13 @@ public class RPyromane extends Role{
 			lgp.choose(new LGChooseCallback() {
 				@Override
 				public void callback(LGPlayer choosen) {
-					if(choosen != null) {
-						if(choosen == first) {
+					if (choosen != null) {
+						if (choosen == first) {
 							lgp.sendMessage("§cTu as déjà versé du gasoil sur §7§l" + choosen.getFullName() + "§6.");
 							return;
 						}
 						List<LGPlayer> liste = lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE);
-						if(liste.contains(choosen)) {
+						if (liste.contains(choosen)) {
 							lgp.sendMessage("§7§l" + choosen.getFullName() + "§c est déjà recouvert de gasoil.");
 							return;
 						}
@@ -224,21 +227,21 @@ public class RPyromane extends Role{
 						player.updateInventory();
 						lgp.sendMessage("§6Tu as versé du gasoil sur §7§l" + choosen.getFullName() + "§6.");
 						lgp.sendActionBarMessage("§6§7§l" + choosen.getFullName() + "§6 est recouvert de gasoil");
-						if(first != null || getGame().getAlive().size() == 2) {
+						if (first != null || getGame().getAlive().size() == 2) {
 							lgp.hideView();
 							lgp.stopChoosing();
 							LGPyromaneGasoilEvent event = new LGPyromaneGasoilEvent(getGame(), choosen);
 							Bukkit.getPluginManager().callEvent(event);
-							if(event.isCancelled())
+							if (event.isCancelled())
 								lgp.sendMessage("§7§l" + event.getPlayer().getFullName() + "§c est immunisée.");
 							else {
 								event.getPlayer().sendMessage(RPyromane.COVERED_IN_GASOLINE_MESSAGE);
 								liste.add(event.getPlayer());
 							}
-							if(first != null) {
+							if (first != null) {
 								event = new LGPyromaneGasoilEvent(getGame(), first);
 								Bukkit.getPluginManager().callEvent(event);
-								if(event.isCancelled())
+								if (event.isCancelled())
 									lgp.sendMessage("§7§l" + event.getPlayer().getFullName() + "§c est immunisée.");
 								else {
 									event.getPlayer().sendMessage(RPyromane.COVERED_IN_GASOLINE_MESSAGE);
@@ -255,11 +258,13 @@ public class RPyromane extends Role{
 			}, lgp);
 		}
 	}
+
 	@EventHandler
 	public void onClick(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		LGPlayer lgp = LGPlayer.thePlayer(player);
-		if(lgp.getRole() == this && e.getItem() != null && e.getItem().hasItemMeta() && e.getItem().getItemMeta().getDisplayName().equals(cancel.getItemMeta().getDisplayName())) {
+		if (lgp.getRole() == this && e.getItem() != null && e.getItem().hasItemMeta()
+				&& e.getItem().getItemMeta().getDisplayName().equals(cancel.getItemMeta().getDisplayName())) {
 			e.setCancelled(true);
 			player.getInventory().setItem(8, null);
 			player.updateInventory();
@@ -267,23 +272,25 @@ public class RPyromane extends Role{
 			openInventory(player);
 		}
 	}
+
 	@EventHandler
 	public void onKilled(LGPlayerKilledEvent e) {
-		if(e.getGame() == getGame())
-			for(LGPlayer lgp : getPlayers())
-				if(lgp.getCache().has(RPyromane.COVERED_IN_GASOLINE)) {
+		if (e.getGame() == getGame())
+			for (LGPlayer lgp : getPlayers())
+				if (lgp.getCache().has(RPyromane.COVERED_IN_GASOLINE)) {
 					List<LGPlayer> liste = lgp.getCache().<List<LGPlayer>>get(RPyromane.COVERED_IN_GASOLINE);
-					if(liste.contains(e.getKilled()))//Au cas où le mec soit rez
+					if (liste.contains(e.getKilled()))// Au cas où le mec soit rez
 						liste.remove(e.getKilled());
 				}
 	}
+
 	@EventHandler
 	public void onQuitInventory(InventoryCloseEvent e) {
-		if(e.getInventory() instanceof CraftInventoryCustom) {
-			LGPlayer player = LGPlayer.thePlayer((Player)e.getPlayer());
-			if(player.getRole() == this && inMenu) {
+		if (e.getInventory() instanceof CraftInventoryCustom) {
+			LGPlayer player = LGPlayer.thePlayer((Player) e.getPlayer());
+			if (player.getRole() == this && inMenu) {
 				new BukkitRunnable() {
-					
+
 					@Override
 					public void run() {
 						e.getPlayer().openInventory(e.getInventory());
@@ -292,21 +299,22 @@ public class RPyromane extends Role{
 			}
 		}
 	}
-	
-	//Win condition
-	
+
+	// Win condition
+
 	@EventHandler
 	public void onEndgameCheck(LGEndCheckEvent e) {
-		if(e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO && !getPlayers().isEmpty()) {
+		if (e.getGame() == getGame() && e.getWinType() == LGWinType.SOLO && !getPlayers().isEmpty()) {
 			e.setWinType(LGWinType.PYROMANE);
 		}
 	}
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEndGame(LGGameEndEvent e) {
-		if(e.getWinType() == LGWinType.PYROMANE) {
+		if (e.getWinType() == LGWinType.PYROMANE) {
 			e.getWinners().clear();
 			e.getWinners().addAll(getPlayers());
 		}
 	}
-	
+
 }

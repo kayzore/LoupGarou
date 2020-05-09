@@ -22,7 +22,7 @@ import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 import fr.leomelki.loupgarou.events.LGPlayerKilledEvent.Reason;
 
-public class RSorciere extends Role{
+public class RSorciere extends Role {
 	private static ItemStack[] items = new ItemStack[4];
 	private static ItemStack cancel;
 	protected static final String WICH_USED_DEATH_POTION = "wich_used_death_potion";
@@ -48,67 +48,77 @@ public class RSorciere extends Role{
 		meta.setDisplayName("§c§lRevenir au choix des potions");
 		cancel.setItemMeta(meta);
 	}
-	
-	
+
 	public RSorciere(LGGame game) {
 		super(game);
 	}
+
 	@Override
 	public RoleType getType() {
 		return RoleType.VILLAGER;
 	}
+
 	@Override
 	public RoleWinType getWinType() {
 		return RoleWinType.VILLAGE;
 	}
+
 	@Override
 	public String getName(int amount) {
 		final String baseline = this.getName();
 
 		return (amount > 1) ? baseline + "s" : baseline;
 	}
+
 	@Override
 	public String getName() {
 		return "§a§lSorcière";
 	}
+
 	@Override
 	public String getFriendlyName() {
-		return "de la "+getName();
+		return "de la " + getName();
 	}
+
 	@Override
 	public String getShortDescription() {
 		return "Tu gagnes avec le §a§lVillage";
 	}
+
 	@Override
 	public String getDescription() {
 		return "Tu gagnes avec le §a§lVillage§f. Tu disposes de deux potions : une §e§o§lpotion de vie§f pour sauver la victime des §c§lLoups§f, et une §e§o§lpotion de mort§f pour assassiner quelqu'un.";
 	}
+
 	@Override
 	public String getTask() {
 		return "Que veux-tu faire cette nuit ?";
 	}
+
 	@Override
 	public String getBroadcastedTask() {
-		return "La "+getName()+"§9 est en train de concocter un nouvel élixir.";
+		return "La " + getName() + "§9 est en train de concocter un nouvel élixir.";
 	}
+
 	@Override
 	public int getTimeout() {
 		return 30;
 	}
-	
+
 	private LGPlayer sauver;
 	private Runnable callback;
-	
+
 	@Override
 	protected void onNightTurn(LGPlayer player, Runnable callback) {
 		player.showView();
 		this.callback = callback;
 		sauver = getGame().getDeaths().get(Reason.LOUP_GAROU);
-		if(sauver == null)
+		if (sauver == null)
 			sauver = getGame().getDeaths().get(Reason.DONT_DIE);
-		
+
 		openInventory(player);
 	}
+
 	@Override
 	protected void onNightTurnTimeout(LGPlayer player) {
 		player.getPlayer().getInventory().setItem(8, null);
@@ -117,31 +127,36 @@ public class RSorciere extends Role{
 		player.getPlayer().updateInventory();
 		player.hideView();
 	}
+
 	private void openInventory(LGPlayer player) {
 		inMenu = true;
-		Inventory inventory = Bukkit.createInventory(null, InventoryType.BREWING, sauver == null ? "§7Personne n'a été ciblé" : "§7§l" + sauver.getFullName() + " §7est ciblé");
-		inventory.setContents(items.clone());//clone au cas où Bukkit prenne directement la liste pour éviter de la modifier avec setItem (jsp)
-		if(sauver == null || player.getCache().getBoolean(RSorciere.WICH_USED_LIFE_POTION))
+		Inventory inventory = Bukkit.createInventory(null, InventoryType.BREWING,
+				sauver == null ? "§7Personne n'a été ciblé" : "§7§l" + sauver.getFullName() + " §7est ciblé");
+		inventory.setContents(items.clone());// clone au cas où Bukkit prenne directement la liste pour éviter de la
+																					// modifier avec setItem (jsp)
+		if (sauver == null || player.getCache().getBoolean(RSorciere.WICH_USED_LIFE_POTION))
 			inventory.setItem(0, null);
-		
-		if(sauver != null) {
+
+		if (sauver != null) {
 			ItemStack head = new ItemStack(Material.ARROW);
 			ItemMeta meta = head.getItemMeta();
 			meta.setDisplayName("§7§l" + sauver.getFullName() + "§c est ciblé");
 			head.setItemMeta(meta);
 			inventory.setItem(4, head);
 		}
-		if(player.getCache().getBoolean(RSorciere.WICH_USED_DEATH_POTION))
+		if (player.getCache().getBoolean(RSorciere.WICH_USED_DEATH_POTION))
 			inventory.setItem(2, null);
 		player.getPlayer().closeInventory();
 		player.getPlayer().openInventory(inventory);
 	}
+
 	boolean inMenu = false;
-	
+
 	private void closeInventory(Player p) {
 		inMenu = false;
 		p.closeInventory();
 	}
+
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		ItemStack item = e.getCurrentItem();
@@ -151,7 +166,9 @@ public class RSorciere extends Role{
 		if (lgp.getRole() != this || item == null || item.getItemMeta() == null)
 			return;
 
-		if (item.getItemMeta().getDisplayName().equals(items[0].getItemMeta().getDisplayName()) && sauver != null) {// Potion de vie
+		if (item.getItemMeta().getDisplayName().equals(items[0].getItemMeta().getDisplayName()) && sauver != null) {// Potion
+																																																								// de
+																																																								// vie
 			e.setCancelled(true);
 			closeInventory(player);
 			saveLife(lgp);
@@ -165,27 +182,28 @@ public class RSorciere extends Role{
 			e.setCancelled(true);
 			player.getInventory().setItem(8, cancel);
 			player.updateInventory();
-			
-			//On le met sur le slot 0 pour éviter un missclick sur la croix
+
+			// On le met sur le slot 0 pour éviter un missclick sur la croix
 			WrapperPlayServerHeldItemSlot hold = new WrapperPlayServerHeldItemSlot();
 			hold.setSlot(0);
 			hold.sendPacket(lgp.getPlayer());
-			
+
 			closeInventory(player);
 			lgp.choose(choosen -> {
 				if (choosen != null) {
 					lgp.stopChoosing();
 					kill(choosen, lgp);
 				}
-			}/*, sauver*/);//On peut tuer la personne qui a été tué par les loups (bien que cela ne serve à rien)
+			}/* , sauver */);// On peut tuer la personne qui a été tué par les loups (bien que cela ne serve
+												// à rien)
 		}
 	}
-	
+
 	@EventHandler
 	public void onClick(PlayerInteractEvent e) {
 		Player p = e.getPlayer();
 		LGPlayer player = LGPlayer.thePlayer(p);
-		if(e.getItem() != null && e.getItem().getType() == Material.IRON_NUGGET && player.getRole() == this) {
+		if (e.getItem() != null && e.getItem().getType() == Material.IRON_NUGGET && player.getRole() == this) {
 			player.stopChoosing();
 			p.getInventory().setItem(8, null);
 			p.updateInventory();
@@ -193,13 +211,14 @@ public class RSorciere extends Role{
 			openInventory(player);
 		}
 	}
+
 	@EventHandler
 	public void onQuitInventory(InventoryCloseEvent e) {
-		if(e.getInventory() instanceof CraftInventoryCustom) {
-			LGPlayer player = LGPlayer.thePlayer((Player)e.getPlayer());
-			if(player.getRole() == this && inMenu) {
+		if (e.getInventory() instanceof CraftInventoryCustom) {
+			LGPlayer player = LGPlayer.thePlayer((Player) e.getPlayer());
+			if (player.getRole() == this && inMenu) {
 				new BukkitRunnable() {
-					
+
 					@Override
 					public void run() {
 						e.getPlayer().openInventory(e.getInventory());
@@ -208,7 +227,7 @@ public class RSorciere extends Role{
 			}
 		}
 	}
-	
+
 	private void kill(LGPlayer choosen, LGPlayer player) {
 		player.getPlayer().getInventory().setItem(8, null);
 		player.getPlayer().updateInventory();
@@ -219,6 +238,7 @@ public class RSorciere extends Role{
 		player.hideView();
 		callback.run();
 	}
+
 	private void saveLife(LGPlayer player) {
 		player.getCache().set(RSorciere.WICH_USED_LIFE_POTION, true);
 		getGame().getDeaths().remove(Reason.LOUP_GAROU, sauver);

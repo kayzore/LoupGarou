@@ -7,10 +7,10 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import fr.leomelki.loupgarou.classes.LGPlayer;
 
-public class ChatListener implements Listener{
+public class ChatListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onChat(AsyncPlayerChatEvent e) {
-		if(!e.isCancelled()) {
+		if (!e.isCancelled()) {
 			LGPlayer player = LGPlayer.thePlayer(e.getPlayer());
 			player.onChat(e.getMessage());
 			e.setCancelled(true);

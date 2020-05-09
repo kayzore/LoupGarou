@@ -8,19 +8,19 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-public class LGPlayerKilledEvent extends LGEvent implements Cancellable{
-	@Getter @Setter boolean cancelled;  
+public class LGPlayerKilledEvent extends LGEvent implements Cancellable {
+	@Getter @Setter boolean cancelled;
 	@Getter @Setter private LGPlayer killed;
 	@Getter @Setter private Reason reason;
-		
+
 	public LGPlayerKilledEvent(LGGame game, LGPlayer killed, Reason reason) {
 		super(game);
 		this.killed = killed;
 		this.reason = reason;
 	}
-	
+
 	@RequiredArgsConstructor
-	public enum Reason{
+	public enum Reason {
 		LOUP_GAROU("§7§l%s§4 est mort pendant la nuit"),
 		GM_LOUP_GAROU("§7§l%s§4 est mort pendant la nuit"),
 		LOUP_BLANC(LOUP_GAROU.getMessage()),
@@ -38,8 +38,8 @@ public class LGPlayerKilledEvent extends LGEvent implements Cancellable{
 		PIRATE("§7§l%s§4 était l'otage"),
 		FAUCHEUR("§7§l%s§4 a égaré son âme"),
 		DONT_DIE("§7§l%s§4 est mort pour rien");
-		
+
 		@Getter private final String message;
 	}
-	
+
 }

@@ -12,14 +12,14 @@ import fr.leomelki.loupgarou.events.LGGameJoinEvent;
 public class LoupGarouListener implements Listener {
 	@EventHandler
 	public void onGameJoin(LGGameJoinEvent e) {
-		//Tous les loups-garous
+		// Tous les loups-garous
 		WrapperPlayServerScoreboardTeam teamDelete = new WrapperPlayServerScoreboardTeam();
 		teamDelete.setMode(1);
 		teamDelete.setName("loup_garou_list");
-		
+
 		teamDelete.sendPacket(e.getPlayer().getPlayer());
-		
-		//Loup-Garou noir
+
+		// Loup-Garou noir
 		WrapperPlayServerScoreboardScore score = new WrapperPlayServerScoreboardScore();
 		score.setObjectiveName("lg_scoreboard");
 		score.setValue(0);

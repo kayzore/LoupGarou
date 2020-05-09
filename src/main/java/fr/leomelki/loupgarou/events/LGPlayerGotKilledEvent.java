@@ -9,7 +9,7 @@ public class LGPlayerGotKilledEvent extends LGEvent {
 	@Getter private final boolean endGame;
 	@Getter private final LGPlayer killed;
 	@Getter private Reason reason;
-		
+
 	public LGPlayerGotKilledEvent(LGGame game, LGPlayer killed, Reason reason, boolean endGame) {
 		super(game);
 		this.killed = killed;

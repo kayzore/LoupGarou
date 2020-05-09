@@ -6,7 +6,7 @@ import fr.leomelki.loupgarou.classes.LGCustomItems;
 import fr.leomelki.loupgarou.classes.LGGame;
 import fr.leomelki.loupgarou.classes.LGPlayer;
 
-public class RChienLoupLG extends Role{
+public class RChienLoupLG extends Role {
 	public RChienLoupLG(LGGame game) {
 		super(game);
 	}
@@ -20,15 +20,15 @@ public class RChienLoupLG extends Role{
 
 	@Override
 	public String getName() {
-		for(LGPlayer lgp : getPlayers())
-			if(lgp.getPlayer() != null && lgp.getPlayer().hasPotionEffect(PotionEffectType.INVISIBILITY))
+		for (LGPlayer lgp : getPlayers())
+			if (lgp.getPlayer() != null && lgp.getPlayer().hasPotionEffect(PotionEffectType.INVISIBILITY))
 				return "§c§lChien-Loup";
-		return (!getPlayers().isEmpty() ? "§a" : "§c")+"§lChien-Loup";
+		return (!getPlayers().isEmpty() ? "§a" : "§c") + "§lChien-Loup";
 	}
 
 	@Override
 	public String getFriendlyName() {
-		return "du "+getName();
+		return "du " + getName();
 	}
 
 	@Override
@@ -48,12 +48,14 @@ public class RChienLoupLG extends Role{
 
 	@Override
 	public String getBroadcastedTask() {
-		return "Le "+getName()+"§9 pourrait trouver de nouveaux amis...";
+		return "Le " + getName() + "§9 pourrait trouver de nouveaux amis...";
 	}
+
 	@Override
 	public RoleType getType() {
 		return RoleType.LOUP_GAROU;
 	}
+
 	@Override
 	public RoleWinType getWinType() {
 		return RoleWinType.LOUP_GAROU;
@@ -69,11 +71,11 @@ public class RChienLoupLG extends Role{
 		super.join(player, sendMessage);
 		player.setRole(this);
 		LGCustomItems.updateItem(player);
-		for(Role role : getGame().getRoles())
-			if(role instanceof RLoupGarou) {
+		for (Role role : getGame().getRoles())
+			if (role instanceof RLoupGarou) {
 				role.join(player, false);
-				for(LGPlayer lgp : role.getPlayers())
-					if(lgp != player)
+				for (LGPlayer lgp : role.getPlayers())
+					if (lgp != player)
 						lgp.sendMessage("§7§l" + player.getFullName() + "§6 a rejoint les §c§lLoups-Garous§6.");
 			}
 	}

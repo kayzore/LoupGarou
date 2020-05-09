@@ -15,7 +15,8 @@ class ParserFixedRoles extends ParserAbstract {
     final FileConfiguration config = this.instanceMainLg.getConfig();
     final String roleDistribution = config.getString("roleDistribution");
 
-    this.roleDistributionWarning = "§b'roleDistribution: fixed'§5 dans config.yml.\n/!\\ Actuellement le mode de distribution est: §b'roleDistribution: " + roleDistribution + "'§5\n";
+    this.roleDistributionWarning = "§b'roleDistribution: fixed'§5 dans config.yml.\n/!\\ Actuellement le mode de distribution est: §b'roleDistribution: "
+        + roleDistribution + "'§5\n";
     this.isRoleDistributionFixed = roleDistribution.equals("fixed");
   }
 
@@ -43,7 +44,8 @@ class ParserFixedRoles extends ParserAbstract {
     }
 
     sender.sendMessage("\n§4Erreur: §cCommande incorrecte.");
-    sender.sendMessage("§4Essayez §c/lg roles§4 ou §c/lg roles list§4 ou §c/lg roles set <role_id/role_name> <nombre>§4");
+    sender
+        .sendMessage("§4Essayez §c/lg roles§4 ou §c/lg roles list§4 ou §c/lg roles set <role_id/role_name> <nombre>§4");
   }
 
   /* ========================================================================== */
@@ -52,7 +54,8 @@ class ParserFixedRoles extends ParserAbstract {
 
   private void displayAvailableRoles(CommandSender sender) {
     if (!this.isRoleDistributionFixed) {
-      sender.sendMessage("\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec " + this.roleDistributionWarning);
+      sender.sendMessage(
+          "\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec " + this.roleDistributionWarning);
     }
 
     sender.sendMessage("\n§7Voici la liste des rôles:");
@@ -72,7 +75,8 @@ class ParserFixedRoles extends ParserAbstract {
 
   private void displayAllRoles(CommandSender sender) {
     if (!this.isRoleDistributionFixed) {
-      sender.sendMessage("\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec " + this.roleDistributionWarning);
+      sender.sendMessage(
+          "\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec " + this.roleDistributionWarning);
     }
 
     int index = 0;
@@ -84,7 +88,8 @@ class ParserFixedRoles extends ParserAbstract {
       sender.sendMessage("  §e- " + (index++) + " - §6" + role + " §e> " + openedSlots);
     }
 
-    sender.sendMessage("\n§7Écrivez §8§o/lg roles set <role_id/role_name> <nombre>§7 pour définir le nombre de joueurs qui devrons avoir ce rôle.");
+    sender.sendMessage(
+        "\n§7Écrivez §8§o/lg roles set <role_id/role_name> <nombre>§7 pour définir le nombre de joueurs qui devrons avoir ce rôle.");
   }
 
   /* ========================================================================== */
@@ -99,7 +104,8 @@ class ParserFixedRoles extends ParserAbstract {
     }
 
     if (!this.isRoleDistributionFixed) {
-      sender.sendMessage("\n§l§5/!\\ Ces valeurs vont être sauvegardées mais ne seront utilisées qu'avec " + this.roleDistributionWarning);
+      sender.sendMessage("\n§l§5/!\\ Ces valeurs vont être sauvegardées mais ne seront utilisées qu'avec "
+          + this.roleDistributionWarning);
     }
 
     final String roleName = this.getRoleName(args[2]);
@@ -110,19 +116,18 @@ class ParserFixedRoles extends ParserAbstract {
 
     final Integer amount = this.getRoleAmount(args[3]);
 
-    
     if (amount == null) {
       sender.sendMessage("\n§4Erreur: La valeur §c'" + args[3] + "'§4 n'est pas une quantité valide de joueurs");
     }
 
     this.setOpenedSlots(roleName, amount);
-    
+
     sender.sendMessage("\n§6Il y aura §e " + amount + " §6" + roleName);
     this.instanceMainLg.saveConfig();
     this.instanceMainLg.loadConfig();
     sender.sendMessage("§7§oSi vous avez fini de changer les rôles, utilisez §8§o/lg joinall§7§o");
   }
-  
+
   /* ========================================================================== */
   /*                                UTILITY METHODS                            */
   /* ========================================================================== */
@@ -143,19 +148,20 @@ class ParserFixedRoles extends ParserAbstract {
     try {
       final int roleID = Integer.parseInt(raw);
       final Object[] array = this.instanceMainLg.getRolesBuilder().keySet().toArray();
-      
-      return (array.length > roleID) ? (String)array[roleID] : null;
+
+      return (array.length > roleID) ? (String) array[roleID] : null;
     } catch (NumberFormatException e) {
       return raw;
-    } 
+    }
   }
 
   private String getRoleName(String raw) {
     final String rawRoleName = this.parseRoleKey(raw);
-    
+
     return (rawRoleName != null)
-      ? this.instanceMainLg.getRolesBuilder().keySet().stream().filter(e -> e.equalsIgnoreCase(rawRoleName)).findAny().orElse(null)
-      : null;
+        ? this.instanceMainLg.getRolesBuilder().keySet().stream().filter(e -> e.equalsIgnoreCase(rawRoleName)).findAny()
+            .orElse(null)
+        : null;
   }
 
   private Integer getRoleAmount(String raw) {
@@ -165,6 +171,6 @@ class ParserFixedRoles extends ParserAbstract {
       return (parsedValue >= 0) ? parsedValue : null;
     } catch (NumberFormatException e) {
       return null;
-    } 
+    }
   }
 }

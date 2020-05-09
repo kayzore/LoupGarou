@@ -21,62 +21,62 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerInteractListener implements Listener {
+    @Getter private Map<String, Constructor<? extends Role>> roles = new HashMap<>();
 
-    @Getter
-    private Map<String, Constructor<? extends Role>> roles = new HashMap<>();
     public PlayerInteractListener(Map<String, Constructor<? extends Role>> roles) {
         this.roles = roles;
     }
 
     @EventHandler
-    public void onInteract(PlayerInteractEvent e){
+    public void onInteract(PlayerInteractEvent e) {
         int index = 0;
         ItemStack item = e.getItem();
 
-        if(item == null) return;
+        if (item == null)
+            return;
 
-        if(item.getType().equals(Material.ENDER_EYE)){
+        if (item.getType().equals(Material.ENDER_EYE)) {
             Player p = e.getPlayer();
 
-            Inventory gui = Bukkit.createInventory(null, 4*9, "Rôles");
+            Inventory gui = Bukkit.createInventory(null, 4 * 9, "Rôles");
             for (String role : getRoles().keySet())
                 gui.setItem(index++, new ItemBuilder(Material.HEART_OF_THE_SEA).setName(role).build());
             gui.setItem(35, new ItemBuilder(Material.GOLD_NUGGET).setName("Valider").build());
             p.openInventory(gui);
-        } else if (item.getType().equals(Material.EMERALD)){
+        } else if (item.getType().equals(Material.EMERALD)) {
             Bukkit.dispatchCommand(e.getPlayer(), "lg start " + e.getPlayer().getDisplayName());
         }
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent e){
+    public void onInventoryClick(InventoryClickEvent e) {
         Player p = (Player) e.getWhoClicked();
-        if(e.getView().getTitle().equals("Rôles")){
+        if (e.getView().getTitle().equals("Rôles")) {
             int index = 0;
             Integer n = null;
 
-            if(e.getCurrentItem().getType() == Material.GOLD_NUGGET){
+            if (e.getCurrentItem().getType() == Material.GOLD_NUGGET) {
                 for (Player pl : Bukkit.getOnlinePlayers())
                     Bukkit.getPluginManager().callEvent(new PlayerQuitEvent(pl, "joinall"));
                 for (Player pl : Bukkit.getOnlinePlayers())
                     Bukkit.getPluginManager().callEvent(new PlayerJoinEvent(pl, "joinall"));
-                p.getInventory().setItem(3,new ItemBuilder(Material.EMERALD).setName("Lancer la partie").build());
-                p.getInventory().setItem(1,new ItemBuilder(Material.ENDER_EYE).setName("Choisir les rôles").build());
-            } else if(e.isLeftClick()){
-                for(String role : getRoles().keySet()){
-                    if(role.equals(e.getCurrentItem().getItemMeta().getDisplayName())){
+                p.getInventory().setItem(3, new ItemBuilder(Material.EMERALD).setName("Lancer la partie").build());
+                p.getInventory().setItem(1, new ItemBuilder(Material.ENDER_EYE).setName("Choisir les rôles").build());
+            } else if (e.isLeftClick()) {
+                for (String role : getRoles().keySet()) {
+                    if (role.equals(e.getCurrentItem().getItemMeta().getDisplayName())) {
                         n = MainLg.getInstance().getConfig().getInt("distributionFixed." + role);
-                        Bukkit.dispatchCommand(p, "lg roles set " + index + " " + (n+1));
+                        Bukkit.dispatchCommand(p, "lg roles set " + index + " " + (n + 1));
                         return;
                     }
                     index++;
                 }
-            } else if(e.isRightClick()){
-                for(String role : getRoles().keySet()){
-                    if(role.equals(e.getCurrentItem().getItemMeta().getDisplayName())){
+            } else if (e.isRightClick()) {
+                for (String role : getRoles().keySet()) {
+                    if (role.equals(e.getCurrentItem().getItemMeta().getDisplayName())) {
                         n = MainLg.getInstance().getConfig().getInt("distributionFixed." + role);
-                        if(n > 0)
-                            Bukkit.dispatchCommand(p, "lg roles set " + index + " " + (n-1));
+                        if (n > 0)
+                            Bukkit.dispatchCommand(p, "lg roles set " + index + " " + (n - 1));
                         return;
                     }
                     index++;

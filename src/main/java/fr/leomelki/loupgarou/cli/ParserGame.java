@@ -28,14 +28,15 @@ class ParserGame extends ParserAbstract {
 
     sender.sendMessage("\n" + onlinePlayers.size() + " joueurs ont été détectés en ligne et vont rejoindre la partie");
 
-    for(Player p : onlinePlayers) {
+    for (Player p : onlinePlayers) {
       Bukkit.getPluginManager().callEvent(new PlayerQuitEvent(p, "joinall"));
     }
 
-    for(Player p : onlinePlayers) {
+    for (Player p : onlinePlayers) {
       Bukkit.getPluginManager().callEvent(new PlayerJoinEvent(p, "joinall"));
       if (p.getPlayer().hasPermission("loupgarou.admin")) {
-        p.getPlayer().getInventory().setItem(1, new ItemBuilder(Material.ENDER_EYE).setName("Choisir les rôles").build());
+        p.getPlayer().getInventory().setItem(1,
+            new ItemBuilder(Material.ENDER_EYE).setName("Choisir les rôles").build());
         p.getPlayer().getInventory().setItem(3, new ItemBuilder(Material.EMERALD).setName("Lancer la partie").build());
       }
     }
@@ -47,7 +48,7 @@ class ParserGame extends ParserAbstract {
 
   protected void processStartGame(CommandSender sender, String[] args) {
     final boolean isTargetingPlayer = (args.length == 2);
-    final Player player = (isTargetingPlayer) ? Bukkit.getPlayer(args[1]) : (Player)sender;
+    final Player player = (isTargetingPlayer) ? Bukkit.getPlayer(args[1]) : (Player) sender;
 
     if (isTargetingPlayer && player == null) {
       sender.sendMessage(PLAYER_ERROR_PREFIX + args[1] + "§c n'existe pas !");
@@ -56,12 +57,12 @@ class ParserGame extends ParserAbstract {
 
     final LGPlayer lgp = LGPlayer.thePlayer(player);
 
-    if(lgp.getGame() == null) {
+    if (lgp.getGame() == null) {
       sender.sendMessage(PLAYER_ERROR_PREFIX + lgp.getName() + "§c n'est pas dans une partie.");
       return;
     }
 
-    if(this.instanceMainLg.getConfig().getList("spawns").size() < lgp.getGame().getMaxPlayers()) {
+    if (this.instanceMainLg.getConfig().getList("spawns").size() < lgp.getGame().getMaxPlayers()) {
       sender.sendMessage("\n§4Erreur : §cIl n'y a pas assez de points de spawn !");
       sender.sendMessage("§8§oPour les définir, merci de faire §7/lg addSpawn");
       return;
@@ -77,7 +78,7 @@ class ParserGame extends ParserAbstract {
 
   protected void processEndGame(CommandSender sender, String[] args) {
     final boolean isTargetingPlayer = (args.length == 2);
-    final Player selected = (isTargetingPlayer) ? Bukkit.getPlayer(args[1]) : (Player)sender;
+    final Player selected = (isTargetingPlayer) ? Bukkit.getPlayer(args[1]) : (Player) sender;
 
     if (isTargetingPlayer && selected == null) {
       sender.sendMessage(PLAYER_ERROR_PREFIX + args[1] + "§c n'est pas connecté.");
@@ -86,8 +87,8 @@ class ParserGame extends ParserAbstract {
 
     final LGGame game = LGPlayer.thePlayer(selected).getGame();
 
-    if(game == null) {
-      sender.sendMessage(PLAYER_ERROR_PREFIX + selected.getName()+"§c n'est pas dans une partie.");
+    if (game == null) {
+      sender.sendMessage(PLAYER_ERROR_PREFIX + selected.getName() + "§c n'est pas dans une partie.");
       return;
     }
 

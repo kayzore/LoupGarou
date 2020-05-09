@@ -30,13 +30,14 @@ public class LGCustomItems {
 		final Reader reader = new InputStreamReader(stream);
 		JSONParser jsonParser = new JSONParser();
 
-    return jsonParser.parse(reader);
+		return jsonParser.parse(reader);
 	}
 
 	private static void addItem(final String roleName, HashMap<String, Material> currentMapping) {
 		try {
 			@SuppressWarnings("unchecked")
-			final Class<? extends Role> matchingClass = (Class<? extends Role>)Class.forName("fr.leomelki.loupgarou.roles.R" + roleName);
+			final Class<? extends Role> matchingClass = (Class<? extends Role>) Class
+					.forName("fr.leomelki.loupgarou.roles.R" + roleName);
 
 			LGCustomItems.mappings.put(matchingClass, currentMapping);
 		} catch (ClassNotFoundException e) {
@@ -54,16 +55,16 @@ public class LGCustomItems {
 		}
 
 		for (Object rawEntry : parsedJson.entrySet()) {
-			final HashMap<String,Material> items = new HashMap<>();
+			final HashMap<String, Material> items = new HashMap<>();
 
 			@SuppressWarnings("unchecked")
-			final Entry<String,HashMap<String, Material>> entry = (Entry<String,HashMap<String, Material>>) rawEntry;
+			final Entry<String, HashMap<String, Material>> entry = (Entry<String, HashMap<String, Material>>) rawEntry;
 			final JSONObject currentProperties = (JSONObject) entry.getValue();
 			final String roleName = entry.getKey();
 
 			for (Object rawProperty : currentProperties.entrySet()) {
 				@SuppressWarnings("unchecked")
-				final Entry<String,String> property = (Entry<String,String>) rawProperty;
+				final Entry<String, String> property = (Entry<String, String>) rawProperty;
 				final String currentName = property.getKey();
 				final String currentMaterial = property.getValue();
 
@@ -83,13 +84,17 @@ public class LGCustomItems {
 
 		Collections.sort(constraints);
 		HashMap<String, Material> mapps = mappings.get(player.getRole().getClass());
-		if(mapps == null)
-			return Material.AIR;//Lors du développement de rôles.
+		
+		// Lors du développement de rôles.
+		if (mapps == null)
+			return Material.AIR;
+
 		StringJoiner sj = new StringJoiner("_");
-		for(String s : constraints)
+		for (String s : constraints)
 			sj.add(s);
 		return mapps.get(sj.toString());
 	}
+
 	public static Material getItem(LGPlayer player) {
 		return getItem(player, new ArrayList<String>());
 	}
@@ -105,11 +110,9 @@ public class LGCustomItems {
 	}
 
 	@RequiredArgsConstructor
-	public enum LGCustomItemsConstraints{
-		INFECTED("infecte"),
-		MAYOR("maire"),
-		VAMPIRE_INFECTE("vampire-infecte"),
-		DEAD("mort");
+	public enum LGCustomItemsConstraints {
+		INFECTED("infecte"), MAYOR("maire"), VAMPIRE_INFECTE("vampire-infecte"), DEAD("mort");
+
 		@Getter private final String name;
 	}
 
