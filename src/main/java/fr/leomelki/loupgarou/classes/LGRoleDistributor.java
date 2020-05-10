@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import fr.leomelki.loupgarou.MainLg;
 import fr.leomelki.loupgarou.roles.Role;
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerUpdateHealth;
 
@@ -99,30 +100,26 @@ public class LGRoleDistributor {
 
   private List<Role> useRandomAssignation() {
     final SecureRandom random = new SecureRandom();
-    final ArrayList<LGPlayer> toGive = new ArrayList<>(players);
+    final ArrayList<LGPlayer> toGive = new ArrayList<>(this.players);
 
     final int maxPlayers = this.players.size();
-    final Map<String, Object> categoryWeigths = config.getConfigurationSection("distributionRandom.categoryWeights").getValues(false);
-    final int totalRolesWeight = (int) categoryWeigths.get("evilRoles") + (int) categoryWeigths.get("neutralRoles")+ (int) categoryWeigths.get("villagerRoles");
-    final double amountOfEvil = Math.floor((double) (maxPlayers * (int) categoryWeigths.get("evilRoles")) / totalRolesWeight);
-    final double amountOfNeutral = Math.ceil((double) (maxPlayers * (int) categoryWeigths.get("neutralRoles")) / totalRolesWeight);
-    final double amountOfVillagers = maxPlayers - (amountOfEvil + amountOfNeutral);
+    final LGRandomRoleSplit categorySplits = LGRandomRoleSplit.getCategorySplits(maxPlayers, this.config);
 
-    final Map<String, Object> evilWeigths = this.config.getConfigurationSection("distributionRandom.evilWeigths").getValues(false);
+    final Map<String, Object> evilWeigths = this.config.getConfigurationSection(MainLg.DISTRIBUTION_RANDOM_KEY + "evilWeigths").getValues(false);
     final LGRandomRolePicker evilRolePicker = new LGRandomRolePicker(game, evilWeigths, this.rolesBuilder);
 
-    for (int i = 0; i < amountOfEvil; i++) {
+    for (int i = 0; i < categorySplits.getAmountOfEvil(); i++) {
       final Role pickedRole = evilRolePicker.roll();
       final int randomized = random.nextInt(toGive.size());
       final LGPlayer selected = toGive.remove(randomized);
       this.setRoleToPlayer(selected, pickedRole);
     }
 
-    final Map<String, Object> neutralWeights = this.config.getConfigurationSection("distributionRandom.neutralWeights").getValues(false);
+    final Map<String, Object> neutralWeights = this.config.getConfigurationSection(MainLg.DISTRIBUTION_RANDOM_KEY + "neutralWeights").getValues(false);
     final LGRandomRolePicker neutralRolePicker = new LGRandomRolePicker(game, neutralWeights, this.rolesBuilder);
     int amountOfVampires = 0;
 
-    for (int i = 0; i < amountOfNeutral; i++) {
+    for (int i = 0; i < categorySplits.getAmountOfNeutral(); i++) {
       final Role pickedRole = neutralRolePicker.roll();
       final int randomized = random.nextInt(toGive.size());
       final LGPlayer selected = toGive.remove(randomized);
@@ -133,10 +130,10 @@ public class LGRoleDistributor {
       }
     }
 
-    final Map<String, Object> villagerWeights = this.config.getConfigurationSection("distributionRandom.villagerWeights").getValues(false);
+    final Map<String, Object> villagerWeights = this.config.getConfigurationSection(MainLg.DISTRIBUTION_RANDOM_KEY + "villagerWeights").getValues(false);
     final LGRandomRolePicker villagerRolePicker = new LGRandomRolePicker(game, villagerWeights, this.rolesBuilder);
 
-    for (int i = 0; i < amountOfVillagers; i++) {
+    for (int i = 0; i < categorySplits.getAmountOfVillagers(); i++) {
       final Role pickedRole = (amountOfVampires-- > 0) 
         ? this.instantiateRole("ChasseurDeVampire") 
         : villagerRolePicker.roll();

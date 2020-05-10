@@ -133,8 +133,9 @@ public class LGVote {
 				equal = false;
 				max = entry.getValue().size();
 				choosen = entry.getKey();
-			} else if (entry.getValue().size() == max)
+			} else if (entry.getValue().size() == max) {
 				equal = true;
+			}
 		for (LGPlayer player : participants) {
 			player.getCache().remove("vote");
 			player.stopChoosing();

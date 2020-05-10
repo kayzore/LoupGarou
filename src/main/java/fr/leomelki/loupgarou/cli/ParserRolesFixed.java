@@ -1,23 +1,13 @@
 package fr.leomelki.loupgarou.cli;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import fr.leomelki.loupgarou.MainLg;
 
-class ParserFixedRoles extends ParserAbstract {
-  final String roleDistributionWarning;
-  final boolean isRoleDistributionFixed;
-
-  protected ParserFixedRoles(CommandInterpreter other) {
+class ParserRolesFixed extends ParserRolesAbstract {
+  protected ParserRolesFixed(CommandInterpreter other) {
     super(other);
-
-    final FileConfiguration config = this.instanceMainLg.getConfig();
-    final String roleDistribution = config.getString("roleDistribution");
-
-    this.roleDistributionWarning = "§b'roleDistribution: fixed'§5 dans config.yml.\n/!\\ Actuellement le mode de distribution est: §b'roleDistribution: "
-        + roleDistribution + "'§5\n";
-    this.isRoleDistributionFixed = roleDistribution.equals("fixed");
+    this.expectedDistribution = "fixed";
   }
 
   protected void processRoles(CommandSender sender, String[] args) {
@@ -44,19 +34,16 @@ class ParserFixedRoles extends ParserAbstract {
     }
 
     sender.sendMessage("\n§4Erreur: §cCommande incorrecte.");
-    sender
-        .sendMessage("§4Essayez §c/lg roles§4 ou §c/lg roles list§4 ou §c/lg roles set <role_id/role_name> <nombre>§4");
+    sender.sendMessage("§4Essayez §c/lg roles§4 ou §c/lg roles list§4 ou §c/lg roles set <role_id/role_name> <nombre>§4");
   }
 
   /* ========================================================================== */
   /*                           DISPLAY AVAILABLE ROLES                          */
   /* ========================================================================== */
 
-  private void displayAvailableRoles(CommandSender sender) {
-    if (!this.isRoleDistributionFixed) {
-      sender.sendMessage(
-          "\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec " + this.roleDistributionWarning);
-    }
+  @Override
+  protected void displayAvailableRoles(CommandSender sender) {
+    this.warnWhenRoleDistributionDontMatch(sender, "\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec");
 
     sender.sendMessage("\n§7Voici la liste des rôles:");
 
@@ -73,11 +60,9 @@ class ParserFixedRoles extends ParserAbstract {
   /*                              DISPLAY ALL ROLES                             */
   /* ========================================================================== */
 
-  private void displayAllRoles(CommandSender sender) {
-    if (!this.isRoleDistributionFixed) {
-      sender.sendMessage(
-          "\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec " + this.roleDistributionWarning);
-    }
+  @Override
+  protected void displayAllRoles(CommandSender sender) {
+    this.warnWhenRoleDistributionDontMatch(sender, "\n§l§5/!\\ Les valeurs qui suivent ne sont applicables qu'avec");
 
     int index = 0;
     sender.sendMessage("\n§7roVoici la liste complète des rôles:");
@@ -96,25 +81,22 @@ class ParserFixedRoles extends ParserAbstract {
   /*                             SET ROLE AVAILABILITY                          */
   /* ========================================================================== */
 
-  private void setRoleAvailability(CommandSender sender, String[] args) {
+  @Override
+  protected void setRoleAvailability(CommandSender sender, String[] args) {
     if (args.length != 4) {
       sender.sendMessage("\n§4Erreur: §cCommande incorrecte.");
       sender.sendMessage("§4Essayez §c/lg roles set <role_id/role_name> <nombre>§4");
       return;
     }
 
-    if (!this.isRoleDistributionFixed) {
-      sender.sendMessage("\n§l§5/!\\ Ces valeurs vont être sauvegardées mais ne seront utilisées qu'avec "
-          + this.roleDistributionWarning);
-    }
-
+    this.warnWhenRoleDistributionDontMatch(sender, "\n§l§5/!\\ Ces valeurs vont être sauvegardées mais ne seront utilisées qu'avec");
     final String roleName = this.getRoleName(args[2]);
 
     if (roleName == null) {
       sender.sendMessage("\n§4Erreur: Le rôle §c'" + args[2] + "'§4 n'existe pas");
     }
 
-    final Integer amount = this.getRoleAmount(args[3]);
+    final Integer amount = this.parseInteger(args[3]);
 
     if (amount == null) {
       sender.sendMessage("\n§4Erreur: La valeur §c'" + args[3] + "'§4 n'est pas une quantité valide de joueurs");
@@ -142,35 +124,5 @@ class ParserFixedRoles extends ParserAbstract {
     final String roleKey = MainLg.DISTRIBUTION_FIXED_KEY + role;
 
     this.instanceMainLg.getConfig().set(roleKey, amount);
-  }
-
-  private String parseRoleKey(String raw) {
-    try {
-      final int roleID = Integer.parseInt(raw);
-      final Object[] array = this.instanceMainLg.getRolesBuilder().keySet().toArray();
-
-      return (array.length > roleID) ? (String) array[roleID] : null;
-    } catch (NumberFormatException e) {
-      return raw;
-    }
-  }
-
-  private String getRoleName(String raw) {
-    final String rawRoleName = this.parseRoleKey(raw);
-
-    return (rawRoleName != null)
-        ? this.instanceMainLg.getRolesBuilder().keySet().stream().filter(e -> e.equalsIgnoreCase(rawRoleName)).findAny()
-            .orElse(null)
-        : null;
-  }
-
-  private Integer getRoleAmount(String raw) {
-    try {
-      final Integer parsedValue = Integer.parseInt(raw);
-
-      return (parsedValue >= 0) ? parsedValue : null;
-    } catch (NumberFormatException e) {
-      return null;
-    }
   }
 }

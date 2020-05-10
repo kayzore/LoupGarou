@@ -23,4 +23,14 @@ abstract class ParserAbstract {
   protected void denyCommand(CommandSender sender) {
     sender.sendMessage("§4Erreur: Vous n'avez pas la permission...");
   }
+  
+  protected Integer parseInteger(String raw) {
+    try {
+      final Integer parsedValue = Integer.parseInt(raw);
+
+      return (parsedValue >= 0) ? parsedValue : null;
+    } catch (NumberFormatException e) {
+      return null;
+    }
+  }
 }

@@ -68,6 +68,7 @@ public class MainLg extends JavaPlugin {
 	private List<String> startingMemes;
 	private LGStats stats;
 	public static final String DISTRIBUTION_FIXED_KEY = "distributionFixed.";
+	public static final String DISTRIBUTION_RANDOM_KEY = "distributionRandom.";
 
 	@Override
 	public void onEnable() {
@@ -77,9 +78,9 @@ public class MainLg extends JavaPlugin {
 		if (!new File(getDataFolder(), "config.yml").exists()) {
 			config.set("showScoreboard", true);
 			config.set("roleDistribution", "fixed");
-			config.set("distributionRandom.villageRoles", 5);
-			config.set("distributionRandom.evilRoles", 3);
-			config.set("distributionRandom.neutralRoles", 1);
+			config.set(DISTRIBUTION_RANDOM_KEY + "villageRoles", 5);
+			config.set(DISTRIBUTION_RANDOM_KEY + "evilRoles", 3);
+			config.set(DISTRIBUTION_RANDOM_KEY + "neutralRoles", 1);
 
 			// Nombre de participant pour chaque rôle
 			for (String role : rolesBuilder.keySet()) {
@@ -252,33 +253,7 @@ public class MainLg extends JavaPlugin {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if (!sender.hasPermission("loupgarou.admin"))
-			return new ArrayList<>(0);
-
-		if (args.length > 1) {
-			if (args[0].equalsIgnoreCase("roles"))
-				if (args.length == 2)
-					return getStartingList(args[1], "list", "set");
-				else if (args.length == 3 && args[1].equalsIgnoreCase("set"))
-					return getStartingList(args[2], rolesBuilder.keySet().toArray(new String[rolesBuilder.size()]));
-				else if (args.length == 4)
-					return Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-		} else if (args.length == 1) {
-			return getStartingList(args[0], "addSpawn", "end", "start", "nextNight", "nextDay", "reloadConfig", "roles",
-					"joinAll", "reloadPacks", "nick", "unnick");
-		}
-		return new ArrayList<>(0);
-	}
-
-	private List<String> getStartingList(String startsWith, String... list) {
-		startsWith = startsWith.toLowerCase();
-		ArrayList<String> returnlist = new ArrayList<>();
-		if (startsWith.length() == 0)
-			return Arrays.asList(list);
-		for (String s : list)
-			if (s.toLowerCase().startsWith(startsWith))
-				returnlist.add(s);
-		return returnlist;
+		return new CommandInterpreter(this).getAutocomplete(sender, args);
 	}
 
 	public void loadConfig() {
@@ -293,7 +268,7 @@ public class MainLg extends JavaPlugin {
 		}
 
 		if (roleDistribution.equals("random")) {
-			players = config.getInt("distributionRandom.amountOfPlayers");
+			players = config.getInt(DISTRIBUTION_RANDOM_KEY + "amountOfPlayers");
 		}
 
 		currentGame = new LGGame(players);
