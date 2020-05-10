@@ -391,8 +391,12 @@ public class LGGame implements Listener {
 
 	private void _start() {
 		broadcastMessage("§8§oDébut de la partie...");
-		started = true;
 
+		for (Role role: this.roles) {
+			role.updateItemsForAllMembers();
+		}
+
+		started = true;
 		updateRoleScoreboard();
 
 		// Classe les roles afin de les appeler dans le bon ordre

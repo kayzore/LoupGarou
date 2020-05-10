@@ -17,39 +17,32 @@ import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Role implements Listener {
-	@Getter
-	@Setter
-	private int waitedPlayers;
-	@Getter
-	private ArrayList<LGPlayer> players = new ArrayList<>();
-	@Getter
-	public List<LGPlayer> playersThisRound = new ArrayList<>();
-	@Getter
-	private final LGGame game;
+	@Getter @Setter private int waitedPlayers;
+	@Getter private ArrayList<LGPlayer> players = new ArrayList<>(); 
+	@Getter public List<LGPlayer> playersThisRound = new ArrayList<>(); 
+	@Getter private final LGGame game;
 	protected static final String PERFORMED_NO_ACTION = "§6Tu n'as rien fait cette nuit.";
 	protected static final String IS_IMMUNE_FROM_WOLVES = "§cVotre cible est immunisée.";
 
 	public Role(LGGame game) {
 		this.game = game;
+
 		Bukkit.getPluginManager().registerEvents(this, MainLg.getInstance());
+
 		FileConfiguration config = MainLg.getInstance().getConfig();
 		String roleConfigName = "distributionFixed." + getClass().getSimpleName().substring(1);
-		if (config.contains(roleConfigName))
+
+		if (config.contains(roleConfigName)) {
 			waitedPlayers = config.getInt(roleConfigName);
+		}
 	}
 
 	public abstract String getName(int amount);
-
 	public abstract String getName();
-
 	public abstract String getFriendlyName();
-
 	public abstract String getShortDescription();
-
 	public abstract String getDescription();
-
 	public abstract String getTask();
-
 	public abstract String getBroadcastedTask();
 
 	public RoleType getType(LGPlayer lgp) {
@@ -120,11 +113,16 @@ public abstract class Role implements Listener {
 		final String joinLog = player.getFullName() + " est " + getName();
 
 		System.out.println(joinLog.replaceAll("\\§.", ""));
-		players.add(player);
-		playersThisRound.add(player);
-		if (player.getRole() == null)
+		
+		this.players.add(player);
+		this.playersThisRound.add(player);
+		
+		if (player.getRole() == null) {
 			player.setRole(this);
+		}
+
 		waitedPlayers--;
+
 		if (sendMessage) {
 			player.sendTitle("§6Tu es " + getName(), "§e" + getShortDescription(), 200);
 			player.sendMessage("§6Tu es " + getName() + "§6.");
@@ -139,7 +137,12 @@ public abstract class Role implements Listener {
 
 	public void joinAndDisplayRole(final LGPlayer player) {
 		join(player, true);
-		LGCustomItems.updateItem(player);
+	}
+
+	public void updateItemsForAllMembers() {
+		for (LGPlayer player: this.players) {
+			LGCustomItems.updateItem(player);
+		}
 	}
 
 	public boolean hasPlayersLeft() {
