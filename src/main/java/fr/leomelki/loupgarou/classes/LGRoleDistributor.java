@@ -56,7 +56,7 @@ public class LGRoleDistributor {
   }
 
   private void setRoleToPlayer(LGPlayer selected, Role givenRole) {
-    givenRole.join(selected);
+    givenRole.joinAndDisplayRole(selected);
 
     WrapperPlayServerUpdateHealth update = new WrapperPlayServerUpdateHealth();
     update.setFood(6);

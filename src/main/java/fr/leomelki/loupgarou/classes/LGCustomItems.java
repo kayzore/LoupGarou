@@ -111,7 +111,10 @@ public class LGCustomItems {
 
 	@RequiredArgsConstructor
 	public enum LGCustomItemsConstraints {
-		INFECTED("infecte"), MAYOR("maire"), VAMPIRE_INFECTE("vampire-infecte"), DEAD("mort");
+		INFECTED("infecte"), 
+		MAYOR("maire"), 
+		VAMPIRE_INFECTE("vampire-infecte"), 
+		DEAD("mort");
 
 		@Getter private final String name;
 	}

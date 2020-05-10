@@ -132,8 +132,13 @@ public abstract class Role implements Listener {
 		}
 	}
 
-	public void join(LGPlayer player) {
+	public void join(final LGPlayer player) {
 		join(player, !getGame().isStarted());
+		LGCustomItems.updateItem(player);
+	}
+
+	public void joinAndDisplayRole(final LGPlayer player) {
+		join(player, true);
 		LGCustomItems.updateItem(player);
 	}
 

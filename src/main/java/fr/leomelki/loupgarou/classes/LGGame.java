@@ -696,7 +696,9 @@ public class LGGame implements Listener {
 			p.setWalkSpeed(0.2f);
 		}
 
-		this.improvedScoreboard.hide();
+		if (this.improvedScoreboard != null) {
+			this.improvedScoreboard.hide();
+		}
 
 		for (LGPlayer lgp : getInGame())
 			if (lgp.getPlayer().isOnline()) {
