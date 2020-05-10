@@ -15,7 +15,7 @@ import lombok.Getter;
 
 public class CustomScoreboard {
 	@Getter private boolean shown;
-	@Getter private final String name = RandomString.generate(16);
+	@Getter private final String name = RandomString.generate(15);
 	@Getter private final List<LGPlayer> inGamePlayers;
 	private static final String DISPLAY_NAME = "§7";
 	private final List<CustomScoreboardEntry> entries = new ArrayList<>();

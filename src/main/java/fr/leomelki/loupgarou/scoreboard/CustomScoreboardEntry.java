@@ -2,6 +2,7 @@ package fr.leomelki.loupgarou.scoreboard;
 
 import java.util.Arrays;
 
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.EnumWrappers.ScoreboardAction;
 
 import fr.leomelki.com.comphenix.packetwrapper.WrapperPlayServerScoreboardScore;
@@ -13,6 +14,7 @@ public class CustomScoreboardEntry {
 	private final CustomScoreboard scoreboard;
 	private final String name;
 	private final String scoreboardName;
+	private WrappedChatComponent prefix;
 
 	public CustomScoreboardEntry(CustomScoreboard scoreboard, String rawName, int amount) {
 		this.amount = amount;
@@ -25,6 +27,7 @@ public class CustomScoreboardEntry {
 	public void show() {
 		WrapperPlayServerScoreboardTeam team = new WrapperPlayServerScoreboardTeam();
 		team.setPlayers(Arrays.asList(this.name));
+		team.setPrefix(this.prefix);
 		team.setName(this.name);
 		team.setMode(0);
 
@@ -45,8 +48,15 @@ public class CustomScoreboardEntry {
 			return rawName;
 		}
 
-		final int limit = rawName.charAt(14) == '§' && rawName.charAt(13) != '§' ? 14 : rawName.charAt(15) == '§' ? 15 : 16;
-		final String prefix = rawName.substring(0, limit);
+		int limit = 16;
+
+		if (rawName.charAt(15) == '§') {
+			limit = 15;
+		} else if (rawName.charAt(14) == '§' && rawName.charAt(13) != '§') {
+			limit = 14;
+		}
+
+		final String sringifiedPrefix = rawName.substring(0, limit);
 		String suffix;
 
 		if (limit != 16) {
@@ -54,7 +64,7 @@ public class CustomScoreboardEntry {
 		} else {
 			char colorCode = 'f';
 			boolean storeColorCode = false;
-			for (char c : prefix.toCharArray()) {
+			for (char c : sringifiedPrefix.toCharArray()) {
 				if (storeColorCode) {
 					storeColorCode = false;
 					colorCode = c;
@@ -65,7 +75,9 @@ public class CustomScoreboardEntry {
 			suffix = "§" + colorCode + rawName.substring(limit);
 		}
 
-		return prefix + suffix;
+		this.prefix = WrappedChatComponent.fromText(sringifiedPrefix);
+
+		return suffix;
 	}
 
 	public void delete() {
