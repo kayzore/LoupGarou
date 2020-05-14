@@ -17,10 +17,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Role implements Listener {
-	@Getter @Setter private int waitedPlayers;
-	@Getter private ArrayList<LGPlayer> players = new ArrayList<>(); 
+	@Getter @Setter protected int waitedPlayers;
 	@Getter public List<LGPlayer> playersThisRound = new ArrayList<>(); 
-	@Getter private final LGGame game;
+	@Getter protected ArrayList<LGPlayer> players = new ArrayList<>(); 
+	@Getter protected final LGGame game;
 	protected static final String PERFORMED_NO_ACTION = "§6Tu n'as rien fait cette nuit.";
 	protected static final String IS_IMMUNE_FROM_WOLVES = "§cVotre cible est immunisée.";
 
@@ -159,6 +159,7 @@ public abstract class Role implements Listener {
 		callback.run();
 	}
 
+	// En combientième ce rôle doit être appellé
 	public int getTurnOrder() {
 		try {
 			RoleSort role = RoleSort.valueOf(getClass().getSimpleName().substring(1));
@@ -166,5 +167,5 @@ public abstract class Role implements Listener {
 		} catch (Exception e) {
 			return -1;
 		}
-	}// En combientième ce rôle doit être appellé
+	}
 }

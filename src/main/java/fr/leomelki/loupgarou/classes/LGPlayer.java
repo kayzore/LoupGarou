@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -45,7 +46,7 @@ import net.minecraft.server.v1_15_R1.WorldType;
 public class LGPlayer {
 	private static HashMap<Player, LGPlayer> cachedPlayers = new HashMap<>();
 
-	@Getter @Setter private int place;
+	@Getter @Setter private int spawnIndex;
 	@Getter private Player player;
 	@Getter @Setter private boolean dead;
 	@Setter @Getter private Role role;
@@ -440,5 +441,52 @@ public class LGPlayer {
 
 	public void enableAbilityToSelectDead() {
 		this.canSelectDead = true;
+	}
+
+	public List<LGPlayer> getAdjacentPlayers() {
+		final List<LGPlayer> remainingNeighbors = getGame().getAliveExcept(this);
+
+		if (remainingNeighbors.size() <= 2) {
+			return remainingNeighbors;
+		}
+
+		final List<Integer> matchingSpawnIndexes = remainingNeighbors
+			.stream()
+			.map(e -> e.getSpawnIndex())
+			.sorted(Integer::compare)
+			.collect(Collectors.toList());
+
+		final int lowestSpawnIndex = matchingSpawnIndexes.get(0);
+		final int highestSpawnIndex = matchingSpawnIndexes.get(matchingSpawnIndexes.size() - 1);
+
+		if (this.spawnIndex < lowestSpawnIndex || this.spawnIndex > highestSpawnIndex) {
+			return Arrays.asList(
+				remainingNeighbors.get(lowestSpawnIndex),
+				remainingNeighbors.get(highestSpawnIndex)
+			);
+		}
+		
+		final List<LGPlayer> adjacentPlayers = new ArrayList<>();
+		double closestSpawnIndexToLeft = Double.NEGATIVE_INFINITY;
+		double closestSpawnIndexToRight = Double.POSITIVE_INFINITY;
+
+		for (Integer currentIndex: matchingSpawnIndexes) {
+			if (currentIndex < this.spawnIndex && currentIndex > closestSpawnIndexToLeft) {
+				closestSpawnIndexToLeft = currentIndex;
+			} else if (currentIndex > this.spawnIndex && currentIndex < closestSpawnIndexToRight) {
+				closestSpawnIndexToRight = currentIndex;
+				break;
+			}
+		}
+
+		if (closestSpawnIndexToLeft != Double.NEGATIVE_INFINITY) {
+			adjacentPlayers.add(getGame().getPlacements().get((int)closestSpawnIndexToLeft));
+		}
+
+		if (closestSpawnIndexToRight != Double.POSITIVE_INFINITY) {
+			adjacentPlayers.add(getGame().getPlacements().get((int)closestSpawnIndexToRight));
+		}
+
+		return adjacentPlayers;
 	}
 }

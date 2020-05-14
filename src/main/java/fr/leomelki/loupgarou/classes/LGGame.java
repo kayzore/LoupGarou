@@ -330,19 +330,19 @@ public class LGGame implements Listener {
 		MainLg.getInstance().loadConfig();
 		started = true;
 
-		// Registering roles
-		List<?> original = MainLg.getInstance().getConfig().getList("spawns");
-		List<Object> list = new ArrayList<>(original);
+		final List<Object> availableSpawns = new ArrayList<>(MainLg.getInstance().getConfig().getList("spawns"));
 		for (LGPlayer lgp : getInGame()) {
-			@SuppressWarnings("unchecked")
-			List<Double> location = (List<Double>) list.remove(random.nextInt(list.size()));
-			Player p = lgp.getPlayer();
+			final Player p = lgp.getPlayer();
+			final int spawnIndex = random.nextInt(availableSpawns.size());
+			@SuppressWarnings("unchecked") final List<Double> spawn = (List<Double>) availableSpawns.remove(spawnIndex);
+
+			placements.put(spawnIndex, lgp);
+			lgp.setSpawnIndex(spawnIndex);
+
 			p.setWalkSpeed(0);
 			p.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 99999, 180, false, false));
-			lgp.setPlace(original.indexOf(location));
-			placements.put(lgp.getPlace(), lgp);
-			p.teleport(new Location(p.getWorld(), location.get(0) + 0.5, location.get(1), location.get(2) + 0.5,
-					location.get(3).floatValue(), location.get(4).floatValue()));
+			p.teleport(new Location(p.getWorld(), spawn.get(0) + 0.5, spawn.get(1), spawn.get(2) + 0.5, spawn.get(3).floatValue(), spawn.get(4).floatValue()));
+			
 			WrapperPlayServerUpdateHealth update = new WrapperPlayServerUpdateHealth();
 			update.setFood(6);
 			update.setFoodSaturation(1);
@@ -351,6 +351,7 @@ public class LGGame implements Listener {
 		}
 
 		try {
+			// Registering roles
 			roles = this.roleDistributor.assignRoles();
 		} catch (Exception err) {
 			Bukkit.broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
@@ -447,6 +448,10 @@ public class LGGame implements Listener {
 
 	public List<LGPlayer> getAlive() {
 		return this.inGame.stream().filter(lgp -> !lgp.isDead()).collect(Collectors.toList());
+	}
+
+	public List<LGPlayer> getAliveExcept(LGPlayer excludedPlayer) {
+		return this.inGame.stream().filter(lgp -> !lgp.isDead() && !lgp.equals(excludedPlayer)).collect(Collectors.toList());
 	}
 
 	public void nextNight() {
