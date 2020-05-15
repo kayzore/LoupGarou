@@ -2,7 +2,12 @@
 
 - This repository is based off https://github.com/leomelki/LoupGarou and contains improvements made by the community before it lands in the main repository (if ever).
 - The `dev` branch is **STABLE**, despite his name. The `wip` branch, on the other hand might not
+
+
+## Server files (plug and play)
+
 - The server files containing the compiled jar of my fork can be found at: https://github.com/TheOptimisticFactory/java-minecraft-loupGarou-server
+- The jar itself is downloadable from https://github.com/TheOptimisticFactory/java-minecraft-loupGarou-server/tree/master/plugins (dont forget the [config file](https://github.com/TheOptimisticFactory/java-minecraft-loupGarou-server/blob/master/plugins/LoupGarou/config.yml))
 
 ## Additional features compared to original plugin ##
 
