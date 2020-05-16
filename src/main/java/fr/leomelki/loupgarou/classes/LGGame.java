@@ -352,6 +352,7 @@ public class LGGame implements Listener {
 
 		try {
 			// Registering roles
+			broadcastMessage("§2Attribution des rôles...");
 			roles = this.roleDistributor.assignRoles();
 		} catch (Exception err) {
 			Bukkit.broadcastMessage("§4§lUne erreur est survenue lors de la création des roles... Regardez la console !");
@@ -375,7 +376,6 @@ public class LGGame implements Listener {
 						lgp.getPlayer().getInventory().clear();
 						lgp.getPlayer().updateInventory();
 					}
-					broadcastMessage("§2Attribution des rôles...");
 				}
 
 				if (--actualRole < 0)
