@@ -137,11 +137,21 @@ public class CommandInterpreter extends ParserAbstract {
     }
 
     if (args.length == 3) {
-      final HashMap<String, Constructor<? extends Role>> rolesBuilder = this.instanceMainLg.getRolesBuilder();
+      if (args[0].equalsIgnoreCase("roles") && args[1].equalsIgnoreCase("set")) {
+        final HashMap<String, Constructor<? extends Role>> rolesBuilder = this.instanceMainLg.getRolesBuilder();
 
-      return (isAuthorized) 
-        ? getStartingList(args[2], rolesBuilder.keySet().toArray(new String[rolesBuilder.size()]))
-        : new ArrayList<>(0);
+        return (isAuthorized) 
+          ? getStartingList(args[2], rolesBuilder.keySet().toArray(new String[rolesBuilder.size()]))
+          : new ArrayList<>(0);
+      }
+
+      if (args[0].equalsIgnoreCase("random") && args[1].equalsIgnoreCase("players")) {
+        return (isAuthorized)
+          ? Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+          : new ArrayList<>(0);
+      }
+
+      return new ArrayList<>(0);
     }
 
     if (args.length == 4) {

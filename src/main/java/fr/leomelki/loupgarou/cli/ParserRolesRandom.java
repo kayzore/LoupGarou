@@ -1,5 +1,6 @@
 package fr.leomelki.loupgarou.cli;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,6 +33,7 @@ class ParserRolesRandom extends ParserRolesAbstract {
       }
 
       this.setPlayerSlots(sender, args);
+      return;
     }
 
     if (args[1].equalsIgnoreCase("showAll")) {
@@ -58,10 +60,10 @@ class ParserRolesRandom extends ParserRolesAbstract {
   /* ========================================================================== */
 
   private void setPlayerSlots(CommandSender sender, String[] args) {
-    final Integer amount = this.parseInteger(args[3]);
+    final Integer amount = this.parseInteger(args[2]);
 
     if (amount == null) {
-      sender.sendMessage("\n§4Erreur: La valeur §c'" + args[3] + "'§4 n'est pas une quantité valide de joueurs");
+      sender.sendMessage("\n§4Erreur: La valeur §c'" + args[2] + "'§4 n'est pas une quantité valide de joueurs");
     }
 
     this.setOpenedSlots(amount);
