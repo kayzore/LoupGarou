@@ -547,7 +547,6 @@ public class LGGame implements Listener {
 						if (role.getTurnOrder() == -1 || !role.hasPlayersLeft())
 							this.run();
 						else {
-							broadcastMessage("§9" + role.getBroadcastedTask());
 							role.onNightTurn(run);
 						}
 					}
