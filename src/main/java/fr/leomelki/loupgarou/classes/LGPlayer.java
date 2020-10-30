@@ -317,7 +317,7 @@ public class LGPlayer {
 	}
 
 	public boolean hasProperty(String property) {
-		return this.getCache().getBoolean(property);
+		return this.getCache().has(property);
 	}
 
 	public void setProperty(String property) {
